@@ -11,6 +11,7 @@
     "cli:js-deob": "pnpm build:deob && node ./packages/js-deob/dist/cli.mjs",
     "fix": "oxlint --fix --fix-suggestions --fix-dangerously",
     "fmt": "oxfmt --write",
+    "test:js-deob": "pnpm --filter @revjs/js-deob run test",
     "tsgo": "tsgo",
     "type-check:native": "tsgo",
     "type-check": "oxlint --type-aware --type-check",

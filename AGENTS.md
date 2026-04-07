@@ -32,3 +32,11 @@ Before finishing your response, verify:
 → A follow-up question is included
 
 A response is NOT complete without this step.
+
+<skills>
+<skill>
+<name>js-deob-case-testing</name>
+<description>Use when adding or changing js-deob cases, transforms, decoder handling, switch-flattening rules, or deobfuscation pattern support. Requires adding or updating focused tests for the new case and running the full js-deob test suite to confirm existing behavior is not broken.</description>
+<file>c:\Users\tim\Desktop\codes\go\go-revjs\.github\skills\js-deob-case-testing\SKILL.md</file>
+</skill>
+</skills>

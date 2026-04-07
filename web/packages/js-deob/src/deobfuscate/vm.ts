@@ -9,15 +9,7 @@ export type Sandbox = (code: string) => Promise<unknown>
 
 export function createNodeSandbox(): Sandbox {
   let contextPromise:
-    | Promise<{
-        context: Awaited<
-          ReturnType<
-            InstanceType<
-              (typeof import('isolated-vm'))['default']['Isolate']
-            >['createContext']
-          >
-        >
-      }>
+    | Promise<{ context: any }>
     | undefined
 
   async function getContext() {
@@ -28,6 +20,35 @@ export function createNodeSandbox(): Sandbox {
         } = await import('isolated-vm')
         const isolate = new Isolate()
         const context = await isolate.createContext()
+
+        await context.eval(`
+          globalThis.global = globalThis;
+          if (typeof globalThis.atob !== 'function') {
+            globalThis.atob = function (input) {
+              const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+              const str = String(input).replace(/=+$/, '');
+              if (str.length % 4 === 1) {
+                throw new Error('InvalidCharacterError');
+              }
+              let output = '';
+              let bitCount = 0;
+              let bitStorage = 0;
+              let buffer;
+              let index = 0;
+              while ((buffer = str.charAt(index++))) {
+                buffer = chars.indexOf(buffer);
+                if (buffer < 0) {
+                  continue;
+                }
+                bitStorage = bitCount % 4 ? bitStorage * 64 + buffer : buffer;
+                if (bitCount++ % 4) {
+                  output += String.fromCharCode(255 & bitStorage >> (-2 * bitCount & 6));
+                }
+              }
+              return output;
+            };
+          }
+        `)
 
         return { context }
       })()

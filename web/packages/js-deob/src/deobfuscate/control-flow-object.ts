@@ -99,6 +99,14 @@ export default {
       m.or(m.fromCapture(varId), m.fromCapture(aliasId)),
       propertyName,
     )
+    // E.g. obj[decoder(N)] — computed access with a call-expression key (string decoder pattern)
+    const computedCallAccess = m.memberExpression(
+      m.or(m.fromCapture(varId), m.fromCapture(aliasId)),
+      m.anything(),
+      true,
+    )
+    // Relaxed matcher: accepts literal-key OR computed-call-key member accesses
+    const relaxedMemberAccess = m.or(memberAccess, computedCallAccess)
     const varMatcher = m.variableDeclarator(
       varId,
       m.objectExpression(objectProperties),
@@ -123,7 +131,8 @@ export default {
         if (!binding) return changes
         if (!isConstantBinding(binding)) return changes
         if (!transformObjectKeys(binding)) return changes
-        if (!isReadonlyObject(binding, memberAccess)) return changes
+        // Use relaxed check: also allow computed accesses with call-expression keys (obj[decoder(N)])
+        if (!isReadonlyObject(binding, relaxedMemberAccess)) return changes
 
         const props = new Map(
           objectProperties.current!.map(p => [
@@ -134,12 +143,19 @@ export default {
         if (!props.size) return changes
 
         const oldRefs = [...binding.referencePaths];
+        let hasUnresolvedComputedRefs = false;
 
         // Have to loop backwards because we might replace a node that
         // contains another reference to the binding (https://github.com/babel/babel/issues/12943)
         [...binding.referencePaths].reverse().forEach((ref) => {
           const memberPath = ref.parentPath as NodePath<t.MemberExpression>
-          const propName = getPropName(memberPath.node.property)!
+          const propName = getPropName(memberPath.node.property)
+          if (propName === undefined) {
+            // Computed access with a call-expression key (e.g. obj[decoder(N)])
+            // Cannot inline without resolving the decoder — skip silently
+            hasUnresolvedComputedRefs = true
+            return
+          }
           const value = props.get(propName)
           if (!value) {
             ref.addComment('leading', 'webcrack:control_flow_missing_prop')
@@ -163,8 +179,12 @@ export default {
           if (varDeclarator) changes += transform(varDeclarator)
         })
 
-        path.remove()
-        changes++
+        // Only remove the declaration if every reference was inlined.
+        // Keep it alive when there are still unresolved obj[decoder(N)] accesses.
+        if (!hasUnresolvedComputedRefs) {
+          path.remove()
+          changes++
+        }
       }
       return changes
     }
@@ -212,7 +232,7 @@ export default {
       if (objBinding.references !== properties.length + 1) return false
 
       const aliasBinding = objBinding.scope.getBinding(aliasId.current!.name)!
-      if (!isReadonlyObject(aliasBinding, memberAccess)) return false
+      if (!isReadonlyObject(aliasBinding, relaxedMemberAccess)) return false
 
       objectProperties.current!.push(...properties)
       container.splice(startIndex, properties.length)

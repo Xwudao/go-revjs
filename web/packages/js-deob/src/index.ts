@@ -16,6 +16,7 @@ import {
 } from './ast-utils'
 import controlFlowObject from './deobfuscate/control-flow-object'
 import controlFlowSwitch from './deobfuscate/control-flow-switch'
+import myControlFlowSwitch from './deobfuscate/my-control-flow-switch'
 import deadCode from './deobfuscate/dead-code'
 import debugProtection from './deobfuscate/debug-protection'
 import evaluateGlobals from './deobfuscate/evaluate-globals'
@@ -197,7 +198,9 @@ export async function deob(rawCode: string, options: Options = {}): Promise<Deob
     () =>
       applyTransforms(
         ast,
-        [mergeStrings, deadCode, controlFlowObject, controlFlowSwitch],
+        // myControlFlowSwitch handles the pattern where the sequence string is in an
+        // object property (obj.PROP.split("|")) after control-flow-object inlines it
+        [mergeStrings, deadCode, controlFlowObject, myControlFlowSwitch, controlFlowSwitch],
         { noScope: true },
       ),
     // unminify
