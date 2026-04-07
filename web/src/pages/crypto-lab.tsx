@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
 import CryptoJS from 'crypto-js'
 import { AppCheckbox } from '@/components/ui/app-checkbox'
@@ -18,23 +18,6 @@ type PaddingMode =
   | 'Iso97971'
   | 'ZeroPadding'
   | 'NoPadding'
-
-interface CryptoPreset {
-  id: string
-  label: string
-  description: string
-  algorithm: CryptoAlgorithm
-  mode: BlockMode
-  padding: PaddingMode
-  key: string
-  iv: string
-  input: string
-  usePassphrase: boolean
-  dataEncoding: TextEncoding
-  secretEncoding: TextEncoding
-  cipherEncoding: 'Base64' | 'Hex'
-  note: string
-}
 
 interface FormState {
   algorithm: CryptoAlgorithm
@@ -103,73 +86,6 @@ const inputEncodingOptions: AppSelectOption<TextEncoding>[] = [
 const cipherEncodingOptions: AppSelectOption<'Base64' | 'Hex'>[] = [
   { value: 'Base64', label: 'Base64', description: '接口最常见输出。' },
   { value: 'Hex', label: 'Hex', description: '适合脚本联调和逐字节核对。' },
-]
-
-const presets: readonly CryptoPreset[] = [
-  {
-    id: 'aes-cbc-utf8',
-    label: 'AES-CBC / UTF-8',
-    description: '快速验证最常见的 AES-CBC-Pkcs7 组合。',
-    algorithm: 'AES',
-    mode: 'CBC',
-    padding: 'Pkcs7',
-    key: '0123456789abcdef',
-    iv: 'abcdef9876543210',
-    input: 'revjs crypto online test',
-    usePassphrase: false,
-    dataEncoding: 'Utf8',
-    secretEncoding: 'Utf8',
-    cipherEncoding: 'Base64',
-    note: '16 字节 key + 16 字节 iv，适合快速验证通用 AES 场景。',
-  },
-  {
-    id: 'des-cbc-hex',
-    label: 'DES-CBC / Hex',
-    description: '适合老系统十六进制数据对照。',
-    algorithm: 'DES',
-    mode: 'CBC',
-    padding: 'Pkcs7',
-    key: '12345678',
-    iv: '87654321',
-    input: '3132333435363738',
-    usePassphrase: false,
-    dataEncoding: 'Hex',
-    secretEncoding: 'Utf8',
-    cipherEncoding: 'Hex',
-    note: '8 字节 key + 8 字节 iv，输入按 Hex 解析。',
-  },
-  {
-    id: 'tripledes-ecb',
-    label: '3DES-ECB',
-    description: '老接口兼容测试时常见。',
-    algorithm: 'TripleDES',
-    mode: 'ECB',
-    padding: 'Pkcs7',
-    key: '1234567890abcdef12345678',
-    iv: '',
-    input: 'legacy payload block',
-    usePassphrase: false,
-    dataEncoding: 'Utf8',
-    secretEncoding: 'Utf8',
-    cipherEncoding: 'Base64',
-    note: 'ECB 不使用 IV，适合兼容性排查。',
-  },
-  {
-    id: 'rabbit-passphrase',
-    label: 'Rabbit / Passphrase',
-    description: '直接用口令测试流密码场景。',
-    algorithm: 'Rabbit',
-    mode: 'CBC',
-    padding: 'Pkcs7',
-    key: '',
-    iv: '',
-    input: 'browser only quick verification',
-    usePassphrase: true,
-    dataEncoding: 'Utf8',
-    secretEncoding: 'Utf8',
-    cipherEncoding: 'Base64',
-    note: '口令模式会保留 CryptoJS 格式化输出，便于直接回解。',
-  },
 ]
 
 const defaultFormState: FormState = {
@@ -287,23 +203,6 @@ function getKeyHint(algorithm: CryptoAlgorithm) {
   }
 }
 
-function getAlgorithmNotes(algorithm: CryptoAlgorithm) {
-  switch (algorithm) {
-    case 'AES':
-      return ['支持 CBC/CFB/CTR/CTRGladman/ECB/OFB', '适合通用前后端联调']
-    case 'DES':
-      return ['适合兼容旧接口', '建议仅用于测试和对照，不建议新生产方案']
-    case 'TripleDES':
-      return ['兼容存量系统常见', 'ECB/CBC 排查场景较多']
-    case 'Rabbit':
-      return ['流密码，不依赖分组模式和填充', '适合快速口令联调']
-    case 'RC4':
-      return ['流密码，不依赖分组模式和填充', '常用于旧样本比对']
-    case 'RC4Drop':
-      return ['流密码，CryptoJS 默认 drop 192 words', '适合对照特定前端实现']
-  }
-}
-
 function buildOptions(state: FormState) {
   if (state.usePassphrase) {
     return supportsBlockOptions(state.algorithm)
@@ -387,30 +286,10 @@ function CryptoLabPage() {
   const [resultMeta, setResultMeta] = useState<ResultMeta | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [copyState, setCopyState] = useState<'idle' | 'done' | 'failed'>('idle')
-  const [activePresetId, setActivePresetId] = useState<string>(presets[0]?.id ?? '')
 
-  const presetOptions = useMemo<AppSelectOption<string>[]>(
-    () =>
-      presets.map((item) => ({
-        value: item.id,
-        label: item.label,
-        description: item.description,
-      })),
-    [],
-  )
-
-  const currentPreset = useMemo(
-    () => presets.find((item) => item.id === activePresetId) ?? presets[0],
-    [activePresetId],
-  )
-
-  const algorithmNotes = useMemo(
-    () => getAlgorithmNotes(form.algorithm),
-    [form.algorithm],
-  )
-  const keyHint = useMemo(() => getKeyHint(form.algorithm), [form.algorithm])
   const usesBlockOptions = supportsBlockOptions(form.algorithm)
   const showIvField = !form.usePassphrase && requiresIv(form.algorithm, form.mode)
+  const keyHint = useMemo(() => getKeyHint(form.algorithm), [form.algorithm])
   const resultEncodingLabel =
     form.direction === 'encrypt' ? form.cipherEncoding : form.dataEncoding
 
@@ -440,31 +319,6 @@ function CryptoLabPage() {
     setErrorMessage('')
   }
 
-  function applyPreset() {
-    if (!currentPreset) return
-
-    startTransition(() => {
-      setForm((current) => ({
-        ...current,
-        algorithm: currentPreset.algorithm,
-        mode: currentPreset.mode,
-        padding: currentPreset.padding,
-        key: currentPreset.key,
-        iv: currentPreset.iv,
-        passphrase: currentPreset.usePassphrase ? 'revjs-demo-passphrase' : '',
-        usePassphrase: currentPreset.usePassphrase,
-        dataEncoding: currentPreset.dataEncoding,
-        secretEncoding: currentPreset.secretEncoding,
-        cipherEncoding: currentPreset.cipherEncoding,
-        inputText: currentPreset.input,
-        direction: 'encrypt',
-      }))
-      setResult('')
-      setResultMeta(null)
-      setErrorMessage('')
-    })
-  }
-
   function swapInputOutput() {
     if (!result) return
 
@@ -483,7 +337,6 @@ function CryptoLabPage() {
     setResult('')
     setResultMeta(null)
     setErrorMessage('')
-    setActivePresetId(presets[0]?.id ?? '')
     window.localStorage.removeItem(storageKey)
   }
 
@@ -531,300 +384,253 @@ function CryptoLabPage() {
 
   return (
     <main className={clsx(classes.cryptoLabPage)}>
-      <section className={clsx(classes.cryptoLabPanel, classes.cryptoLabHero)}>
-        <div className={clsx(classes.cryptoLabHeroMain)}>
-          <div className={clsx(classes.cryptoLabHeroHead)}>
-            <span className={clsx(classes.cryptoLabKicker)}>
-              <span className="i-mdi-lock-outline" aria-hidden="true" />
-              对称加解密实验台
-            </span>
-            <span className={clsx(classes.cryptoLabStatus)}>本地运行 / 参数即时切换</span>
-          </div>
-
-          <div className={clsx(classes.cryptoLabTitleRow)}>
-            <h1 className={clsx(classes.cryptoLabTitle)}>Crypto Lab</h1>
-            <p className={clsx(classes.cryptoLabCopy)}>
-              一页完成算法切换、参数联调、输入输出比对和结果回填。
-            </p>
-          </div>
-
-          <div className={clsx(classes.cryptoLabHighlights)}>
-            <span>AES / DES / 3DES / RC4 / Rabbit</span>
-            <span>模式 / 填充 / 编码齐全</span>
-            <span>工作区内直接执行</span>
-            <span>结果一键回填</span>
-          </div>
-        </div>
-      </section>
-
-      <section className={clsx(classes.cryptoLabPanel, classes.cryptoLabControls)}>
-        <div className={clsx(classes.cryptoLabToolbar)}>
-          <div className={clsx(classes.cryptoLabField)}>
-            <span className={clsx(classes.cryptoLabFieldLabel)}>快捷预置</span>
-            <AppSelect
-              value={activePresetId}
-              options={presetOptions}
-              onChange={setActivePresetId}
-            />
-          </div>
-
-          <div className={clsx(classes.cryptoLabToolbarActions)}>
-            <button
-              type="button"
-              className={clsx(classes.cryptoLabButton)}
-              onClick={applyPreset}
-            >
-              <span className="i-mdi-flash-outline" aria-hidden="true" />
-              应用预置
-            </button>
-          </div>
+      {/* ── Top toolbar ── */}
+      <div className={clsx(classes.cryptoLabPanel, classes.cryptoLabToolbar)}>
+        <div className={clsx(classes.cryptoLabToolbarLeft)}>
+          <span className={clsx(classes.cryptoLabBrand)}>
+            <span className="i-mdi-lock-outline" aria-hidden="true" />
+            Crypto Lab
+          </span>
+          <span className={clsx(classes.cryptoLabStatusBadge)}>
+            <span className="i-mdi-shield-check-outline" aria-hidden="true" />
+            本地运行
+          </span>
         </div>
 
-        {currentPreset && (
-          <p className={clsx(classes.cryptoLabToolbarNote)}>{currentPreset.note}</p>
-        )}
+        <div className={clsx(classes.cryptoLabToolbarActions)}>
+          <button
+            type="button"
+            className={clsx(
+              classes.cryptoLabButton,
+              classes.cryptoLabButtonPrimary,
+            )}
+            onClick={executeCrypto}
+          >
+            <span className="i-mdi-play-circle-outline" aria-hidden="true" />
+            {form.direction === 'encrypt' ? '立即加密' : '立即解密'}
+          </button>
+          <button
+            type="button"
+            className={clsx(classes.cryptoLabButton)}
+            onClick={swapInputOutput}
+            disabled={!result}
+          >
+            <span className="i-mdi-swap-horizontal" aria-hidden="true" />
+            结果回填
+          </button>
+          <button
+            type="button"
+            className={clsx(classes.cryptoLabButton)}
+            onClick={copyResult}
+            disabled={!result}
+          >
+            <span className="i-mdi-content-copy" aria-hidden="true" />
+            {copyState === 'done' ? '已复制' : copyState === 'failed' ? '失败' : '复制结果'}
+          </button>
 
-        <div className={clsx(classes.cryptoLabForm)}>
-          <div className={clsx(classes.cryptoLabField)}>
-            <span className={clsx(classes.cryptoLabFieldLabel)}>算法</span>
-            <AppSelect
-              value={form.algorithm}
-              options={algorithmOptions}
-              onChange={handleAlgorithmChange}
-            />
-          </div>
+          <div className={clsx(classes.cryptoLabDivider)} aria-hidden="true" />
 
-          <div className={clsx(classes.cryptoLabField)}>
-            <span className={clsx(classes.cryptoLabFieldLabel)}>方向</span>
-            <AppSelect
-              value={form.direction}
-              options={directionOptions}
-              onChange={(value) => updateForm({ direction: value })}
-            />
-          </div>
-
-          <div className={clsx(classes.cryptoLabField)}>
-            <span className={clsx(classes.cryptoLabFieldLabel)}>明文编码</span>
-            <AppSelect
-              value={form.dataEncoding}
-              options={inputEncodingOptions}
-              onChange={(value) => updateForm({ dataEncoding: value })}
-            />
-          </div>
-
-          <div className={clsx(classes.cryptoLabField)}>
-            <span className={clsx(classes.cryptoLabFieldLabel)}>密文编码</span>
-            <AppSelect
-              value={form.cipherEncoding}
-              options={cipherEncodingOptions}
-              onChange={(value) => updateForm({ cipherEncoding: value })}
-            />
-          </div>
-
-          <div className={clsx(classes.cryptoLabField)}>
-            <span className={clsx(classes.cryptoLabFieldLabel)}>Key / IV 编码</span>
-            <AppSelect
-              value={form.secretEncoding}
-              options={inputEncodingOptions}
-              onChange={(value) => updateForm({ secretEncoding: value })}
-            />
-          </div>
-
-          {usesBlockOptions && (
-            <>
-              <div className={clsx(classes.cryptoLabField)}>
-                <span className={clsx(classes.cryptoLabFieldLabel)}>模式</span>
-                <AppSelect
-                  value={form.mode}
-                  options={blockModeOptions}
-                  onChange={(value) => updateForm({ mode: value })}
-                />
-              </div>
-
-              <div className={clsx(classes.cryptoLabField)}>
-                <span className={clsx(classes.cryptoLabFieldLabel)}>填充</span>
-                <AppSelect
-                  value={form.padding}
-                  options={paddingOptions}
-                  onChange={(value) => updateForm({ padding: value })}
-                />
-              </div>
-            </>
-          )}
-
-          <div className={clsx(classes.cryptoLabField, classes.cryptoLabFieldCheckbox)}>
-            <AppCheckbox
-              checked={form.usePassphrase}
-              onChange={(checked) => updateForm({ usePassphrase: checked })}
-              label="使用 Passphrase"
-              description="适合 Rabbit / RC4 这类快速验证，也可测试 CryptoJS 口令派生逻辑。"
-            />
-          </div>
-
-          {form.usePassphrase ? (
-            <label className={clsx(classes.cryptoLabField)}>
-              <span className={clsx(classes.cryptoLabFieldLabel)}>Passphrase</span>
-              <input
-                className={clsx(classes.cryptoLabInput)}
-                value={form.passphrase}
-                onChange={(event) => updateForm({ passphrase: event.target.value })}
-                placeholder="输入口令"
-              />
-            </label>
-          ) : (
-            <>
-              <label className={clsx(classes.cryptoLabField)}>
-                <span className={clsx(classes.cryptoLabFieldLabel)}>Key</span>
-                <input
-                  className={clsx(classes.cryptoLabInput)}
-                  value={form.key}
-                  onChange={(event) => updateForm({ key: event.target.value })}
-                  placeholder="输入 key"
-                />
-                <span className={clsx(classes.cryptoLabHint)}>{keyHint}</span>
-              </label>
-
-              {showIvField && (
-                <label className={clsx(classes.cryptoLabField)}>
-                  <span className={clsx(classes.cryptoLabFieldLabel)}>IV</span>
-                  <input
-                    className={clsx(classes.cryptoLabInput)}
-                    value={form.iv}
-                    onChange={(event) => updateForm({ iv: event.target.value })}
-                    placeholder="输入 iv"
-                  />
-                  <span className={clsx(classes.cryptoLabHint)}>
-                    ECB 和流密码不需要 IV。
-                  </span>
-                </label>
-              )}
-            </>
-          )}
+          <button
+            type="button"
+            className={clsx(classes.cryptoLabButton)}
+            onClick={clearAll}
+          >
+            <span className="i-mdi-refresh" aria-hidden="true" />
+            重置
+          </button>
         </div>
-      </section>
+      </div>
 
-      <section className={clsx(classes.cryptoLabPanel, classes.cryptoLabWorkbench)}>
-        <div className={clsx(classes.cryptoLabActionBar)}>
-          <div className={clsx(classes.cryptoLabActionBarCopy)}>
-            <span className={clsx(classes.cryptoLabActionTitle)}>工作区操作</span>
-            <span className={clsx(classes.cryptoLabActionHint)}>
-              参数调整后直接执行，结果区支持复制和回填。
+      {/* ── Editors ── */}
+      <div className={clsx(classes.cryptoLabEditorsGrid)}>
+        <div className={clsx(classes.cryptoLabPanel, classes.cryptoLabSection)}>
+          <div className={clsx(classes.cryptoLabEditorHead)}>
+            <h2 className={clsx(classes.cryptoLabSectionTitle)}>
+              {form.direction === 'encrypt' ? '明文输入' : '密文输入'}
+            </h2>
+            <span className={clsx(classes.cryptoLabEditorMeta)}>
+              编码:{' '}
+              {form.direction === 'encrypt' ? form.dataEncoding : form.cipherEncoding}
+              {' · '}
+              {form.inputText.length} 字符
             </span>
           </div>
-
-          <div className={clsx(classes.cryptoLabActionBarButtons)}>
-            <button
-              type="button"
-              className={clsx(classes.cryptoLabButton, classes.cryptoLabButtonPrimary)}
-              onClick={executeCrypto}
-            >
-              <span className="i-mdi-play-circle-outline" aria-hidden="true" />
-              立即执行
-            </button>
-            <button
-              type="button"
-              className={clsx(classes.cryptoLabButton)}
-              onClick={swapInputOutput}
-            >
-              <span className="i-mdi-swap-horizontal" aria-hidden="true" />
-              结果回填
-            </button>
-            <button
-              type="button"
-              className={clsx(classes.cryptoLabButton)}
-              onClick={clearAll}
-            >
-              <span className="i-mdi-delete-outline" aria-hidden="true" />
-              清空
-            </button>
-          </div>
-        </div>
-
-        <div className={clsx(classes.cryptoLabEditors)}>
-          <article className={clsx(classes.cryptoLabEditorCard)}>
-            <div className={clsx(classes.cryptoLabEditorHead)}>
-              <div>
-                <h2>输入区</h2>
-                <p>
-                  {form.direction === 'encrypt'
-                    ? '输入明文或原始字节数据。'
-                    : '输入待解密的密文，格式由密文编码决定。'}
-                </p>
-              </div>
-              <span className={clsx(classes.cryptoLabMeta)}>
-                编码:{' '}
-                {form.direction === 'encrypt' ? form.dataEncoding : form.cipherEncoding}
-              </span>
-            </div>
-
+          <div className={clsx(classes.cryptoLabEditorWrap)}>
             <CodeEditor
               value={form.inputText}
               onChange={(value) => updateForm({ inputText: value })}
-              minHeight="24rem"
+              minHeight="20rem"
             />
-          </article>
-
-          <article className={clsx(classes.cryptoLabEditorCard)}>
-            <div className={clsx(classes.cryptoLabEditorHead)}>
-              <div>
-                <h2>结果区</h2>
-                <p>执行后立即得到结果，可复制、回填或继续切换参数复算。</p>
-              </div>
-              <div className={clsx(classes.cryptoLabEditorActions)}>
-                <span className={clsx(classes.cryptoLabMeta)}>
-                  编码: {resultEncodingLabel}
-                </span>
-                <button
-                  type="button"
-                  className={clsx(classes.cryptoLabInlineAction)}
-                  onClick={copyResult}
-                  disabled={!result}
-                >
-                  <span className="i-mdi-content-copy" aria-hidden="true" />
-                  {copyState === 'done'
-                    ? '已复制'
-                    : copyState === 'failed'
-                      ? '复制失败'
-                      : '复制结果'}
-                </button>
-              </div>
-            </div>
-
-            <CodeEditor value={result} readOnly minHeight="24rem" />
-          </article>
+          </div>
         </div>
 
-        {errorMessage ? (
-          <div className={clsx(classes.cryptoLabError, classes.cryptoLabInlineFeedback)}>
-            <span className="i-mdi-alert-circle-outline" aria-hidden="true" />
-            <span>{errorMessage}</span>
+        <div className={clsx(classes.cryptoLabPanel, classes.cryptoLabSection)}>
+          <div className={clsx(classes.cryptoLabEditorHead)}>
+            <h2 className={clsx(classes.cryptoLabSectionTitle)}>
+              {form.direction === 'encrypt' ? '密文结果' : '明文结果'}
+            </h2>
+            <span className={clsx(classes.cryptoLabEditorMeta)}>
+              编码: {resultEncodingLabel}
+              {result ? ` · ${result.length} 字符` : ''}
+            </span>
           </div>
-        ) : (
-          <div className={clsx(classes.cryptoLabNote, classes.cryptoLabInlineFeedback)}>
-            <span className="i-mdi-information-outline" aria-hidden="true" />
-            <span>优先用预置带起一组参数，再围绕 key / iv / 编码逐项微调，最快。</span>
+          {errorMessage ? (
+            <div className={clsx(classes.cryptoLabError)}>
+              <span className="i-mdi-alert-circle-outline" aria-hidden="true" />
+              {errorMessage}
+            </div>
+          ) : (
+            <div className={clsx(classes.cryptoLabNote)}>
+              <span className="i-mdi-information-outline" aria-hidden="true" />
+              {result ? '执行完成。' : '调好参数后点"立即执行"。'}
+            </div>
+          )}
+          <div className={clsx(classes.cryptoLabEditorWrap)}>
+            <CodeEditor value={result} readOnly minHeight="20rem" />
           </div>
-        )}
-      </section>
+        </div>
+      </div>
 
-      <section className={clsx(classes.cryptoLabInfoGrid)}>
-        <section className={clsx(classes.cryptoLabPanel, classes.cryptoLabInfoCard)}>
-          <div className={clsx(classes.cryptoLabSectionHead)}>
-            <h2>当前算法提示</h2>
-            <p>围绕当前算法给出最常用的联调提醒。</p>
-          </div>
-          <ul className={clsx(classes.cryptoLabBulletList)}>
-            {algorithmNotes.map((note) => (
-              <li key={note}>{note}</li>
-            ))}
-          </ul>
-        </section>
+      {/* ── Options + Summary ── */}
+      <div className={clsx(classes.cryptoLabBottomRow)}>
+        {/* Options */}
+        <div
+          className={clsx(
+            classes.cryptoLabPanel,
+            classes.cryptoLabSection,
+            classes.cryptoLabOptions,
+          )}
+        >
+          <h2 className={clsx(classes.cryptoLabSectionTitle)}>参数配置</h2>
 
-        <section className={clsx(classes.cryptoLabPanel, classes.cryptoLabInfoCard)}>
-          <div className={clsx(classes.cryptoLabSectionHead)}>
-            <h2>结果摘要</h2>
-            <p>便于快速确认这次运行使用了哪组参数。</p>
+          <div className={clsx(classes.cryptoLabForm)}>
+            <div className={clsx(classes.cryptoLabField)}>
+              <span className={clsx(classes.cryptoLabFieldLabel)}>算法</span>
+              <AppSelect
+                value={form.algorithm}
+                options={algorithmOptions}
+                onChange={handleAlgorithmChange}
+              />
+            </div>
+
+            <div className={clsx(classes.cryptoLabField)}>
+              <span className={clsx(classes.cryptoLabFieldLabel)}>方向</span>
+              <AppSelect
+                value={form.direction}
+                options={directionOptions}
+                onChange={(value) => updateForm({ direction: value })}
+              />
+            </div>
+
+            <div className={clsx(classes.cryptoLabField)}>
+              <span className={clsx(classes.cryptoLabFieldLabel)}>明文编码</span>
+              <AppSelect
+                value={form.dataEncoding}
+                options={inputEncodingOptions}
+                onChange={(value) => updateForm({ dataEncoding: value })}
+              />
+            </div>
+
+            <div className={clsx(classes.cryptoLabField)}>
+              <span className={clsx(classes.cryptoLabFieldLabel)}>密文编码</span>
+              <AppSelect
+                value={form.cipherEncoding}
+                options={cipherEncodingOptions}
+                onChange={(value) => updateForm({ cipherEncoding: value })}
+              />
+            </div>
+
+            <div className={clsx(classes.cryptoLabField)}>
+              <span className={clsx(classes.cryptoLabFieldLabel)}>Key / IV 编码</span>
+              <AppSelect
+                value={form.secretEncoding}
+                options={inputEncodingOptions}
+                onChange={(value) => updateForm({ secretEncoding: value })}
+              />
+            </div>
+
+            {usesBlockOptions && (
+              <>
+                <div className={clsx(classes.cryptoLabField)}>
+                  <span className={clsx(classes.cryptoLabFieldLabel)}>模式</span>
+                  <AppSelect
+                    value={form.mode}
+                    options={blockModeOptions}
+                    onChange={(value) => updateForm({ mode: value })}
+                  />
+                </div>
+
+                <div className={clsx(classes.cryptoLabField)}>
+                  <span className={clsx(classes.cryptoLabFieldLabel)}>填充</span>
+                  <AppSelect
+                    value={form.padding}
+                    options={paddingOptions}
+                    onChange={(value) => updateForm({ padding: value })}
+                  />
+                </div>
+              </>
+            )}
+
+            <div className={clsx(classes.cryptoLabField, classes.cryptoLabFieldCheckbox)}>
+              <AppCheckbox
+                checked={form.usePassphrase}
+                onChange={(checked) => updateForm({ usePassphrase: checked })}
+                label="使用 Passphrase"
+                description="适合 Rabbit / RC4 快速验证，也可测试 CryptoJS 口令派生逻辑。"
+              />
+            </div>
+
+            {form.usePassphrase ? (
+              <label className={clsx(classes.cryptoLabField)}>
+                <span className={clsx(classes.cryptoLabFieldLabel)}>Passphrase</span>
+                <input
+                  className={clsx(classes.cryptoLabInput)}
+                  value={form.passphrase}
+                  onChange={(event) => updateForm({ passphrase: event.target.value })}
+                  placeholder="输入口令"
+                />
+              </label>
+            ) : (
+              <>
+                <label className={clsx(classes.cryptoLabField)}>
+                  <span className={clsx(classes.cryptoLabFieldLabel)}>Key</span>
+                  <input
+                    className={clsx(classes.cryptoLabInput)}
+                    value={form.key}
+                    onChange={(event) => updateForm({ key: event.target.value })}
+                    placeholder="输入 key"
+                  />
+                  <span className={clsx(classes.cryptoLabHint)}>{keyHint}</span>
+                </label>
+
+                {showIvField && (
+                  <label className={clsx(classes.cryptoLabField)}>
+                    <span className={clsx(classes.cryptoLabFieldLabel)}>IV</span>
+                    <input
+                      className={clsx(classes.cryptoLabInput)}
+                      value={form.iv}
+                      onChange={(event) => updateForm({ iv: event.target.value })}
+                      placeholder="输入 iv"
+                    />
+                    <span className={clsx(classes.cryptoLabHint)}>
+                      ECB 和流密码不需要 IV。
+                    </span>
+                  </label>
+                )}
+              </>
+            )}
           </div>
+        </div>
+
+        {/* Result summary */}
+        <div
+          className={clsx(
+            classes.cryptoLabPanel,
+            classes.cryptoLabSection,
+            classes.cryptoLabSummaryPanel,
+          )}
+        >
+          <h2 className={clsx(classes.cryptoLabSectionTitle)}>结果摘要</h2>
 
           {resultMeta ? (
             <dl className={clsx(classes.cryptoLabSummary)}>
@@ -846,32 +652,18 @@ function CryptoLabPage() {
               </div>
               <div>
                 <dt>输入长度</dt>
-                <dd>{resultMeta.inputLength}</dd>
+                <dd>{resultMeta.inputLength} 字符</dd>
               </div>
               <div>
                 <dt>输出长度</dt>
-                <dd>{resultMeta.outputLength}</dd>
+                <dd>{resultMeta.outputLength} 字符</dd>
               </div>
             </dl>
           ) : (
-            <p className={clsx(classes.cryptoLabEmpty)}>
-              执行一次后，这里会显示本次参数摘要。
-            </p>
+            <p className={clsx(classes.cryptoLabEmpty)}>执行一次后，这里会显示本次参数摘要。</p>
           )}
-        </section>
-
-        <section className={clsx(classes.cryptoLabPanel, classes.cryptoLabInfoCard)}>
-          <div className={clsx(classes.cryptoLabSectionHead)}>
-            <h2>使用建议</h2>
-            <p>为了更快定位参数，建议按这个顺序排查。</p>
-          </div>
-          <ol className={clsx(classes.cryptoLabNumberList)}>
-            <li>先确定算法，再判断是 key 模式还是 passphrase 模式。</li>
-            <li>分组密码优先排查 mode、padding、IV、输入编码。</li>
-            <li>解密为空串时，优先检查密文编码和 key/iv 字节长度。</li>
-          </ol>
-        </section>
-      </section>
+        </div>
+      </div>
     </main>
   )
 }
