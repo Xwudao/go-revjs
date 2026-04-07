@@ -80,7 +80,6 @@
 
 .app-select-menu {
   position: absolute;
-  top: calc(100% + var(--space-2));
   left: 0;
   right: 0;
   z-index: var(--z-dropdown);
@@ -90,6 +89,15 @@
   background: color-mix(in srgb, var(--color-surface) 98%, transparent);
   box-shadow: var(--shadow-md);
   backdrop-filter: blur(12px);
+
+  // default: open downward
+  top: calc(100% + var(--space-2));
+  bottom: auto;
+
+  .app-select[data-direction='up'] & {
+    top: auto;
+    bottom: calc(100% + var(--space-2));
+  }
 }
 
 .app-select-scroll {

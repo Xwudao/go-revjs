@@ -26,6 +26,7 @@ export function AppSelect<T extends string>({
   menuMaxHeight = '16rem',
 }: AppSelectProps<T>) {
   const [open, setOpen] = useState(false)
+  const [direction, setDirection] = useState<'down' | 'up'>('down')
   const rootRef = useRef<HTMLDivElement | null>(null)
   const reactId = useId()
   const listboxId = `${reactId}-listbox`
@@ -41,12 +42,14 @@ export function AppSelect<T extends string>({
     function handlePointerDown(event: PointerEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
         setOpen(false)
+        setDirection('down')
       }
     }
 
     function handleEscape(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setOpen(false)
+        setDirection('down')
       }
     }
 
@@ -64,6 +67,7 @@ export function AppSelect<T extends string>({
       className={clsx(classes.appSelect)}
       data-open={open}
       data-disabled={disabled}
+      data-direction={direction}
       ref={rootRef}
     >
       <button
@@ -74,7 +78,15 @@ export function AppSelect<T extends string>({
         aria-expanded={open}
         aria-controls={listboxId}
         disabled={disabled}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          if (!open && rootRef.current) {
+            const rect = rootRef.current.getBoundingClientRect()
+            const spaceBelow = window.innerHeight - rect.bottom
+            const menuEstimate = 260
+            setDirection(spaceBelow < menuEstimate && rect.top > spaceBelow ? 'up' : 'down')
+          }
+          setOpen((current) => !current)
+        }}
       >
         <span className={clsx(classes.appSelectValue)}>
           <span className={clsx(classes.appSelectLabel)}>{selectedOption.label}</span>
@@ -114,6 +126,7 @@ export function AppSelect<T extends string>({
                 onClick={() => {
                   onChange(option.value)
                   setOpen(false)
+                  setDirection('down')
                 }}
               >
                 <span className={clsx(classes.appSelectOptionCopy)}>
