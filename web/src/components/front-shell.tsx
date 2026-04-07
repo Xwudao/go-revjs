@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import { Link, useRouterState } from '@tanstack/react-router'
 import useAppConfigStore, { type AccentPreset } from '@/store/useAppConfig'
 import { useAppConfig } from '@/provider/ConfigProvider'
+import { SearchModal, useSearchModal } from './search-modal'
 import classes from './front-shell.module.scss'
 
 type FrontShellProps = PropsWithChildren
@@ -28,13 +29,16 @@ export function FrontShell({ children }: FrontShellProps) {
         ? 'code-format'
         : 'home'
 
+  const search = useSearchModal()
+
   return (
     <div className={clsx(classes.frontShell)}>
-      <FrontHeader current={current} />
+      <FrontHeader current={current} onSearchOpen={search.open} />
       <div className={clsx(classes.frontShellBody, classes.frontShellMain)}>
         <div className={clsx(classes.frontShellOutlet)}>{children}</div>
       </div>
       <FrontFooter />
+      <SearchModal open={search.isOpen} onClose={search.close} />
     </div>
   )
 }
@@ -53,7 +57,7 @@ export function RoutePending() {
   )
 }
 
-function FrontHeader({ current }: { current: NavKey }) {
+function FrontHeader({ current, onSearchOpen }: { current: NavKey; onSearchOpen: () => void }) {
   const { theme, accent } = useAppConfig()
   const toggleTheme = useAppConfigStore((state) => state.toggleTheme)
   const setAccent = useAppConfigStore((state) => state.setAccent)
@@ -93,6 +97,16 @@ function FrontHeader({ current }: { current: NavKey }) {
         </nav>
 
         <div className={clsx(classes.siteHeaderTools)}>
+          <button
+            type="button"
+            className={clsx(classes.siteSearchTrigger)}
+            aria-label="搜索工具 (Ctrl+K)"
+            onClick={onSearchOpen}
+          >
+            <span className="i-mdi-magnify" aria-hidden="true" />
+            <span>搜索</span>
+            <kbd>⌘K</kbd>
+          </button>
           <div
             className={clsx(classes.siteAccentSwitcher)}
             role="group"

@@ -27,5 +27,5 @@
 
 .dragging {
   opacity: 0.45;
-  z-index: 9999;
+  z-index: var(--z-top);
 }

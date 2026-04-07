@@ -1,65 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import clsx from 'clsx'
+import { HUB_CARDS } from '@/data/hub-tools'
 import classes from './index.module.scss'
-
-interface HubFeature {
-  title: string
-  description: string
-  state: string
-  iconClass: string
-  to?: '/crypto-lab' | '/curl-to-code' | '/js-deob' | '/code-format' | '/string-tools' | '/text-pipeline'
-}
-
-const hubFeatures: readonly HubFeature[] = [
-  {
-    title: 'cURL 2 Req',
-    description:
-      '粘贴 cURL 命令，一键转成 Python Requests、Go net/http、Fetch、Axios、OkHttp 等请求代码。',
-    state: '已上线',
-    iconClass: 'i-mdi-console-network-outline',
-    to: '/curl-to-code',
-  },
-  {
-    title: 'Crypto Lab',
-    description:
-      '统一测试 AES、DES、TripleDES、Rabbit、RC4、RC4Drop 等算法，支持常见模式、填充、编码和一键互转。',
-    state: '已上线',
-    iconClass: 'i-mdi-lock-outline',
-    to: '/crypto-lab',
-  },
-  {
-    title: 'JS 解混淆',
-    description:
-      '直接贴入混淆后的 JavaScript，调整参数后在同一工作台查看整理结果和运行过程。',
-    state: '已上线',
-    iconClass: 'i-mdi-code-json',
-    to: '/js-deob',
-  },
-  {
-    title: 'Code Formatter',
-    description:
-      '支持 JS、TS、HTML、CSS、SCSS、Less、JSON、Markdown、GraphQL 等多种格式，基于 Prettier 在浏览器本地运行。',
-    state: '已上线',
-    iconClass: 'i-mdi-code-braces-box',
-    to: '/code-format',
-  },
-  {
-    title: 'String Tools',
-    description:
-      '一输入全覆盖：Hash（MD5/SHA系列/RIPEMD160）、URL/Base64/HTML/Hex/Unicode 编解码、大小写和命名风格转换、行操作、JWT 解码、时间戳和 JSON 处理。',
-    state: '已上线',
-    iconClass: 'i-mdi-text-box-multiple-outline',
-    to: '/string-tools',
-  },
-  {
-    title: 'Text Pipeline',
-    description:
-      '自由组合处理函数，构建文本管道依次执行。支持行操作、编解码、大小写转换、文本提取等 40+ 步骤，Worker 后台处理不阻塞界面。',
-    state: '已上线',
-    iconClass: 'i-mdi-pipe',
-    to: '/text-pipeline',
-  },
-]
 
 const commandEntries = [
   { label: '打开 cURL 2 Req', value: '可用' },
@@ -134,20 +76,18 @@ function IndexPage() {
       </section>
 
       <section className={clsx(classes.frontPageGrid)}>
-        {hubFeatures.map((feature) => {
-          const card = (
-            <article
-              key={feature.title}
-              className={clsx(
-                classes.frontPagePanel,
-                feature.to && classes.frontPagePanelFeature,
-              )}
-            >
+        {HUB_CARDS.map((feature) => (
+          <Link
+            key={feature.title}
+            to={feature.to}
+            className={clsx(classes.frontPagePanelLink)}
+          >
+            <article className={clsx(classes.frontPagePanel, classes.frontPagePanelFeature)}>
               <div className={clsx(classes.frontPagePanelHead)}>
                 <span className={clsx(classes.frontPageFeatureIcon)} aria-hidden="true">
                   <span className={feature.iconClass} />
                 </span>
-                <span className={clsx(classes.frontPageBadge)}>{feature.state}</span>
+                <span className={clsx(classes.frontPageBadge)}>{feature.cardState}</span>
               </div>
 
               <div className={clsx(classes.frontPagePanelBody)}>
@@ -156,26 +96,12 @@ function IndexPage() {
               </div>
 
               <span className={clsx(classes.frontPageTextLink)}>
-                {feature.to ? '进入工作台' : '预留模块'}
+                进入工作台
                 <span className="i-mdi-arrow-right" aria-hidden="true" />
               </span>
             </article>
-          )
-
-          if (feature.to) {
-            return (
-              <Link
-                key={feature.title}
-                to={feature.to}
-                className={clsx(classes.frontPagePanelLink)}
-              >
-                {card}
-              </Link>
-            )
-          }
-
-          return card
-        })}
+          </Link>
+        ))}
       </section>
 
       <section id="hub-stack" className={clsx(classes.frontPageConsole)}>

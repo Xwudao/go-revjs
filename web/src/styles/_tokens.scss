@@ -101,6 +101,13 @@
   --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.48);
   --shadow-lg: 0 16px 52px rgba(0, 0, 0, 0.6);
 
+  /* Z-index layers */
+  --z-raised: 1;
+  --z-dropdown: 30;
+  --z-header: 40;
+  --z-modal: 200;
+  --z-top: 9999;
+
   /* Semantic aliases */
   --bg: var(--color-canvas);
   --text: var(--color-text);
