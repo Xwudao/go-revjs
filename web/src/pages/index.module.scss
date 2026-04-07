@@ -15,16 +15,6 @@
   pointer-events: none;
 }
 
-.front-page::before {
-  background:
-    radial-gradient(circle at top, var(--color-backdrop-glow), transparent 34%),
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--color-canvas) 92%, #02060d) 0%,
-      var(--color-canvas) 100%
-    );
-}
-
 .front-page::after {
   inset: 2rem 0 auto;
   height: 28rem;
