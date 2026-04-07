@@ -7,7 +7,7 @@ interface HubFeature {
   description: string
   state: string
   iconClass: string
-  to?: '/crypto-lab' | '/curl-to-code' | '/js-deob'
+  to?: '/crypto-lab' | '/curl-to-code' | '/js-deob' | '/code-format'
 }
 
 const hubFeatures: readonly HubFeature[] = [
@@ -36,42 +36,32 @@ const hubFeatures: readonly HubFeature[] = [
     to: '/js-deob',
   },
   {
-    title: '指纹分析',
-    description: '针对请求特征、设备指纹和反爬标记进行对比分析，即将推出。',
-    state: '即将推出',
-    iconClass: 'i-mdi-fingerprint',
+    title: 'Code Formatter',
+    description:
+      '支持 JS、TS、HTML、CSS、SCSS、Less、JSON、Markdown、GraphQL 等多种格式，基于 Prettier 在浏览器本地运行。',
+    state: '已上线',
+    iconClass: 'i-mdi-code-braces-box',
+    to: '/code-format',
   },
-  // {
-  //   title: '协议模拟',
-  //   description: '支持协议回放与接口实验，帮助快速复现和验证目标接口行为。',
-  //   state: '即将推出',
-  //   iconClass: 'i-mdi-swap-horizontal',
-  // },
-  // {
-  //   title: '高级调试',
-  //   description: '提供运行时 hook、细粒度日志和逐步排查能力，适合复杂场景分析。',
-  //   state: '即将推出',
-  //   iconClass: 'i-mdi-refresh',
-  // },
 ]
 
 const commandEntries = [
   { label: '打开 cURL 2 Req', value: '可用' },
   { label: '打开 Crypto Lab', value: '可用' },
   { label: '打开 JS Deob 工作台', value: '可用' },
-  { label: '指纹分析', value: '即将推出' },
+  { label: '打开 Code Formatter', value: '可用' },
 ] as const
 
 const scopeEntries = [
   '已上线 cURL 转请求代码工具，支持 Python、Go、Fetch、Axios、OkHttp 和原始 HTTP。',
   '已上线对称加解密实验台，适合快速验证 AES、DES、TripleDES 等参数组合。',
   '当前已上线 JS 解混淆工具，可直接粘贴混淆代码开始分析。',
-  '更多分析模块正在开发中，敬请期待。',
+  '已上线代码格式化工具，支持 JS、TS、HTML、CSS、JSON 等 10 种格式，基于 Prettier。',
   '所有工具均在本地浏览器中运行，代码不会上传至服务器。',
 ] as const
 
 const runtimeStats = [
-  { label: '在线工具', value: '03' },
+  { label: '在线工具', value: '04' },
   { label: '即将上线', value: '01' },
   { label: '本地运行', value: '100%' },
 ] as const

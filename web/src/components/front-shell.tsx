@@ -11,6 +11,7 @@ const navItems = [
   { key: 'home', label: '首页', to: '/' },
   { key: 'crypto-lab', label: 'Crypto Lab', to: '/crypto-lab' },
   { key: 'js-deob', label: 'JS Deob', to: '/js-deob' },
+  { key: 'code-format', label: 'Formatter', to: '/code-format' },
 ] as const
 
 type NavKey = (typeof navItems)[number]['key']
@@ -23,7 +24,9 @@ export function FrontShell({ children }: FrontShellProps) {
     ? 'js-deob'
     : pathname.startsWith('/crypto-lab')
       ? 'crypto-lab'
-      : 'home'
+      : pathname.startsWith('/code-format')
+        ? 'code-format'
+        : 'home'
 
   return (
     <div className={clsx(classes.frontShell)}>
@@ -90,7 +93,11 @@ function FrontHeader({ current }: { current: NavKey }) {
         </nav>
 
         <div className={clsx(classes.siteHeaderTools)}>
-          <div className={clsx(classes.siteAccentSwitcher)} role="group" aria-label="主题色">
+          <div
+            className={clsx(classes.siteAccentSwitcher)}
+            role="group"
+            aria-label="主题色"
+          >
             {accentPresets.map(({ key, label }) => (
               <button
                 key={key}

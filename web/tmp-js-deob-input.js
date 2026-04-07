@@ -13,7 +13,7 @@
         parseInt(_0x4d4209(0xac)) / 0xa
       if (_0x39606d === _0x815c2e) break
       else _0x2a6c26['push'](_0x2a6c26['shift']())
-    } catch  {
+    } catch {
       _0x2a6c26['push'](_0x2a6c26['shift']())
     }
   }

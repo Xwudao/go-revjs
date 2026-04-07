@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as JsDeobRouteImport } from './routes/js-deob'
 import { Route as CurlToCodeRouteImport } from './routes/curl-to-code'
 import { Route as CryptoLabRouteImport } from './routes/crypto-lab'
+import { Route as CodeFormatRouteImport } from './routes/code-format'
 import { Route as IndexRouteImport } from './routes/index'
 
 const JsDeobRoute = JsDeobRouteImport.update({
@@ -29,6 +30,11 @@ const CryptoLabRoute = CryptoLabRouteImport.update({
   path: '/crypto-lab',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CodeFormatRoute = CodeFormatRouteImport.update({
+  id: '/code-format',
+  path: '/code-format',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,12 +43,14 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/code-format': typeof CodeFormatRoute
   '/crypto-lab': typeof CryptoLabRoute
   '/curl-to-code': typeof CurlToCodeRoute
   '/js-deob': typeof JsDeobRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/code-format': typeof CodeFormatRoute
   '/crypto-lab': typeof CryptoLabRoute
   '/curl-to-code': typeof CurlToCodeRoute
   '/js-deob': typeof JsDeobRoute
@@ -50,20 +58,28 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/code-format': typeof CodeFormatRoute
   '/crypto-lab': typeof CryptoLabRoute
   '/curl-to-code': typeof CurlToCodeRoute
   '/js-deob': typeof JsDeobRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/crypto-lab' | '/curl-to-code' | '/js-deob'
+  fullPaths: '/' | '/code-format' | '/crypto-lab' | '/curl-to-code' | '/js-deob'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/crypto-lab' | '/curl-to-code' | '/js-deob'
-  id: '__root__' | '/' | '/crypto-lab' | '/curl-to-code' | '/js-deob'
+  to: '/' | '/code-format' | '/crypto-lab' | '/curl-to-code' | '/js-deob'
+  id:
+    | '__root__'
+    | '/'
+    | '/code-format'
+    | '/crypto-lab'
+    | '/curl-to-code'
+    | '/js-deob'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CodeFormatRoute: typeof CodeFormatRoute
   CryptoLabRoute: typeof CryptoLabRoute
   CurlToCodeRoute: typeof CurlToCodeRoute
   JsDeobRoute: typeof JsDeobRoute
@@ -92,6 +108,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CryptoLabRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/code-format': {
+      id: '/code-format'
+      path: '/code-format'
+      fullPath: '/code-format'
+      preLoaderRoute: typeof CodeFormatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +127,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CodeFormatRoute: CodeFormatRoute,
   CryptoLabRoute: CryptoLabRoute,
   CurlToCodeRoute: CurlToCodeRoute,
   JsDeobRoute: JsDeobRoute,

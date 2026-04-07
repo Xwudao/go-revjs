@@ -16,6 +16,7 @@ import classes from './code-editor.module.scss'
 
 export type CodeEditorLanguage =
   | 'javascript'
+  | 'typescript'
   | 'go'
   | 'python'
   | 'html'
@@ -38,6 +39,8 @@ function buildLangExtension(language: CodeEditorLanguage) {
   switch (language) {
     case 'javascript':
       return javascript()
+    case 'typescript':
+      return javascript({ typescript: true })
     case 'go':
       return go()
     case 'python':

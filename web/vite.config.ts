@@ -1,19 +1,19 @@
-import react, { reactCompilerPreset } from '@vitejs/plugin-react';
-import { tanstackRouter } from '@tanstack/router-plugin/vite';
-import babel from '@rolldown/plugin-babel';
-import * as path from 'path';
-import { fileURLToPath } from 'node:url';
-import AutoImport from 'unplugin-auto-import/vite';
-import IconsResolver from 'unplugin-icons/resolver';
-import Icons from 'unplugin-icons/vite';
-import { defineConfig } from 'vite';
-import checker from 'vite-plugin-checker';
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
-import UnoCSS from 'unocss/vite';
-import { compression, defineAlgorithm } from 'vite-plugin-compression2';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
+import babel from '@rolldown/plugin-babel'
+import * as path from 'path'
+import { fileURLToPath } from 'node:url'
+import AutoImport from 'unplugin-auto-import/vite'
+import IconsResolver from 'unplugin-icons/resolver'
+import Icons from 'unplugin-icons/vite'
+import { defineConfig } from 'vite'
+import checker from 'vite-plugin-checker'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import UnoCSS from 'unocss/vite'
+import { compression, defineAlgorithm } from 'vite-plugin-compression2'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const resolve = (p: string) => path.resolve(__dirname, p);
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const resolve = (p: string) => path.resolve(__dirname, p)
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -77,8 +77,8 @@ export default defineConfig({
       jsx: 'react',
       compiler: 'jsx',
       iconCustomizer(_collection, _icon, props) {
-        props.width = '1em';
-        props.height = '1em';
+        props.width = '1em'
+        props.height = '1em'
       },
     }),
   ],
@@ -92,4 +92,4 @@ export default defineConfig({
       },
     },
   },
-});
+})

@@ -45,8 +45,6 @@ interface TargetConfig {
 
 const storageKey = 'revjs:curl-to-code:state'
 
-
-
 const targetConfigs: Record<ConversionTarget, TargetConfig> = {
   'python-requests': {
     label: 'Python Requests',
