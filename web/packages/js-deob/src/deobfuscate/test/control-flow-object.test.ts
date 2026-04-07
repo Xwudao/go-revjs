@@ -28,3 +28,41 @@ test('inline literal properties even when computed decoder lookups remain', () =
       return "0|1".split("|");
     }
   `))
+
+test('inline function wrappers from mixed literal objects', () =>
+  expectJS(`
+    function demo() {
+      const obj = {
+        Qwert: true,
+        Asdfg: function (fn) {
+          return fn();
+        }
+      };
+      obj.Asdfg(step);
+      return obj.Qwert;
+    }
+  `).toMatchInlineSnapshot(`
+    function demo() {
+      step();
+      return true;
+    }
+  `))
+
+test('inline mixed objects with regular property names', () =>
+  expectJS(`
+    function demo() {
+      const obj = {
+        enabled: true,
+        run: function (fn) {
+          return fn();
+        }
+      };
+      obj.run(step);
+      return obj.enabled;
+    }
+  `).toMatchInlineSnapshot(`
+    function demo() {
+      step();
+      return true;
+    }
+  `))

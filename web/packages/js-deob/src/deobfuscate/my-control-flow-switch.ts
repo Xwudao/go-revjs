@@ -26,6 +26,26 @@ function inferSequenceFromObjectBinding(
     return []
   }
 
+  const targetPropName = getPropName(splitTarget.property)
+  if (targetPropName) {
+    const exactMatch = init.properties.find((property) => {
+      return (
+        t.isObjectProperty(property)
+        && getPropName(property.key) === targetPropName
+        && t.isStringLiteral(property.value)
+        && isSequenceString(property.value.value)
+      )
+    })
+
+    if (
+      exactMatch
+      && t.isObjectProperty(exactMatch)
+      && t.isStringLiteral(exactMatch.value)
+    ) {
+      return exactMatch.value.value.split('|')
+    }
+  }
+
   const candidates = init.properties.flatMap((property) => {
     if (!t.isObjectProperty(property) || !t.isStringLiteral(property.value)) {
       return []

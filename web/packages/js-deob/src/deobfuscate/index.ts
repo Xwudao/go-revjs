@@ -72,7 +72,6 @@ export default {
     state.changes += applyTransforms(
       ast,
       [mergeStrings, deadCode, controlFlowObject, controlFlowSwitch],
-      { noScope: true },
     ).changes
   },
 } satisfies AsyncTransform<Sandbox>

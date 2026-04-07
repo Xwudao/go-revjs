@@ -201,7 +201,6 @@ export async function deob(rawCode: string, options: Options = {}): Promise<Deob
         // myControlFlowSwitch handles the pattern where the sequence string is in an
         // object property (obj.PROP.split("|")) after control-flow-object inlines it
         [mergeStrings, deadCode, controlFlowObject, myControlFlowSwitch, controlFlowSwitch],
-        { noScope: true },
       ),
     // unminify
     () => applyTransforms(ast, [transpile, unminify]),

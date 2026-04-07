@@ -67,3 +67,41 @@ test('infer decoder-hidden sequence string by matching case count', () =>
       return 3;
     }
   `))
+
+test('prefer the exact split property when multiple sequence strings share the same case count', () =>
+  expectJS(`
+    function demo() {
+      var dict = {
+        primary: "1|0|2",
+        backup: "2|1|0",
+        other: "noop"
+      };
+      var order = dict.primary.split("|");
+      var index = 0;
+      while (true) {
+        switch (order[index++]) {
+          case "0":
+            second();
+            continue;
+          case "1":
+            first();
+            continue;
+          case "2":
+            return done;
+        }
+        break;
+      }
+    }
+  `).toMatchInlineSnapshot(`
+    function demo() {
+      var dict = {
+        primary: "1|0|2",
+        backup: "2|1|0",
+        other: "noop"
+      };
+      var index = 0;
+      first();
+      second();
+      return done;
+    }
+  `))

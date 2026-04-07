@@ -10,6 +10,12 @@ test('inline property', () =>
       console.log(a.x);
     `).toMatchInlineSnapshot('console.log(1);'))
 
+test('inline boolean property', () =>
+  expectJS(`
+    const a = { enabled: true };
+    return a.enabled;
+  `).toMatchInlineSnapshot('return true;'))
+
 test('ignore non-existent properties', () =>
   expectJS(`
     const a = { x: 1 };

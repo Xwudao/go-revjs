@@ -42,7 +42,7 @@ export default {
       m.arrayOf(
         m.objectProperty(
           propertyKey,
-          m.or(m.stringLiteral(), m.numericLiteral()),
+          m.or(m.stringLiteral(), m.numericLiteral(), m.booleanLiteral()),
         ),
       ),
     )
@@ -82,7 +82,7 @@ export default {
           binding,
           m.objectProperty(
             propertyKey,
-            m.or(m.stringLiteral(), m.numericLiteral()),
+            m.or(m.stringLiteral(), m.numericLiteral(), m.booleanLiteral()),
           ),
         )
         this.changes++

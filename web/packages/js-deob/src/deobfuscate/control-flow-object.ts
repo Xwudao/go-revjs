@@ -25,11 +25,16 @@ export default {
   scope: true,
   visitor() {
     const varId = m.capture(m.identifier())
-    const propertyName = m.matcher<string>(name => /^[a-z]{5}$/i.test(name))
+    const propertyName = m.matcher<string>(name => /^[$_a-z][$_\w]*$/i.test(name))
     const propertyKey = constKey(propertyName)
+    const literalPropertyValue = m.or(
+      m.stringLiteral(),
+      m.booleanLiteral(),
+      m.numericLiteral(),
+    )
     const propertyValue = m.or(
       // E.g. "6|0|4|3|1|5|2"
-      m.stringLiteral(),
+      literalPropertyValue,
       // E.g. function (a, b) { return a + b }
       createFunctionMatcher(2, (left, right) => [
         m.returnStatement(
@@ -137,7 +142,7 @@ export default {
         const props = new Map(
           objectProperties.current!.map(p => [
             getPropName(p.key),
-            p.value as t.FunctionExpression | t.StringLiteral,
+            p.value as t.FunctionExpression | t.StringLiteral | t.BooleanLiteral | t.NumericLiteral,
           ]),
         )
         if (!props.size) return changes
@@ -162,7 +167,7 @@ export default {
             return
           }
 
-          if (t.isStringLiteral(value)) {
+          if (t.isLiteral(value)) {
             memberPath.replaceWith(value)
           }
           else {
@@ -256,10 +261,10 @@ export default {
           const propName = getPropName(path.node.property)!
           const value = objectProperties.current!.find(
             prop => getPropName(prop.key) === propName,
-          )?.value as t.FunctionExpression | t.StringLiteral | undefined
+          )?.value as t.FunctionExpression | t.StringLiteral | t.BooleanLiteral | t.NumericLiteral | undefined
           if (!value) return
 
-          if (t.isStringLiteral(value)) {
+          if (t.isLiteral(value)) {
             path.replaceWith(value)
           }
           else if (path.parentPath.isCallExpression()) {
