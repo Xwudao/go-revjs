@@ -1,4 +1,5 @@
 import { parse } from '@babel/parser'
+import type { NodePath } from '@babel/traverse'
 import traverse from '@babel/traverse'
 import * as t from '@babel/types'
 import { expect, test } from 'vitest'
@@ -127,6 +128,57 @@ test('inline function call with too few args', () => {
     }
     1 + 2 + void 0;
   `)
+})
+
+test('inline function call with reused argument', () => {
+  const ast = parse(`
+    function f(a) {
+      return a + a;
+    }
+    fn(foo());
+  `)
+  traverse(ast, {
+    CallExpression(path) {
+      if (t.isIdentifier(path.node.callee, { name: 'fn' })) {
+        const fn = path.parentPath.getPrevSibling().node as t.FunctionDeclaration
+        inlineFunctionCall(fn, path)
+      }
+    },
+  })
+  expect(ast).toMatchInlineSnapshot(`
+    function f(a) {
+      return a + a;
+    }
+    foo() + foo();
+  `)
+})
+
+test('inline function call ignores removed caller path', () => {
+  const ast = parse(`
+    function f(a) {
+      return a;
+    }
+    fn(1);
+  `)
+
+  let fn: t.FunctionDeclaration | undefined
+  let callPath: NodePath<t.CallExpression> | undefined
+
+  traverse(ast, {
+    FunctionDeclaration(path) {
+      fn = path.node
+    },
+    CallExpression(path) {
+      if (t.isIdentifier(path.node.callee, { name: 'fn' })) {
+        callPath = path
+        path.stop()
+      }
+    },
+  })
+
+  callPath!.remove()
+
+  expect(() => inlineFunctionCall(fn!, callPath!)).not.toThrow()
 })
 
 test('inline function call with rest arg', () => {
