@@ -9,40 +9,75 @@ type ConfigContextValue = {
   theme: ThemeMode
 }
 
+type AccentTokenSet = {
+  accent: string
+  hover: string
+  active: string
+  soft: string
+  border: string
+  contrast: string
+}
+
 const accentTokens: Record<
   AccentPreset,
   {
-    accent: string
-    hover: string
-    active: string
-    soft: string
-    border: string
-    contrast: string
+    dark: AccentTokenSet
+    light: AccentTokenSet
   }
 > = {
   violet: {
-    accent: '#2ee59d',
-    hover: '#24cf8c',
-    active: '#17a96f',
-    soft: 'rgba(46, 229, 157, 0.14)',
-    border: 'rgba(46, 229, 157, 0.42)',
-    contrast: '#04150e',
+    dark: {
+      accent: '#2ee59d',
+      hover: '#24cf8c',
+      active: '#17a96f',
+      soft: 'rgba(46, 229, 157, 0.14)',
+      border: 'rgba(46, 229, 157, 0.42)',
+      contrast: '#04150e',
+    },
+    light: {
+      accent: '#0d7f5c',
+      hover: '#0b6d4f',
+      active: '#08543c',
+      soft: 'rgba(13, 127, 92, 0.1)',
+      border: 'rgba(13, 127, 92, 0.24)',
+      contrast: '#ffffff',
+    },
   },
   emerald: {
-    accent: '#29d9a4',
-    hover: '#18c593',
-    active: '#11916d',
-    soft: 'rgba(41, 217, 164, 0.14)',
-    border: 'rgba(41, 217, 164, 0.42)',
-    contrast: '#051811',
+    dark: {
+      accent: '#29d9a4',
+      hover: '#18c593',
+      active: '#11916d',
+      soft: 'rgba(41, 217, 164, 0.14)',
+      border: 'rgba(41, 217, 164, 0.42)',
+      contrast: '#051811',
+    },
+    light: {
+      accent: '#0f766e',
+      hover: '#0d665f',
+      active: '#0a514b',
+      soft: 'rgba(15, 118, 110, 0.1)',
+      border: 'rgba(15, 118, 110, 0.24)',
+      contrast: '#ffffff',
+    },
   },
   amber: {
-    accent: '#ffbb56',
-    hover: '#f2a52d',
-    active: '#d18214',
-    soft: 'rgba(255, 187, 86, 0.14)',
-    border: 'rgba(255, 187, 86, 0.4)',
-    contrast: '#241302',
+    dark: {
+      accent: '#ffbb56',
+      hover: '#f2a52d',
+      active: '#d18214',
+      soft: 'rgba(255, 187, 86, 0.14)',
+      border: 'rgba(255, 187, 86, 0.4)',
+      contrast: '#241302',
+    },
+    light: {
+      accent: '#a16207',
+      hover: '#8f5605',
+      active: '#784603',
+      soft: 'rgba(161, 98, 7, 0.1)',
+      border: 'rgba(161, 98, 7, 0.24)',
+      contrast: '#ffffff',
+    },
   },
 }
 
@@ -60,7 +95,7 @@ export function ConfigProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     const root = document.documentElement
-    const tokens = accentTokens[accent]
+    const tokens = accentTokens[accent][theme]
 
     root.style.setProperty('--color-accent', tokens.accent)
     root.style.setProperty('--color-accent-hover', tokens.hover)
@@ -71,7 +106,7 @@ export function ConfigProvider({ children }: PropsWithChildren) {
     root.style.setProperty('--accent', tokens.accent)
     root.style.setProperty('--accent-bg', tokens.soft)
     root.style.setProperty('--accent-border', tokens.border)
-  }, [accent])
+  }, [accent, theme])
 
   return (
     <ConfigContext.Provider

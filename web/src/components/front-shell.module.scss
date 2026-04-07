@@ -155,10 +155,14 @@
   text-decoration: none;
 }
 
-.site-nav-link:hover,
-.site-nav-link[data-current='true'] {
+.site-nav-link:hover {
   background: var(--color-accent-soft);
   color: var(--color-accent);
+}
+
+.site-nav-link[data-current='true'] {
+  background: var(--color-accent-active);
+  color: var(--color-accent-contrast);
 }
 
 .site-header-tools {

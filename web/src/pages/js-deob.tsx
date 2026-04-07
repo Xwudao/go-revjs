@@ -44,8 +44,8 @@ const decoderMethodOptions: AppSelectOption<EditableOptions['decoderLocationMeth
   [
     {
       value: 'stringArray',
-      label: '字符串数组长度',
-      description: '适合大多数常见样本，优先按字符串数组定位。',
+      label: '字符串数组定位',
+      description: '自动按字符串数组特征定位，不再手动输入数组长度。',
     },
     {
       value: 'callCount',
@@ -260,17 +260,7 @@ function JsDeobPage() {
     setParseTime(null)
     setLogs([])
 
-    pushLog(
-      [
-        `开始处理 | 方式: ${options.decoderLocationMethod}`,
-        options.decoderLocationMethod === 'stringArray' &&
-        options.decoderStringArrayLength > 0
-          ? `字符串数组长度: ${options.decoderStringArrayLength}`
-          : '',
-      ]
-        .filter(Boolean)
-        .join(' | '),
-    )
+    pushLog(`开始处理 | 方式: ${options.decoderLocationMethod}`)
 
     if (!workerRef.current) {
       spawnWorkerRef.current()
@@ -428,7 +418,7 @@ function JsDeobPage() {
             </p>
 
             <div className={clsx(classes.jsDeobHighlights)}>
-              <span>适合常见字符串数组场景</span>
+              <span>适合常见混淆样本</span>
               <span>支持自定义注入代码</span>
               <span>输出与日志分区查看</span>
             </div>
@@ -482,41 +472,6 @@ function JsDeobPage() {
                   </div>
                 )}
 
-                {options.decoderLocationMethod === 'stringArray' && (
-                  <div className={clsx(classes.jsDeobField)}>
-                    <label
-                      className={clsx(classes.jsDeobFieldLabel)}
-                      htmlFor="decoder-string-array-length"
-                    >
-                      字符串数组长度
-                    </label>
-                    <input
-                      id="decoder-string-array-length"
-                      className={clsx(classes.jsDeobInput)}
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={
-                        options.decoderStringArrayLength > 0
-                          ? options.decoderStringArrayLength
-                          : ''
-                      }
-                      placeholder="留空或 0 表示自动匹配"
-                      onChange={(event) => {
-                        const value = Number(event.target.value)
-
-                        updateOptions({
-                          decoderStringArrayLength:
-                            Number.isFinite(value) && value > 0 ? value : 0,
-                        })
-                      }}
-                    />
-                    <span className={clsx(classes.jsDeobFieldHint)}>
-                      已知长度时填写会更快命中目标。
-                    </span>
-                  </div>
-                )}
-
                 {options.decoderLocationMethod === 'evalCode' && (
                   <>
                     <div className={clsx(classes.jsDeobField)}>
@@ -553,12 +508,15 @@ function JsDeobPage() {
                   </>
                 )}
 
-                <AppCheckbox
-                  checked={options.isMarkEnable}
-                  label="标记常见关键字"
-                  description="帮助快速查看 debugger、签名或环境检测相关片段。"
-                  onChange={(checked) => updateOptions({ isMarkEnable: checked })}
-                />
+                <div className={clsx(classes.jsDeobField)}>
+                  <span className={clsx(classes.jsDeobFieldLabel)}>关键字标记</span>
+                  <AppCheckbox
+                    checked={options.isMarkEnable}
+                    label="标记常见关键字"
+                    description="帮助快速查看 debugger、签名或环境检测相关片段。"
+                    onChange={(checked) => updateOptions({ isMarkEnable: checked })}
+                  />
+                </div>
 
                 {options.isMarkEnable && (
                   <div className={clsx(classes.jsDeobField)}>
@@ -645,9 +603,9 @@ function JsDeobPage() {
                 </p>
               </div>
               <ul className={clsx(classes.jsDeobSideNotes)}>
-                <li>先试字符串数组长度模式，命中率通常更高。</li>
+                <li>先试字符串数组定位模式，常见样本通常可以直接命中。</li>
                 <li>已知解密调用规模时，再切到调用次数模式。</li>
-                <li>遇到缺环境或缺函数时，再使用注入自定义代码。</li>
+                <li>处理结果回填后再继续运行，便于逐步清理多层混淆。</li>
               </ul>
             </div>
           </aside>

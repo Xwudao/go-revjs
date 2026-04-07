@@ -22,10 +22,10 @@
 
 .app-select-trigger {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: 3.125rem;
+  min-height: 3.5rem;
   padding: 0.625rem 0.875rem;
   border-radius: var(--radius-xl);
   background: color-mix(in srgb, var(--color-surface) 96%, transparent);
@@ -48,6 +48,7 @@
 .app-select-option-copy {
   display: grid;
   gap: 0.125rem;
+  min-width: 0;
 }
 
 .app-select-label,
@@ -59,9 +60,11 @@
 
 .app-select-description,
 .app-select-option-description {
-  color: var(--color-text-muted);
+  display: block;
+  color: var(--color-text);
   font-size: var(--font-size-xs);
   line-height: 1.45;
+  white-space: normal;
 }
 
 .app-select-icon,
@@ -69,6 +72,10 @@
   flex: 0 0 auto;
   color: var(--color-text-muted);
   font-size: 1rem;
+}
+
+.app-select-icon {
+  margin-top: 0.125rem;
 }
 
 .app-select-menu {
