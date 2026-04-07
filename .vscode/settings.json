@@ -18,6 +18,10 @@
     "editor.defaultFormatter": "oxc.oxc-vscode",
     "editor.formatOnSave": true
   },
+  "[markdown]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.formatOnSave": true
+  },
   "oxc.requireConfig": true,
   "oxc.lint.run": "onSave",
   "oxc.enable.oxlint": true,

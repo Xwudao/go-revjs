@@ -3,7 +3,7 @@ import type { Warnings } from 'curlconverter'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import { AppSelect, type AppSelectOption } from '@/components/ui/app-select'
-import { CodeEditor } from '@/components/ui/code-editor'
+import { CodeEditor, type CodeEditorLanguage } from '@/components/ui/code-editor'
 import classes from './curl-to-code.module.scss'
 
 type CurlConverterModule = typeof import('curlconverter')
@@ -17,6 +17,16 @@ type ConversionTarget =
   | 'raw-http'
 
 type ConversionWarning = Warnings[number]
+
+const targetLanguageMap: Record<ConversionTarget, CodeEditorLanguage> = {
+  'python-requests': 'python',
+  'python-http-client': 'python',
+  'go-net-http': 'go',
+  'javascript-fetch': 'javascript',
+  'node-axios': 'javascript',
+  'java-okhttp': 'java',
+  'raw-http': 'plain',
+}
 
 interface StoredState {
   curlCommand: string
@@ -585,7 +595,12 @@ function CurlToCodePage() {
               <span className={clsx(classes.curlReqMeta)}>行数: {outputLineCount}</span>
             </div>
 
-            <CodeEditor value={outputCode} readOnly minHeight="24rem" language="plain" />
+            <CodeEditor
+              value={outputCode}
+              readOnly
+              minHeight="24rem"
+              language={targetLanguageMap[state.target]}
+            />
           </article>
         </div>
       </section>

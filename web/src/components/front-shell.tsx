@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from 'react'
 import clsx from 'clsx'
 import { Link, useRouterState } from '@tanstack/react-router'
-import useAppConfigStore from '@/store/useAppConfig'
+import useAppConfigStore, { type AccentPreset } from '@/store/useAppConfig'
 import { useAppConfig } from '@/provider/ConfigProvider'
 import classes from './front-shell.module.scss'
 
@@ -51,8 +51,15 @@ export function RoutePending() {
 }
 
 function FrontHeader({ current }: { current: NavKey }) {
-  const { theme } = useAppConfig()
+  const { theme, accent } = useAppConfig()
   const toggleTheme = useAppConfigStore((state) => state.toggleTheme)
+  const setAccent = useAppConfigStore((state) => state.setAccent)
+
+  const accentPresets: { key: AccentPreset; label: string }[] = [
+    { key: 'violet', label: '绿色' },
+    { key: 'emerald', label: '青绿' },
+    { key: 'amber', label: '琥珀' },
+  ]
 
   return (
     <header className={clsx(classes.siteHeader)}>
@@ -83,6 +90,21 @@ function FrontHeader({ current }: { current: NavKey }) {
         </nav>
 
         <div className={clsx(classes.siteHeaderTools)}>
+          <div className={clsx(classes.siteAccentSwitcher)} role="group" aria-label="主题色">
+            {accentPresets.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                className={clsx(classes.siteAccentSwitcherItem)}
+                data-active={accent === key}
+                aria-label={label}
+                aria-pressed={accent === key}
+                onClick={() => setAccent(key)}
+              >
+                <span data-accent={key} aria-hidden="true" />
+              </button>
+            ))}
+          </div>
           <button
             type="button"
             className={clsx(classes.siteToolButton)}

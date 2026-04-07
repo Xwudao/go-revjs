@@ -1,12 +1,28 @@
 import type { CSSProperties } from 'react'
 import { useMemo } from 'react'
 import clsx from 'clsx'
+import { css } from '@codemirror/lang-css'
+import { go } from '@codemirror/lang-go'
+import { html } from '@codemirror/lang-html'
+import { java } from '@codemirror/lang-java'
 import { javascript } from '@codemirror/lang-javascript'
+import { json } from '@codemirror/lang-json'
+import { python } from '@codemirror/lang-python'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { EditorView } from '@codemirror/view'
 import CodeMirror from '@uiw/react-codemirror'
 import { useAppConfig } from '@/provider/ConfigProvider'
 import classes from './code-editor.module.scss'
+
+export type CodeEditorLanguage =
+  | 'javascript'
+  | 'go'
+  | 'python'
+  | 'html'
+  | 'json'
+  | 'css'
+  | 'java'
+  | 'plain'
 
 interface CodeEditorProps {
   value: string
@@ -15,7 +31,28 @@ interface CodeEditorProps {
   height?: string
   minHeight?: string
   compact?: boolean
-  language?: 'javascript' | 'plain'
+  language?: CodeEditorLanguage
+}
+
+function buildLangExtension(language: CodeEditorLanguage) {
+  switch (language) {
+    case 'javascript':
+      return javascript()
+    case 'go':
+      return go()
+    case 'python':
+      return python()
+    case 'html':
+      return html()
+    case 'json':
+      return json()
+    case 'css':
+      return css()
+    case 'java':
+      return java()
+    default:
+      return null
+  }
 }
 
 export function CodeEditor({
@@ -30,13 +67,10 @@ export function CodeEditor({
   const { theme } = useAppConfig()
   const editorHeight = height ?? minHeight
 
-  const extensions = useMemo(
-    () =>
-      language === 'javascript'
-        ? [javascript(), EditorView.lineWrapping]
-        : [EditorView.lineWrapping],
-    [language],
-  )
+  const extensions = useMemo(() => {
+    const langExt = buildLangExtension(language)
+    return langExt ? [langExt, EditorView.lineWrapping] : [EditorView.lineWrapping]
+  }, [language])
 
   return (
     <div
