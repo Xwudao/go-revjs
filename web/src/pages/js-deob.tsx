@@ -1,6 +1,7 @@
 import type { Options } from '@revjs/js-deob'
 import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
+import toast from 'react-hot-toast'
 import { AppCheckbox } from '@/components/ui/app-checkbox'
 import { AppSelect, type AppSelectOption } from '@/components/ui/app-select'
 import { CodeEditor } from '@/components/ui/code-editor'
@@ -143,23 +144,47 @@ const exampleCode = [
   'run();',
 ].join('\n')
 
+// Persistent singleton workers — pre-spawned on page load so modules are already
+// loaded by the time the user first triggers a format / minify operation.
+let formatWorkerSingleton: Worker | null = null
+let minifyWorkerSingleton: Worker | null = null
+
+function getFormatWorker(): Worker {
+  if (!formatWorkerSingleton) {
+    formatWorkerSingleton = new JsFormatWorker()
+    formatWorkerSingleton.onerror = () => {
+      formatWorkerSingleton = null
+    }
+  }
+  return formatWorkerSingleton
+}
+
+function getMinifyWorker(): Worker {
+  if (!minifyWorkerSingleton) {
+    minifyWorkerSingleton = new JsMinifyWorker()
+    minifyWorkerSingleton.onerror = () => {
+      minifyWorkerSingleton = null
+    }
+  }
+  return minifyWorkerSingleton
+}
+
 function formatSourceWithWorker(code: string) {
   return new Promise<string>((resolve, reject) => {
-    const worker = new JsFormatWorker()
+    const worker = getFormatWorker()
 
     worker.onmessage = (event: MessageEvent<FormatWorkerResponse>) => {
-      worker.terminate()
-
       if (event.data.type === 'formatted') {
         resolve(event.data.code)
         return
       }
 
+      formatWorkerSingleton = null
       reject(new Error(event.data.message))
     }
 
     worker.onerror = () => {
-      worker.terminate()
+      formatWorkerSingleton = null
       reject(new Error('格式化失败，请检查输入代码是否完整。'))
     }
 
@@ -169,21 +194,20 @@ function formatSourceWithWorker(code: string) {
 
 function minifyOutputWithWorker(code: string) {
   return new Promise<string>((resolve, reject) => {
-    const worker = new JsMinifyWorker()
+    const worker = getMinifyWorker()
 
     worker.onmessage = (event: MessageEvent<MinifyWorkerResponse>) => {
-      worker.terminate()
-
       if (event.data.type === 'minified') {
         resolve(event.data.code)
         return
       }
 
+      minifyWorkerSingleton = null
       reject(new Error(event.data.message))
     }
 
     worker.onerror = () => {
-      worker.terminate()
+      minifyWorkerSingleton = null
       reject(new Error('压缩失败，请稍后重试。'))
     }
 
@@ -268,6 +292,11 @@ function JsDeobPage() {
 
   useEffect(() => {
     spawnWorkerRef.current()
+    // Pre-spawn format / minify workers so their modules are already loaded
+    // when the user first triggers those operations.
+    getFormatWorker()
+    getMinifyWorker()
+    toast.success('工具已就绪', { id: 'deob-workers-ready', duration: 2500 })
 
     return () => {
       workerRef.current?.terminate()
@@ -405,8 +434,10 @@ function JsDeobPage() {
     try {
       await navigator.clipboard.writeText(outputCode)
       setCopyState('done')
+      toast.success('已复制到剪贴板')
     } catch {
       setCopyState('failed')
+      toast.error('复制失败，请检查浏览器权限')
     }
   }
 
@@ -447,15 +478,16 @@ function JsDeobPage() {
       const text = await navigator.clipboard.readText()
 
       if (!text.trim()) {
-        setErrorMessage('剪贴板里没有可用内容。')
+        toast.error('剪贴板里没有可用内容')
         return
       }
 
       setSourceCode(text)
       setErrorMessage('')
       pushLog(`已从剪贴板载入 ${text.length} 字符`)
+      toast.success(`已从剪贴板载入 ${text.length} 字符`)
     } catch {
-      setErrorMessage('读取剪贴板失败，请检查浏览器权限。')
+      toast.error('读取剪贴板失败，请检查浏览器权限')
     }
   }
 

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, type PropsWithChildren } from 'react'
+import { Toaster } from 'react-hot-toast'
 import useAppConfigStore, {
   type AccentPreset,
   type ThemeMode,
@@ -116,6 +117,39 @@ export function ConfigProvider({ children }: PropsWithChildren) {
       }}
     >
       {children}
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: 'var(--color-surface)',
+            color: 'var(--text)',
+            border: '1px solid var(--border)',
+            boxShadow: 'var(--shadow-md)',
+            borderRadius: '8px',
+            fontSize: '13px',
+            padding: '10px 14px',
+          },
+          success: {
+            iconTheme: {
+              primary: 'var(--color-success)',
+              secondary: 'var(--color-surface)',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: 'var(--color-danger)',
+              secondary: 'var(--color-surface)',
+            },
+          },
+          loading: {
+            iconTheme: {
+              primary: 'var(--color-accent)',
+              secondary: 'var(--color-surface)',
+            },
+          },
+        }}
+      />
     </ConfigContext.Provider>
   )
 }

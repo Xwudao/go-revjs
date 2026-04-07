@@ -1,6 +1,7 @@
 import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
 import type { Warnings } from 'curlconverter'
 import clsx from 'clsx'
+import toast from 'react-hot-toast'
 import { AppSelect, type AppSelectOption } from '@/components/ui/app-select'
 import { CodeEditor } from '@/components/ui/code-editor'
 import classes from './curl-to-code.module.scss'
@@ -245,6 +246,13 @@ function CurlToCodePage() {
   }, [state])
 
   useEffect(() => {
+    const id = toast.loading('正在预加载解析器…', { id: 'curl-wasm-preload' })
+    loadConverterModule()
+      .then(() => toast.success('解析器已就绪', { id }))
+      .catch(() => toast.dismiss(id))
+  }, [])
+
+  useEffect(() => {
     if (copyState === 'idle') return
 
     const timer = window.setTimeout(() => setCopyState('idle'), 1600)
@@ -331,8 +339,10 @@ function CurlToCodePage() {
     try {
       await navigator.clipboard.writeText(outputCode)
       setCopyState('done')
+      toast.success('已复制到剪贴板')
     } catch {
       setCopyState('failed')
+      toast.error('复制失败，请检查浏览器权限')
     }
   }
 
@@ -341,7 +351,7 @@ function CurlToCodePage() {
       const text = await navigator.clipboard.readText()
 
       if (!text.trim()) {
-        setErrorMessage('剪贴板里没有可用的 cURL 内容。')
+        toast.error('剪贴板里没有可用的 cURL 内容')
         return
       }
 
@@ -352,8 +362,9 @@ function CurlToCodePage() {
       setOutputCode('')
       setWarnings([])
       setErrorMessage('')
+      toast.success('已从剪贴板粘贴')
     } catch {
-      setErrorMessage('读取剪贴板失败，请检查浏览器权限。')
+      toast.error('读取剪贴板失败，请检查浏览器权限')
     }
   }
 

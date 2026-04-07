@@ -41,18 +41,18 @@ const hubFeatures: readonly HubFeature[] = [
     state: '即将推出',
     iconClass: 'i-mdi-check-circle-outline',
   },
-  {
-    title: '协议模拟',
-    description: '支持协议回放与接口实验，帮助快速复现和验证目标接口行为。',
-    state: '即将推出',
-    iconClass: 'i-mdi-swap-horizontal',
-  },
-  {
-    title: '高级调试',
-    description: '提供运行时 hook、细粒度日志和逐步排查能力，适合复杂场景分析。',
-    state: '即将推出',
-    iconClass: 'i-mdi-refresh',
-  },
+  // {
+  //   title: '协议模拟',
+  //   description: '支持协议回放与接口实验，帮助快速复现和验证目标接口行为。',
+  //   state: '即将推出',
+  //   iconClass: 'i-mdi-swap-horizontal',
+  // },
+  // {
+  //   title: '高级调试',
+  //   description: '提供运行时 hook、细粒度日志和逐步排查能力，适合复杂场景分析。',
+  //   state: '即将推出',
+  //   iconClass: 'i-mdi-refresh',
+  // },
 ]
 
 const commandEntries = [
