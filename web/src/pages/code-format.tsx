@@ -118,14 +118,6 @@ const defaultState: StoredState = {
   options: defaultOptions,
 }
 
-const pageNotes = [
-  '格式化在浏览器本地运行，代码不会上传服务器。',
-  '支持粘贴压缩代码、缩进混乱的代码，格式化后可直接复制使用。',
-  '部分选项（如尾逗号）仅对 JS/TS 生效，HTML / CSS 会自动忽略无关设置。',
-  '如果代码存在语法错误，格式化会失败并给出错误提示，请先修正后再试。',
-  'JSON5 宽松格式允许注释和尾逗号，输出也会保持 JSON5 格式，不会转为标准 JSON。',
-] as const
-
 let workerSingleton: Worker | null = null
 
 function getFormatWorker(): Worker {
@@ -201,7 +193,6 @@ function CodeFormatPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [isFormatting, setIsFormatting] = useState(false)
   const [copyState, setCopyState] = useState<'idle' | 'done' | 'failed'>('idle')
-  const [showOptions, setShowOptions] = useState(false)
 
   const currentLang = langConfigs[state.language]
   const inputLineCount = useMemo(() => countLines(state.inputCode), [state.inputCode])
@@ -329,97 +320,166 @@ function CodeFormatPage() {
         onChange={importSourceFile}
       />
 
-      <section className={clsx(classes.fmtPanel, classes.fmtHero)}>
-        <div className={clsx(classes.fmtHeroMain)}>
-          <div className={clsx(classes.fmtHeroHead)}>
-            <span className={clsx(classes.fmtKicker)}>
-              <span className="i-mdi-code-braces-box" aria-hidden="true" />
-              代码格式化
-            </span>
-            <span className={clsx(classes.fmtStatus)}>本地运行 / Prettier</span>
-          </div>
-
-          <div className={clsx(classes.fmtTitleRow)}>
-            <h1 className={clsx(classes.fmtTitle)}>Code Formatter</h1>
-            <p className={clsx(classes.fmtCopy)}>
-              支持 JS、TS、HTML、CSS、SCSS、Less、JSON、Markdown、GraphQL 等格式，基于
-              Prettier 在浏览器本地执行。
-            </p>
-          </div>
-
-          <div className={clsx(classes.fmtHighlights)}>
-            <span>10 种语言</span>
-            <span>可配置风格</span>
-            <span>本地执行</span>
-            <span>无需安装</span>
-          </div>
+      {/* ── Toolbar ── */}
+      <div className={clsx(classes.fmtPanel, classes.fmtToolbar)}>
+        <div className={clsx(classes.fmtToolbarLeft)}>
+          <span className={clsx(classes.fmtBrand)}>
+            <span className="i-mdi-code-braces-box" aria-hidden="true" />
+            Code Formatter
+          </span>
+          <span className={clsx(classes.fmtStatusBadge)}>
+            <span className="i-mdi-shield-check-outline" aria-hidden="true" />
+            本地运行 / Prettier
+          </span>
         </div>
-      </section>
 
-      <section className={clsx(classes.fmtPanel, classes.fmtControls)}>
-        <div className={clsx(classes.fmtToolbar)}>
-          <div className={clsx(classes.fmtField)}>
-            <span className={clsx(classes.fmtFieldLabel)}>语言 / 格式</span>
-            <AppSelect
-              value={state.language}
-              options={langOptions}
-              ariaLabel="选择代码语言"
-              onChange={(value) => {
-                updateState({ language: value })
-                setOutputCode('')
-                setErrorMessage('')
-              }}
+        <div className={clsx(classes.fmtToolbarActions)}>
+          <button
+            type="button"
+            className={clsx(classes.fmtButton, classes.fmtButtonPrimary)}
+            onClick={runFormat}
+            disabled={isFormatting}
+          >
+            <span
+              className={clsx(
+                isFormatting ? 'i-mdi-loading animate-spin' : 'i-mdi-auto-fix',
+              )}
+              aria-hidden="true"
+            />
+            {isFormatting ? '格式化中' : '立即格式化'}
+          </button>
+
+          <div className={clsx(classes.fmtDivider)} aria-hidden="true" />
+
+          <button
+            type="button"
+            className={clsx(classes.fmtButton)}
+            onClick={pasteFromClipboard}
+          >
+            <span className="i-mdi-clipboard-text-outline" aria-hidden="true" />
+            从剪贴板粘贴
+          </button>
+          <button
+            type="button"
+            className={clsx(classes.fmtButton)}
+            onClick={() => sourceFileInputRef.current?.click()}
+          >
+            <span className="i-mdi-file-import-outline" aria-hidden="true" />
+            导入文件
+          </button>
+
+          <div className={clsx(classes.fmtDivider)} aria-hidden="true" />
+
+          <button
+            type="button"
+            className={clsx(classes.fmtButton)}
+            onClick={copyOutput}
+            disabled={!outputCode}
+          >
+            <span className="i-mdi-content-copy" aria-hidden="true" />
+            {copyState === 'done'
+              ? '已复制'
+              : copyState === 'failed'
+                ? '复制失败'
+                : '复制结果'}
+          </button>
+          <button
+            type="button"
+            className={clsx(classes.fmtButton)}
+            onClick={downloadOutput}
+            disabled={!outputCode}
+          >
+            <span className="i-mdi-download" aria-hidden="true" />
+            下载结果
+          </button>
+
+          <div className={clsx(classes.fmtDivider)} aria-hidden="true" />
+
+          <button type="button" className={clsx(classes.fmtButton)} onClick={clearAll}>
+            <span className="i-mdi-refresh" aria-hidden="true" />
+            重置
+          </button>
+        </div>
+      </div>
+
+      {/* ── Editors ── */}
+      <div className={clsx(classes.fmtEditorsGrid)}>
+        <div className={clsx(classes.fmtPanel, classes.fmtSection)}>
+          <div className={clsx(classes.fmtEditorHead)}>
+            <h2 className={clsx(classes.fmtSectionTitle)}>原始代码</h2>
+            <span className={clsx(classes.fmtEditorMeta)}>
+              {currentLang.label} · {inputLineCount} 行
+            </span>
+          </div>
+          <div className={clsx(classes.fmtEditorWrap)}>
+            <CodeEditor
+              value={state.inputCode}
+              onChange={(value) => updateState({ inputCode: value })}
+              language={currentLang.editorLanguage}
+              minHeight="26rem"
             />
           </div>
-
-          <div className={clsx(classes.fmtToolbarActions)}>
-            <button
-              type="button"
-              className={clsx(classes.fmtButton, classes.fmtButtonPrimary)}
-              onClick={runFormat}
-              disabled={isFormatting}
-            >
-              <span
-                className={clsx(
-                  isFormatting ? 'i-mdi-loading animate-spin' : 'i-mdi-auto-fix',
-                )}
-                aria-hidden="true"
-              />
-              {isFormatting ? '格式化中' : '立即格式化'}
-            </button>
-            <button
-              type="button"
-              className={clsx(classes.fmtButton)}
-              onClick={pasteFromClipboard}
-            >
-              <span className="i-mdi-clipboard-text-outline" aria-hidden="true" />
-              从剪贴板粘贴
-            </button>
-            <button
-              type="button"
-              className={clsx(classes.fmtButton)}
-              onClick={() => sourceFileInputRef.current?.click()}
-            >
-              <span className="i-mdi-file-import-outline" aria-hidden="true" />
-              导入文件
-            </button>
-            <button
-              type="button"
-              className={clsx(classes.fmtButton, showOptions && classes.fmtButtonActive)}
-              onClick={() => setShowOptions((v) => !v)}
-            >
-              <span className="i-mdi-tune-variant" aria-hidden="true" />
-              格式选项
-            </button>
-            <button type="button" className={clsx(classes.fmtButton)} onClick={clearAll}>
-              <span className="i-mdi-delete-outline" aria-hidden="true" />
-              清空
-            </button>
-          </div>
         </div>
 
-        {showOptions && (
-          <div className={clsx(classes.fmtOptions)}>
+        <div className={clsx(classes.fmtPanel, classes.fmtSection)}>
+          <div className={clsx(classes.fmtEditorHead)}>
+            <h2 className={clsx(classes.fmtSectionTitle)}>格式化结果</h2>
+            <span className={clsx(classes.fmtEditorMeta)}>
+              {outputCode ? `${outputLineCount} 行` : '—'}
+            </span>
+          </div>
+          {errorMessage ? (
+            <div className={clsx(classes.fmtError)}>
+              <span className="i-mdi-alert-circle-outline" aria-hidden="true" />
+              {errorMessage}
+            </div>
+          ) : (
+            <div className={clsx(classes.fmtNote)}>
+              <span className="i-mdi-information-outline" aria-hidden="true" />
+              {outputCode ? '格式化完成，可直接复制或下载。' : '配置好选项后点"立即格式化"。'}
+            </div>
+          )}
+          <div className={clsx(classes.fmtEditorWrap)}>
+            <CodeEditor
+              value={outputCode}
+              readOnly
+              language={currentLang.editorLanguage}
+              minHeight="26rem"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Bottom row: options + summary ── */}
+      <div className={clsx(classes.fmtBottomRow)}>
+        <div className={clsx(classes.fmtPanel, classes.fmtSection, classes.fmtOptions)}>
+          <h2 className={clsx(classes.fmtSectionTitle)}>格式配置</h2>
+
+          <div className={clsx(classes.fmtForm)}>
+            <div className={clsx(classes.fmtField)}>
+              <span className={clsx(classes.fmtFieldLabel)}>语言 / 格式</span>
+              <AppSelect
+                value={state.language}
+                options={langOptions}
+                ariaLabel="选择代码语言"
+                onChange={(value) => {
+                  updateState({ language: value })
+                  setOutputCode('')
+                  setErrorMessage('')
+                }}
+              />
+            </div>
+
+            <div className={clsx(classes.fmtField)}>
+              <span className={clsx(classes.fmtFieldLabel)}>尾逗号</span>
+              <AppSelect
+                value={state.options.trailingComma}
+                options={trailingCommaOptions}
+                ariaLabel="尾逗号策略"
+                onChange={(value) => updateOptions({ trailingComma: value })}
+              />
+            </div>
+
             <div className={clsx(classes.fmtOptionRow)}>
               <label className={clsx(classes.fmtOptionLabel)}>
                 <span>行宽</span>
@@ -481,144 +541,56 @@ function CodeFormatPage() {
               />
               <span>单引号字符串</span>
             </label>
-
-            <div className={clsx(classes.fmtOptionField)}>
-              <span className={clsx(classes.fmtFieldLabel)}>尾逗号</span>
-              <AppSelect
-                value={state.options.trailingComma}
-                options={trailingCommaOptions}
-                ariaLabel="尾逗号策略"
-                onChange={(value) => updateOptions({ trailingComma: value })}
-              />
-            </div>
-          </div>
-        )}
-
-        <div className={clsx(classes.fmtMetaStrip)}>
-          <span className={clsx(classes.fmtMeta)}>语言: {currentLang.label}</span>
-          <span className={clsx(classes.fmtMeta)}>行宽: {state.options.printWidth}</span>
-          <span className={clsx(classes.fmtMeta)}>
-            缩进: {state.options.useTabs ? 'Tab' : `${state.options.tabWidth} 空格`}
-          </span>
-          <span className={clsx(classes.fmtMeta)}>
-            引号: {state.options.singleQuote ? '单引号' : '双引号'}
-          </span>
-        </div>
-
-        {errorMessage && (
-          <p className={clsx(classes.fmtError)}>
-            <span className="i-mdi-alert-circle-outline" aria-hidden="true" />
-            {errorMessage}
-          </p>
-        )}
-      </section>
-
-      <section className={clsx(classes.fmtPanel, classes.fmtWorkbench)}>
-        <div className={clsx(classes.fmtActionBar)}>
-          <div className={clsx(classes.fmtActionCopy)}>
-            <span className={clsx(classes.fmtActionTitle)}>工作区</span>
-            <span className={clsx(classes.fmtActionHint)}>
-              左侧粘贴原始代码，格式化后在右侧查看结果。
-            </span>
-          </div>
-
-          <div className={clsx(classes.fmtActionButtons)}>
-            <button
-              type="button"
-              className={clsx(classes.fmtButton)}
-              onClick={copyOutput}
-              disabled={!outputCode}
-            >
-              <span className="i-mdi-content-copy" aria-hidden="true" />
-              {copyState === 'done'
-                ? '已复制'
-                : copyState === 'failed'
-                  ? '复制失败'
-                  : '复制结果'}
-            </button>
-            <button
-              type="button"
-              className={clsx(classes.fmtButton)}
-              onClick={downloadOutput}
-              disabled={!outputCode}
-            >
-              <span className="i-mdi-download" aria-hidden="true" />
-              下载结果
-            </button>
           </div>
         </div>
 
-        <div className={clsx(classes.fmtEditors)}>
-          <article className={clsx(classes.fmtEditorCard)}>
-            <div className={clsx(classes.fmtEditorHead)}>
-              <div>
-                <h2>原始代码</h2>
-                <p>粘贴需要格式化的代码，支持压缩或缩进混乱的输入。</p>
-              </div>
-              <span className={clsx(classes.fmtMeta)}>行数: {inputLineCount}</span>
+        <div
+          className={clsx(classes.fmtPanel, classes.fmtSection, classes.fmtSummaryPanel)}
+        >
+          <h2 className={clsx(classes.fmtSectionTitle)}>配置摘要</h2>
+          <dl className={clsx(classes.fmtSummary)}>
+            <div>
+              <dt>语言</dt>
+              <dd>{currentLang.label}</dd>
             </div>
-
-            <CodeEditor
-              value={state.inputCode}
-              onChange={(value) => updateState({ inputCode: value })}
-              language={currentLang.editorLanguage}
-              minHeight="26rem"
-            />
-          </article>
-
-          <article className={clsx(classes.fmtEditorCard)}>
-            <div className={clsx(classes.fmtEditorHead)}>
-              <div>
-                <h2>格式化结果</h2>
-                <p>
-                  {outputCode
-                    ? `${currentLang.label} · 可直接复制或下载。`
-                    : '运行格式化后在此查看结果。'}
-                </p>
-              </div>
-              <span className={clsx(classes.fmtMeta)}>行数: {outputLineCount}</span>
+            <div>
+              <dt>行宽</dt>
+              <dd>{state.options.printWidth}</dd>
             </div>
-
-            <CodeEditor
-              value={outputCode}
-              readOnly
-              language={currentLang.editorLanguage}
-              minHeight="26rem"
-            />
-          </article>
+            <div>
+              <dt>缩进</dt>
+              <dd>{state.options.useTabs ? 'Tab' : `${state.options.tabWidth} 空格`}</dd>
+            </div>
+            <div>
+              <dt>分号</dt>
+              <dd>{state.options.semi ? '是' : '否'}</dd>
+            </div>
+            <div>
+              <dt>引号</dt>
+              <dd>{state.options.singleQuote ? '单引号' : '双引号'}</dd>
+            </div>
+            <div>
+              <dt>尾逗号</dt>
+              <dd>{state.options.trailingComma}</dd>
+            </div>
+            {outputCode ? (
+              <>
+                <div>
+                  <dt>输入行数</dt>
+                  <dd>{inputLineCount}</dd>
+                </div>
+                <div>
+                  <dt>输出行数</dt>
+                  <dd>{outputLineCount}</dd>
+                </div>
+              </>
+            ) : null}
+          </dl>
+          {!outputCode && (
+            <p className={clsx(classes.fmtEmpty)}>格式化后这里会同步显示输入 / 输出行数。</p>
+          )}
         </div>
-      </section>
-
-      <section className={clsx(classes.fmtInfoGrid)}>
-        <article className={clsx(classes.fmtPanel, classes.fmtInfoCard)}>
-          <div className={clsx(classes.fmtSectionHead)}>
-            <h2>支持格式</h2>
-            <p>以下格式均由 Prettier 在浏览器本地处理，无需网络请求。</p>
-          </div>
-
-          <ul className={clsx(classes.fmtLangList)}>
-            {langOptions.map((opt) => (
-              <li key={opt.value}>
-                <strong>{opt.label}</strong>
-                <span>{opt.description}</span>
-              </li>
-            ))}
-          </ul>
-        </article>
-
-        <article className={clsx(classes.fmtPanel, classes.fmtInfoCard)}>
-          <div className={clsx(classes.fmtSectionHead)}>
-            <h2>使用说明</h2>
-            <p>格式化工具适合快速整理代码风格，以下是一些边界说明。</p>
-          </div>
-
-          <ul className={clsx(classes.fmtNoteList)}>
-            {pageNotes.map((note) => (
-              <li key={note}>{note}</li>
-            ))}
-          </ul>
-        </article>
-      </section>
+      </div>
     </main>
   )
 }

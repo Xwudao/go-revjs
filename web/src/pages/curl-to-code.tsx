@@ -112,14 +112,6 @@ const targetOptions: AppSelectOption<ConversionTarget>[] = Object.entries(
   description: config.description,
 }))
 
-const pageNotes = [
-  '支持多行 cURL 命令，以及 header、cookie、JSON body、form、认证、压缩等常见写法。',
-  '会自动清理命令提示符前缀，Windows 用户直接粘贴也可以正常识别。',
-  '如果输入包含不支持的写法，右侧会列出 warnings，生成的代码可能需要手动补全个别部分。',
-  '不同语言和运行时对重定向、超时、cookie 的默认处理方式有所差异，使用前建议核对一下。',
-  '推荐使用单行 cURL 命令或标准多行格式；其他 shell 环境的语法可能无法完全识别。',
-] as const
-
 const defaultState: StoredState = {
   curlCommand: exampleCurl,
   target: 'python-requests',
@@ -404,207 +396,191 @@ function CurlToCodePage() {
   }
 
   return (
-    <main className={clsx(classes.curlReqPage)}>
+    <main className={clsx(classes.curlPage)}>
       <input
         ref={sourceFileInputRef}
         type="file"
         accept=".txt,.sh,.curl,.bash,.zsh,.ps1,text/plain"
-        className={clsx(classes.curlReqHiddenInput)}
+        className={clsx(classes.curlHiddenInput)}
         onChange={importSourceFile}
       />
 
-      <section className={clsx(classes.curlReqPanel, classes.curlReqHero)}>
-        <div className={clsx(classes.curlReqHeroMain)}>
-          <div className={clsx(classes.curlReqHeroHead)}>
-            <span className={clsx(classes.curlReqKicker)}>
-              <span className="i-mdi-console-network-outline" aria-hidden="true" />
-              请求代码生成
-            </span>
-            <span className={clsx(classes.curlReqStatus)}>本地解析 / 多语言输出</span>
-          </div>
-
-          <div className={clsx(classes.curlReqTitleRow)}>
-            <h1 className={clsx(classes.curlReqTitle)}>cURL 2 Req</h1>
-            <p className={clsx(classes.curlReqCopy)}>
-              把 cURL 命令直接转成 Python、Go、Fetch、Axios、OkHttp 或原始 HTTP。
-            </p>
-          </div>
-
-          <div className={clsx(classes.curlReqHighlights)}>
-            <span>支持多行 Bash</span>
-            <span>保留 headers / body / cookies</span>
-            <span>warnings 单独展示</span>
-            <span>浏览器本地执行</span>
-          </div>
+      {/* ── Toolbar ── */}
+      <div className={clsx(classes.curlPanel, classes.curlToolbar)}>
+        <div className={clsx(classes.curlToolbarLeft)}>
+          <span className={clsx(classes.curlBrand)}>
+            <span className="i-mdi-console-network-outline" aria-hidden="true" />
+            cURL 2 Req
+          </span>
+          <span className={clsx(classes.curlStatusBadge)}>
+            <span className="i-mdi-shield-check-outline" aria-hidden="true" />
+            本地解析
+          </span>
         </div>
-      </section>
 
-      <section className={clsx(classes.curlReqPanel, classes.curlReqControls)}>
-        <div className={clsx(classes.curlReqToolbar)}>
-          <div className={clsx(classes.curlReqField)}>
-            <span className={clsx(classes.curlReqFieldLabel)}>目标代码</span>
-            <AppSelect
-              value={state.target}
-              options={targetOptions}
-              ariaLabel="选择输出语言"
-              onChange={(value) => updateState({ target: value })}
+        <div className={clsx(classes.curlToolbarActions)}>
+          <button
+            type="button"
+            className={clsx(classes.curlButton, classes.curlButtonPrimary)}
+            onClick={runConversion}
+            disabled={isConverting}
+          >
+            <span
+              className={clsx(
+                isConverting ? 'i-mdi-loading animate-spin' : 'i-mdi-play-circle-outline',
+              )}
+              aria-hidden="true"
             />
-          </div>
+            {isConverting ? '转换中' : '立即转换'}
+          </button>
 
-          <div className={clsx(classes.curlReqToolbarActions)}>
-            <button
-              type="button"
-              className={clsx(classes.curlReqButton, classes.curlReqButtonPrimary)}
-              onClick={runConversion}
-              disabled={isConverting}
-            >
-              <span
-                className={clsx(
-                  isConverting
-                    ? 'i-mdi-loading animate-spin'
-                    : 'i-mdi-play-circle-outline',
-                )}
-                aria-hidden="true"
-              />
-              {isConverting ? '转换中' : '立即转换'}
-            </button>
-            <button
-              type="button"
-              className={clsx(classes.curlReqButton)}
-              onClick={pasteFromClipboard}
-            >
-              <span className="i-mdi-clipboard-text-outline" aria-hidden="true" />
-              从剪贴板粘贴
-            </button>
-            <button
-              type="button"
-              className={clsx(classes.curlReqButton)}
-              onClick={() => sourceFileInputRef.current?.click()}
-            >
-              <span className="i-mdi-file-import-outline" aria-hidden="true" />
-              导入文件
-            </button>
-            <button
-              type="button"
-              className={clsx(classes.curlReqButton)}
-              onClick={fillExample}
-            >
-              <span className="i-mdi-flask-outline" aria-hidden="true" />
-              示例命令
-            </button>
-            <button
-              type="button"
-              className={clsx(classes.curlReqButton)}
-              onClick={clearAll}
-            >
-              <span className="i-mdi-delete-outline" aria-hidden="true" />
-              清空
-            </button>
-          </div>
+          <div className={clsx(classes.curlDivider)} aria-hidden="true" />
+
+          <button
+            type="button"
+            className={clsx(classes.curlButton)}
+            onClick={pasteFromClipboard}
+          >
+            <span className="i-mdi-clipboard-text-outline" aria-hidden="true" />
+            从剪贴板粘贴
+          </button>
+          <button
+            type="button"
+            className={clsx(classes.curlButton)}
+            onClick={() => sourceFileInputRef.current?.click()}
+          >
+            <span className="i-mdi-file-import-outline" aria-hidden="true" />
+            导入文件
+          </button>
+          <button type="button" className={clsx(classes.curlButton)} onClick={fillExample}>
+            <span className="i-mdi-flask-outline" aria-hidden="true" />
+            示例命令
+          </button>
+
+          <div className={clsx(classes.curlDivider)} aria-hidden="true" />
+
+          <button
+            type="button"
+            className={clsx(classes.curlButton)}
+            onClick={copyOutput}
+            disabled={!outputCode}
+          >
+            <span className="i-mdi-content-copy" aria-hidden="true" />
+            {copyState === 'done' ? '已复制' : copyState === 'failed' ? '失败' : '复制结果'}
+          </button>
+          <button
+            type="button"
+            className={clsx(classes.curlButton)}
+            onClick={downloadOutput}
+            disabled={!outputCode}
+          >
+            <span className="i-mdi-download" aria-hidden="true" />
+            下载结果
+          </button>
+
+          <div className={clsx(classes.curlDivider)} aria-hidden="true" />
+
+          <button type="button" className={clsx(classes.curlButton)} onClick={clearAll}>
+            <span className="i-mdi-refresh" aria-hidden="true" />
+            重置
+          </button>
         </div>
+      </div>
 
-        <div className={clsx(classes.curlReqMetaStrip)}>
-          <span className={clsx(classes.curlReqMeta)}>
-            运行环境: {currentTarget.runtime}
-          </span>
-          <span className={clsx(classes.curlReqMeta)}>
-            依赖: {currentTarget.dependency}
-          </span>
-          <span className={clsx(classes.curlReqMeta)}>
-            默认文件名: {currentTarget.outputFileName}
-          </span>
-          <span className={clsx(classes.curlReqMeta)}>warnings: {warningCount}</span>
-        </div>
-
-        {errorMessage && (
-          <p className={clsx(classes.curlReqError)}>
-            <span className="i-mdi-alert-circle-outline" aria-hidden="true" />
-            {errorMessage}
-          </p>
-        )}
-      </section>
-
-      <section className={clsx(classes.curlReqPanel, classes.curlReqWorkbench)}>
-        <div className={clsx(classes.curlReqActionBar)}>
-          <div className={clsx(classes.curlReqActionCopy)}>
-            <span className={clsx(classes.curlReqActionTitle)}>工作区</span>
-            <span className={clsx(classes.curlReqActionHint)}>
-              左侧粘贴 cURL，右侧查看生成结果；切换目标语言后可再次转换。
-            </span>
+      {/* ── Editors ── */}
+      <div className={clsx(classes.curlEditorsGrid)}>
+        <div className={clsx(classes.curlPanel, classes.curlSection)}>
+          <div className={clsx(classes.curlEditorHead)}>
+            <h2 className={clsx(classes.curlSectionTitle)}>cURL 输入</h2>
+            <span className={clsx(classes.curlEditorMeta)}>{inputLineCount} 行</span>
           </div>
-
-          <div className={clsx(classes.curlReqActionButtons)}>
-            <button
-              type="button"
-              className={clsx(classes.curlReqButton)}
-              onClick={copyOutput}
-              disabled={!outputCode}
-            >
-              <span className="i-mdi-content-copy" aria-hidden="true" />
-              {copyState === 'done'
-                ? '已复制'
-                : copyState === 'failed'
-                  ? '复制失败'
-                  : '复制结果'}
-            </button>
-            <button
-              type="button"
-              className={clsx(classes.curlReqButton)}
-              onClick={downloadOutput}
-              disabled={!outputCode}
-            >
-              <span className="i-mdi-download" aria-hidden="true" />
-              下载结果
-            </button>
-          </div>
-        </div>
-
-        <div className={clsx(classes.curlReqEditors)}>
-          <article className={clsx(classes.curlReqEditorCard)}>
-            <div className={clsx(classes.curlReqEditorHead)}>
-              <div>
-                <h2>cURL 输入</h2>
-                <p>支持单行或 Bash 风格多行命令；常见 prompt 会自动清理。</p>
-              </div>
-              <span className={clsx(classes.curlReqMeta)}>行数: {inputLineCount}</span>
-            </div>
-
+          <div className={clsx(classes.curlEditorWrap)}>
             <CodeEditor
               value={state.curlCommand}
               onChange={(value) => updateState({ curlCommand: value })}
-              minHeight="24rem"
+              minHeight="20rem"
               language="plain"
             />
-          </article>
+          </div>
+        </div>
 
-          <article className={clsx(classes.curlReqEditorCard)}>
-            <div className={clsx(classes.curlReqEditorHead)}>
-              <div>
-                <h2>生成结果</h2>
-                <p>{currentTarget.label} 格式，可直接复制使用或在此基础上继续修改。</p>
-              </div>
-              <span className={clsx(classes.curlReqMeta)}>行数: {outputLineCount}</span>
+        <div className={clsx(classes.curlPanel, classes.curlSection)}>
+          <div className={clsx(classes.curlEditorHead)}>
+            <h2 className={clsx(classes.curlSectionTitle)}>生成结果</h2>
+            <span className={clsx(classes.curlEditorMeta)}>
+              {outputCode ? `${outputLineCount} 行` : '—'}
+            </span>
+          </div>
+          {errorMessage ? (
+            <div className={clsx(classes.curlError)}>
+              <span className="i-mdi-alert-circle-outline" aria-hidden="true" />
+              {errorMessage}
             </div>
-
+          ) : (
+            <div className={clsx(classes.curlNote)}>
+              <span className="i-mdi-information-outline" aria-hidden="true" />
+              {outputCode ? '转换完成，可直接复制或下载。' : '粘贴 cURL 后点"立即转换"。'}
+            </div>
+          )}
+          <div className={clsx(classes.curlEditorWrap)}>
             <CodeEditor
               value={outputCode}
               readOnly
-              minHeight="24rem"
+              minHeight="20rem"
               language={targetLanguageMap[state.target]}
             />
-          </article>
+          </div>
         </div>
-      </section>
+      </div>
 
-      <section className={clsx(classes.curlReqInfoGrid)}>
-        <article className={clsx(classes.curlReqPanel, classes.curlReqInfoCard)}>
-          <div className={clsx(classes.curlReqSectionHead)}>
-            <h2>转换告警</h2>
-            <p>这里展示转换过程中的注意事项，方便你判断生成的代码是否需要进一步调整。</p>
+      {/* ── Bottom row: options + warnings ── */}
+      <div className={clsx(classes.curlBottomRow)}>
+        <div className={clsx(classes.curlPanel, classes.curlSection, classes.curlOptions)}>
+          <h2 className={clsx(classes.curlSectionTitle)}>输出配置</h2>
+
+          <div className={clsx(classes.curlForm)}>
+            <div className={clsx(classes.curlField)}>
+              <span className={clsx(classes.curlFieldLabel)}>目标语言</span>
+              <AppSelect
+                value={state.target}
+                options={targetOptions}
+                ariaLabel="选择输出语言"
+                onChange={(value) => updateState({ target: value })}
+              />
+            </div>
           </div>
 
+          <dl className={clsx(classes.curlMeta)}>
+            <div>
+              <dt>运行环境</dt>
+              <dd>{currentTarget.runtime}</dd>
+            </div>
+            <div>
+              <dt>依赖</dt>
+              <dd>{currentTarget.dependency}</dd>
+            </div>
+            <div>
+              <dt>文件名</dt>
+              <dd>{currentTarget.outputFileName}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div
+          className={clsx(
+            classes.curlPanel,
+            classes.curlSection,
+            classes.curlWarningsPanel,
+          )}
+        >
+          <h2 className={clsx(classes.curlSectionTitle)}>
+            转换告警
+            {warningCount > 0 && (
+              <span className={clsx(classes.curlWarningBadge)}>{warningCount}</span>
+            )}
+          </h2>
           {warnings.length ? (
-            <ul className={clsx(classes.curlReqWarningList)}>
+            <ul className={clsx(classes.curlWarningList)}>
               {warnings.map((warning, index) => (
                 <li key={`${warning[0]}-${warning[1]}-${index}`}>
                   <strong>{formatWarningCode(warning[0])}</strong>
@@ -613,25 +589,14 @@ function CurlToCodePage() {
               ))}
             </ul>
           ) : (
-            <p className={clsx(classes.curlReqEmpty)}>
-              当前没有注意事项；生成结果已尽量还原原始请求，建议在实际使用前简单验证一下。
+            <p className={clsx(classes.curlEmpty)}>
+              {outputCode
+                ? '没有告警，生成结果已尽量还原原始请求。'
+                : '转换后将显示注意事项。'}
             </p>
           )}
-        </article>
-
-        <article className={clsx(classes.curlReqPanel, classes.curlReqInfoCard)}>
-          <div className={clsx(classes.curlReqSectionHead)}>
-            <h2>边界说明</h2>
-            <p>这个工具对常见输入格式和跨平台差异做了额外适配，下面是一些使用说明。</p>
-          </div>
-
-          <ul className={clsx(classes.curlReqNoteList)}>
-            {pageNotes.map((note) => (
-              <li key={note}>{note}</li>
-            ))}
-          </ul>
-        </article>
-      </section>
+        </div>
+      </div>
     </main>
   )
 }
