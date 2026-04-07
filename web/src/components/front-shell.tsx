@@ -1,23 +1,18 @@
 import type { PropsWithChildren } from 'react'
 import clsx from 'clsx'
 import { Link, useRouterState } from '@tanstack/react-router'
-import { useAppConfig } from '@/provider/ConfigProvider'
 import classes from './front-shell.module.scss'
 
 type FrontShellProps = PropsWithChildren<{
   isPending?: boolean
 }>
 
-const accentOptions = [
-  { label: 'Violet', value: 'violet' },
-  { label: 'Emerald', value: 'emerald' },
-  { label: 'Amber', value: 'amber' },
-] as const
-
 const navItems = [
   { key: 'home', label: '首页', to: '/' },
   { key: 'js-deob', label: 'JS Deob', to: '/js-deob' },
 ] as const
+
+type NavKey = (typeof navItems)[number]['key']
 
 export function FrontShell({ isPending = false, children }: FrontShellProps) {
   const pathname = useRouterState({
@@ -54,9 +49,7 @@ export function FrontShell({ isPending = false, children }: FrontShellProps) {
   )
 }
 
-function FrontHeader({ current }: { current: FrontShellProps['current'] }) {
-  const { accent, setAccent, theme, toggleTheme } = useAppConfig()
-
+function FrontHeader({ current }: { current: NavKey }) {
   return (
     <header className={clsx(classes.siteHeader)}>
       <div className={clsx(classes.siteHeaderInner)}>
@@ -66,8 +59,8 @@ function FrontHeader({ current }: { current: FrontShellProps['current'] }) {
               <span className="i-mdi-code-braces text-[15px]" />
             </span>
             <span>
-              <strong>revjs</strong>
-              <span>在线工具</span>
+              <strong>逆向工程中心</strong>
+              <span>Reverse Engineering Hub</span>
             </span>
           </Link>
         </div>
@@ -84,40 +77,6 @@ function FrontHeader({ current }: { current: FrontShellProps['current'] }) {
             </Link>
           ))}
         </nav>
-
-        <div className={clsx(classes.siteHeaderTools)}>
-          <div className={clsx(classes.siteAccentSwitcher)} aria-label="Accent preset">
-            {accentOptions.map((item) => (
-              <button
-                key={item.value}
-                type="button"
-                className={clsx(classes.siteAccentSwitcherItem)}
-                data-active={accent === item.value}
-                onClick={() => setAccent(item.value)}
-                aria-label={`Switch accent to ${item.label}`}
-                title={item.label}
-              >
-                <span data-accent={item.value} />
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            className={clsx(classes.siteToolButton)}
-            onClick={toggleTheme}
-          >
-            <span
-              className={
-                theme === 'dark'
-                  ? 'i-mdi-weather-night text-[15px]'
-                  : 'i-mdi-white-balance-sunny text-[15px]'
-              }
-              aria-hidden="true"
-            />
-            {theme === 'dark' ? 'Dark' : 'Light'}
-          </button>
-        </div>
       </div>
     </header>
   )
@@ -128,8 +87,8 @@ function FrontFooter() {
     <footer className={clsx(classes.siteFooter)}>
       <div className={clsx(classes.siteFooterInner)}>
         <div className={clsx(classes.siteFooterBrand)}>
-          <strong>revjs</strong>
-          <span>目前提供简单的在线工具入口，后续会继续补充。</span>
+          <strong>逆向工程中心</strong>
+          <span>revjs 当前在线逆向分析工作台入口。</span>
         </div>
       </div>
     </footer>

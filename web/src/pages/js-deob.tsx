@@ -442,7 +442,7 @@ function JsDeobPage() {
               <div className={clsx(classes.jsDeobSectionHead)}>
                 <h2 className={clsx(classes.jsDeobSectionTitle)}>处理选项</h2>
                 <p className={clsx(classes.jsDeobSectionCopy)}>
-                  保留最常用的选项，避免一开始就看到过多解释。
+                  调整识别方式和输出参数，以适配不同混淆样本。
                 </p>
               </div>
 

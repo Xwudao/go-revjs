@@ -1,8 +1,8 @@
 :root {
-  --container-page: 70.375rem;
+  --container-page: 82rem;
 
-  --font-sans: 'Space Grotesk', 'Segoe UI', sans-serif;
-  --font-heading: 'Sora', 'Segoe UI', sans-serif;
+  --font-sans: 'Inter', 'Segoe UI', sans-serif;
+  --font-heading: 'Share Tech Mono', 'IBM Plex Mono', monospace;
   --font-mono: 'IBM Plex Mono', 'Cascadia Code', monospace;
 
   --font-weight-regular: 400;
@@ -63,35 +63,44 @@
   --radius-2xl: 1.5rem;
   --radius-pill: 999px;
 
-  --shadow-xs: 0 1px 2px rgba(8, 6, 13, 0.08);
-  --shadow-sm: 0 8px 24px rgba(8, 6, 13, 0.08);
-  --shadow-md: 0 16px 36px rgba(8, 6, 13, 0.12);
-  --shadow-lg: 0 24px 56px rgba(8, 6, 13, 0.16);
+  --shadow-xs: 0 1px 2px rgba(4, 12, 22, 0.2);
+  --shadow-sm: 0 12px 32px rgba(4, 12, 22, 0.2);
+  --shadow-md: 0 18px 46px rgba(4, 12, 22, 0.28);
+  --shadow-lg: 0 28px 68px rgba(4, 12, 22, 0.42);
 
   --duration-fast: 140ms;
   --duration-normal: 220ms;
   --duration-slow: 320ms;
   --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
 
-  --color-canvas: #fffdf8;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f4f0e8;
-  --color-surface-elevated: rgba(255, 255, 255, 0.88);
-  --color-text: #2d2433;
-  --color-text-muted: #6b6375;
-  --color-text-strong: #08060d;
-  --color-border-soft: #e5e0d8;
-  --color-border-strong: #cbc2d5;
-  --color-accent: #aa3bff;
-  --color-accent-hover: #9530e8;
-  --color-accent-active: #7b1fd0;
-  --color-accent-soft: rgba(170, 59, 255, 0.1);
-  --color-accent-border: rgba(170, 59, 255, 0.5);
-  --color-accent-contrast: #ffffff;
-  --color-success: #0f9f6e;
-  --color-warning: #d97706;
-  --color-danger: #dc2626;
-  --color-info: #2563eb;
+  /* Dark mode is the default */
+  --color-canvas: #06101d;
+  --color-surface: #0b1626;
+  --color-surface-muted: #102036;
+  --color-surface-elevated: rgba(11, 22, 38, 0.84);
+  --color-text: #a5bfdc;
+  --color-text-muted: #7089a8;
+  --color-text-strong: #ecfbff;
+  --color-border-soft: rgba(98, 145, 201, 0.18);
+  --color-border-strong: rgba(106, 195, 255, 0.34);
+  --color-accent: #2ee59d;
+  --color-accent-hover: #24cf8c;
+  --color-accent-active: #17a96f;
+  --color-accent-soft: rgba(46, 229, 157, 0.14);
+  --color-accent-border: rgba(46, 229, 157, 0.42);
+  --color-accent-contrast: #03150d;
+  --color-success: #2ee59d;
+  --color-warning: #ffbb56;
+  --color-danger: #ff6c83;
+  --color-info: #73a8ff;
+  --color-signal: #6ff7bf;
+  --color-signal-soft: rgba(123, 246, 255, 0.12);
+  --color-grid-line: rgba(97, 152, 214, 0.11);
+  --color-backdrop-glow: rgba(46, 229, 157, 0.18);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.32);
+  --shadow-sm: 0 16px 36px rgba(0, 0, 0, 0.32);
+  --shadow-md: 0 24px 52px rgba(0, 0, 0, 0.42);
+  --shadow-lg: 0 32px 72px rgba(0, 0, 0, 0.56);
 
   --bg: var(--color-canvas);
   --text: var(--color-text-muted);
@@ -101,26 +110,31 @@
   --accent: var(--color-accent);
   --accent-bg: var(--color-accent-soft);
   --accent-border: var(--color-accent-border);
-  --social-bg: rgba(244, 240, 232, 0.72);
+  --social-bg: rgba(16, 32, 54, 0.56);
   --shadow: var(--shadow-sm);
   --sans: var(--font-sans);
   --heading: var(--font-heading);
   --mono: var(--font-mono);
 }
 
-:root[data-theme='dark'] {
-  --color-canvas: #16171d;
-  --color-surface: #1c1f27;
-  --color-surface-muted: #20242d;
-  --color-surface-elevated: rgba(32, 36, 45, 0.9);
-  --color-text: #d2d8e2;
-  --color-text-muted: #9ca3af;
-  --color-text-strong: #f3f4f6;
-  --color-border-soft: #2e303a;
-  --color-border-strong: #4b5262;
-  --social-bg: rgba(47, 48, 58, 0.5);
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-sm: 0 12px 28px rgba(0, 0, 0, 0.28);
-  --shadow-md: 0 20px 40px rgba(0, 0, 0, 0.36);
-  --shadow-lg: 0 28px 60px rgba(0, 0, 0, 0.45);
+/* Light mode kept for future use */
+:root[data-theme='light'] {
+  --color-canvas: #eef4fb;
+  --color-surface: #f8fbff;
+  --color-surface-muted: #e6eef8;
+  --color-surface-elevated: rgba(255, 255, 255, 0.8);
+  --color-text: #506987;
+  --color-text-muted: #6b85a3;
+  --color-text-strong: #071a2d;
+  --color-border-soft: rgba(70, 104, 142, 0.18);
+  --color-border-strong: rgba(53, 118, 188, 0.34);
+  --social-bg: rgba(236, 244, 255, 0.68);
+  --color-signal-soft: rgba(111, 247, 191, 0.16);
+  --color-grid-line: rgba(78, 120, 173, 0.12);
+  --color-backdrop-glow: rgba(46, 229, 157, 0.2);
+  --shadow-xs: 0 1px 2px rgba(4, 12, 22, 0.2);
+  --shadow-sm: 0 12px 32px rgba(4, 12, 22, 0.2);
+  --shadow-md: 0 18px 46px rgba(4, 12, 22, 0.28);
+  --shadow-lg: 0 28px 68px rgba(4, 12, 22, 0.42);
+  --social-bg: rgba(236, 244, 255, 0.68);
 }

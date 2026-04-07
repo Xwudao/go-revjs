@@ -1,7 +1,7 @@
-import { createHashHistory, createRouter } from '@tanstack/react-router'
+import { createBrowserHistory, createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 
-const history = createHashHistory()
+const history = createBrowserHistory()
 
 export const router = createRouter({
   routeTree,

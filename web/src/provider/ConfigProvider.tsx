@@ -1,15 +1,10 @@
 import { createContext, useContext, useEffect, type PropsWithChildren } from 'react'
 import useAppConfigStore, {
   type AccentPreset,
-  type ThemeMode,
 } from '@/store/useAppConfig'
 
 type ConfigContextValue = {
-  theme: ThemeMode
   accent: AccentPreset
-  setTheme: (theme: ThemeMode) => void
-  toggleTheme: () => void
-  setAccent: (accent: AccentPreset) => void
 }
 
 const accentTokens: Record<
@@ -24,46 +19,42 @@ const accentTokens: Record<
   }
 > = {
   violet: {
-    accent: '#aa3bff',
-    hover: '#9530e8',
-    active: '#7b1fd0',
-    soft: 'rgba(170, 59, 255, 0.10)',
-    border: 'rgba(170, 59, 255, 0.50)',
-    contrast: '#ffffff',
+    accent: '#2ee59d',
+    hover: '#24cf8c',
+    active: '#17a96f',
+    soft: 'rgba(46, 229, 157, 0.14)',
+    border: 'rgba(46, 229, 157, 0.42)',
+    contrast: '#04150e',
   },
   emerald: {
-    accent: '#0f9f6e',
-    hover: '#0a8a5e',
-    active: '#066c49',
-    soft: 'rgba(15, 159, 110, 0.12)',
-    border: 'rgba(15, 159, 110, 0.50)',
-    contrast: '#f7fffb',
+    accent: '#29d9a4',
+    hover: '#18c593',
+    active: '#11916d',
+    soft: 'rgba(41, 217, 164, 0.14)',
+    border: 'rgba(41, 217, 164, 0.42)',
+    contrast: '#051811',
   },
   amber: {
-    accent: '#d97706',
-    hover: '#b85f00',
-    active: '#964a00',
-    soft: 'rgba(217, 119, 6, 0.12)',
-    border: 'rgba(217, 119, 6, 0.50)',
-    contrast: '#fff8ee',
+    accent: '#ffbb56',
+    hover: '#f2a52d',
+    active: '#d18214',
+    soft: 'rgba(255, 187, 86, 0.14)',
+    border: 'rgba(255, 187, 86, 0.4)',
+    contrast: '#241302',
   },
 }
 
 const ConfigContext = createContext<ConfigContextValue | null>(null)
 
 export function ConfigProvider({ children }: PropsWithChildren) {
-  const theme = useAppConfigStore((state) => state.theme)
   const accent = useAppConfigStore((state) => state.accent)
-  const setTheme = useAppConfigStore((state) => state.setTheme)
-  const toggleTheme = useAppConfigStore((state) => state.toggleTheme)
-  const setAccent = useAppConfigStore((state) => state.setAccent)
 
   useEffect(() => {
     const root = document.documentElement
     const tokens = accentTokens[accent]
 
-    root.dataset.theme = theme
-    root.style.colorScheme = theme
+    root.dataset.theme = 'dark'
+    root.style.colorScheme = 'dark'
     root.style.setProperty('--color-accent', tokens.accent)
     root.style.setProperty('--color-accent-hover', tokens.hover)
     root.style.setProperty('--color-accent-active', tokens.active)
@@ -73,16 +64,12 @@ export function ConfigProvider({ children }: PropsWithChildren) {
     root.style.setProperty('--accent', tokens.accent)
     root.style.setProperty('--accent-bg', tokens.soft)
     root.style.setProperty('--accent-border', tokens.border)
-  }, [accent, theme])
+  }, [accent])
 
   return (
     <ConfigContext.Provider
       value={{
-        theme,
         accent,
-        setTheme,
-        toggleTheme,
-        setAccent,
       }}
     >
       {children}
