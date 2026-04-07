@@ -65,4 +65,6 @@ skills:
 		load: "node_modules/@tanstack/router-core/skills/router-core/path-params/SKILL.md"
 	- task: "changing the Vite TanStack Router plugin, generated routes, or automatic route code splitting"
 		load: "node_modules/@tanstack/router-plugin/skills/router-plugin/SKILL.md"
+	- task: "adding or refactoring a react-revjs page that has substantial state, handlers, or side effects, or extracting logic from a TSX file into a hook file"
+		load: ".github/skills/page-hook-split/SKILL.md"
 <!-- intent-skills:end -->
