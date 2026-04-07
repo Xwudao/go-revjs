@@ -9,12 +9,24 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TextPipelineRouteImport } from './routes/text-pipeline'
+import { Route as StringToolsRouteImport } from './routes/string-tools'
 import { Route as JsDeobRouteImport } from './routes/js-deob'
 import { Route as CurlToCodeRouteImport } from './routes/curl-to-code'
 import { Route as CryptoLabRouteImport } from './routes/crypto-lab'
 import { Route as CodeFormatRouteImport } from './routes/code-format'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TextPipelineRoute = TextPipelineRouteImport.update({
+  id: '/text-pipeline',
+  path: '/text-pipeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StringToolsRoute = StringToolsRouteImport.update({
+  id: '/string-tools',
+  path: '/string-tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JsDeobRoute = JsDeobRouteImport.update({
   id: '/js-deob',
   path: '/js-deob',
@@ -47,6 +59,8 @@ export interface FileRoutesByFullPath {
   '/crypto-lab': typeof CryptoLabRoute
   '/curl-to-code': typeof CurlToCodeRoute
   '/js-deob': typeof JsDeobRoute
+  '/string-tools': typeof StringToolsRoute
+  '/text-pipeline': typeof TextPipelineRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +68,8 @@ export interface FileRoutesByTo {
   '/crypto-lab': typeof CryptoLabRoute
   '/curl-to-code': typeof CurlToCodeRoute
   '/js-deob': typeof JsDeobRoute
+  '/string-tools': typeof StringToolsRoute
+  '/text-pipeline': typeof TextPipelineRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,12 +78,28 @@ export interface FileRoutesById {
   '/crypto-lab': typeof CryptoLabRoute
   '/curl-to-code': typeof CurlToCodeRoute
   '/js-deob': typeof JsDeobRoute
+  '/string-tools': typeof StringToolsRoute
+  '/text-pipeline': typeof TextPipelineRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/code-format' | '/crypto-lab' | '/curl-to-code' | '/js-deob'
+  fullPaths:
+    | '/'
+    | '/code-format'
+    | '/crypto-lab'
+    | '/curl-to-code'
+    | '/js-deob'
+    | '/string-tools'
+    | '/text-pipeline'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/code-format' | '/crypto-lab' | '/curl-to-code' | '/js-deob'
+  to:
+    | '/'
+    | '/code-format'
+    | '/crypto-lab'
+    | '/curl-to-code'
+    | '/js-deob'
+    | '/string-tools'
+    | '/text-pipeline'
   id:
     | '__root__'
     | '/'
@@ -75,6 +107,8 @@ export interface FileRouteTypes {
     | '/crypto-lab'
     | '/curl-to-code'
     | '/js-deob'
+    | '/string-tools'
+    | '/text-pipeline'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -83,10 +117,26 @@ export interface RootRouteChildren {
   CryptoLabRoute: typeof CryptoLabRoute
   CurlToCodeRoute: typeof CurlToCodeRoute
   JsDeobRoute: typeof JsDeobRoute
+  StringToolsRoute: typeof StringToolsRoute
+  TextPipelineRoute: typeof TextPipelineRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/text-pipeline': {
+      id: '/text-pipeline'
+      path: '/text-pipeline'
+      fullPath: '/text-pipeline'
+      preLoaderRoute: typeof TextPipelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/string-tools': {
+      id: '/string-tools'
+      path: '/string-tools'
+      fullPath: '/string-tools'
+      preLoaderRoute: typeof StringToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/js-deob': {
       id: '/js-deob'
       path: '/js-deob'
@@ -131,6 +181,8 @@ const rootRouteChildren: RootRouteChildren = {
   CryptoLabRoute: CryptoLabRoute,
   CurlToCodeRoute: CurlToCodeRoute,
   JsDeobRoute: JsDeobRoute,
+  StringToolsRoute: StringToolsRoute,
+  TextPipelineRoute: TextPipelineRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

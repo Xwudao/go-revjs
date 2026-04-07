@@ -7,7 +7,7 @@ interface HubFeature {
   description: string
   state: string
   iconClass: string
-  to?: '/crypto-lab' | '/curl-to-code' | '/js-deob' | '/code-format'
+  to?: '/crypto-lab' | '/curl-to-code' | '/js-deob' | '/code-format' | '/string-tools' | '/text-pipeline'
 }
 
 const hubFeatures: readonly HubFeature[] = [
@@ -43,6 +43,22 @@ const hubFeatures: readonly HubFeature[] = [
     iconClass: 'i-mdi-code-braces-box',
     to: '/code-format',
   },
+  {
+    title: 'String Tools',
+    description:
+      '一输入全覆盖：Hash（MD5/SHA系列/RIPEMD160）、URL/Base64/HTML/Hex/Unicode 编解码、大小写和命名风格转换、行操作、JWT 解码、时间戳和 JSON 处理。',
+    state: '已上线',
+    iconClass: 'i-mdi-text-box-multiple-outline',
+    to: '/string-tools',
+  },
+  {
+    title: 'Text Pipeline',
+    description:
+      '自由组合处理函数，构建文本管道依次执行。支持行操作、编解码、大小写转换、文本提取等 40+ 步骤，Worker 后台处理不阻塞界面。',
+    state: '已上线',
+    iconClass: 'i-mdi-pipe',
+    to: '/text-pipeline',
+  },
 ]
 
 const commandEntries = [
@@ -50,6 +66,8 @@ const commandEntries = [
   { label: '打开 Crypto Lab', value: '可用' },
   { label: '打开 JS Deob 工作台', value: '可用' },
   { label: '打开 Code Formatter', value: '可用' },
+  { label: '打开 String Tools', value: '可用' },
+  { label: '打开 Text Pipeline', value: '可用' },
 ] as const
 
 const scopeEntries = [
@@ -57,12 +75,13 @@ const scopeEntries = [
   '已上线对称加解密实验台，适合快速验证 AES、DES、TripleDES 等参数组合。',
   '当前已上线 JS 解混淆工具，可直接粘贴混淆代码开始分析。',
   '已上线代码格式化工具，支持 JS、TS、HTML、CSS、JSON 等 10 种格式，基于 Prettier。',
+  '已上线字符串工具箱，涵盖 Hash、编解码、文本变换、行操作等常用处理。',
+  '已上线文本依次处理工具，40+ 步骤自由组合成处理管道，Worker 后台运行。',
   '所有工具均在本地浏览器中运行，代码不会上传至服务器。',
 ] as const
 
 const runtimeStats = [
-  { label: '在线工具', value: '04' },
-  { label: '即将上线', value: '01' },
+  { label: '在线工具', value: '06' },
   { label: '本地运行', value: '100%' },
 ] as const
 
@@ -87,20 +106,21 @@ function IndexPage() {
           </p>
 
           <div className={clsx(classes.frontPageActions)}>
+            {/* PINNED: JS Deob 永远作为第一个主链接，不要调整顺序 */}
             <Link
-              to="/curl-to-code"
+              to="/js-deob"
               className={clsx(classes.frontPageAction, classes.frontPageActionPrimary)}
             >
+              <span className="i-mdi-play-circle-outline" aria-hidden="true" />
+              打开 JS Deob
+            </Link>
+            <Link to="/curl-to-code" className={clsx(classes.frontPageAction)}>
               <span className="i-mdi-console-network-outline" aria-hidden="true" />
               打开 cURL 2 Req
             </Link>
             <Link to="/crypto-lab" className={clsx(classes.frontPageAction)}>
               <span className="i-mdi-lock-open-variant-outline" aria-hidden="true" />
               打开 Crypto Lab
-            </Link>
-            <Link to="/js-deob" className={clsx(classes.frontPageAction)}>
-              <span className="i-mdi-play-circle-outline" aria-hidden="true" />
-              打开 JS Deob
             </Link>
           </div>
 

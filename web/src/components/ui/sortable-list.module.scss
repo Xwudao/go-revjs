@@ -1,0 +1,31 @@
+.item {
+  display: flex;
+  align-items: center;
+}
+
+.drag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  cursor: grab;
+  border-radius: var(--radius-sm);
+  transition: color 100ms, background 100ms;
+
+  &:hover {
+    color: var(--color-text);
+    background: color-mix(in srgb, var(--color-border) 40%, transparent);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.dragging {
+  opacity: 0.45;
+  z-index: 9999;
+}

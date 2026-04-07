@@ -145,6 +145,7 @@ export function ConfigProvider({ children }: PropsWithChildren) {
             },
           },
           loading: {
+            duration: Infinity,
             iconTheme: {
               primary: 'var(--color-accent)',
               secondary: 'var(--color-surface)',
