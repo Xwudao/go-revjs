@@ -193,6 +193,12 @@ func (m *SpaMdw) Serve(urlPrefix string) gin.HandlerFunc {
 			c.Abort()
 			return
 
+		case fd.Exists("", strings.TrimPrefix(path, "/")):
+			// 文件存在于嵌入 FS 中但不在 manifest 里（如 web worker 文件）
+			fileServer.ServeHTTP(c.Writer, c.Request)
+			c.Abort()
+			return
+
 		default:
 			rtn := m.modifierIndex(fd, c)
 			c.Header("Cache-Control", "no-cache, no-store, must-revalidate")

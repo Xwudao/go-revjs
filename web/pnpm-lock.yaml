@@ -132,6 +132,9 @@ importers:
       vite-plugin-checker:
         specifier: ^0.11.0
         version: 0.11.0(eslint@9.39.4(jiti@2.6.1))(optionator@0.9.4)(oxlint@1.58.0(oxlint-tsgolint@0.20.0))(typescript@6.0.2)(vite@8.0.5(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.99.0)(tsx@4.21.0))
+      vite-plugin-compression2:
+        specifier: ^2.5.3
+        version: 2.5.3
       vite-plugin-node-polyfills:
         specifier: ^0.25.0
         version: 0.25.0(vite@8.0.5(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.99.0)(tsx@4.21.0))
@@ -2929,6 +2932,9 @@ packages:
   svg-parser@2.0.4:
     resolution: {integrity: sha512-e4hG1hRwoOdRb37cIMSgzNsxyzKfayW6VOflrwvR+/bzrkyxY/31WkbgnQpgtrNp1SdpJvpUAGTa/ZoiPNDuRQ==}
 
+  tar-mini@0.2.0:
+    resolution: {integrity: sha512-+qfUHz700DWnRutdUsxRRVZ38G1Qr27OetwaMYTdg8hcPxf46U0S1Zf76dQMWRBmusOt2ZCK5kbIaiLkoGO7WQ==}
+
   timers-browserify@2.0.12:
     resolution: {integrity: sha512-9phl76Cqm6FhSX9Xe1ZUAMLtm1BLkKj2Qd5ApyWkXzsMRaA7dgr81kf4wJmQf/hAvg8EEyJxDo3du/0KlhPiKQ==}
     engines: {node: '>=0.6.0'}
@@ -3174,6 +3180,9 @@ packages:
         optional: true
       vue-tsc:
         optional: true
+
+  vite-plugin-compression2@2.5.3:
+    resolution: {integrity: sha512-ItPgqQWkcnBbVw7is9OKwiZ8v6+ju9rYROl5Lp6QfQDEx/d55AwJQb/KLpsQqsU9HoigYBsZ8tK6I02UwJNvEw==}
 
   vite-plugin-node-polyfills@0.25.0:
     resolution: {integrity: sha512-rHZ324W3LhfGPxWwQb2N048TThB6nVvnipsqBUJEzh3R9xeK9KI3si+GMQxCuAcpPJBVf0LpDtJ+beYzB3/chg==}
@@ -6008,6 +6017,8 @@ snapshots:
 
   svg-parser@2.0.4: {}
 
+  tar-mini@0.2.0: {}
+
   timers-browserify@2.0.12:
     dependencies:
       setimmediate: 1.0.5
@@ -6249,6 +6260,13 @@ snapshots:
       optionator: 0.9.4
       oxlint: 1.58.0(oxlint-tsgolint@0.20.0)
       typescript: 6.0.2
+
+  vite-plugin-compression2@2.5.3:
+    dependencies:
+      '@rollup/pluginutils': 5.3.0
+      tar-mini: 0.2.0
+    transitivePeerDependencies:
+      - rollup
 
   vite-plugin-node-polyfills@0.25.0(vite@8.0.5(@emnapi/core@1.9.2)(@emnapi/runtime@1.9.2)(@types/node@24.12.2)(esbuild@0.27.7)(jiti@2.6.1)(sass@1.99.0)(tsx@4.21.0)):
     dependencies:
