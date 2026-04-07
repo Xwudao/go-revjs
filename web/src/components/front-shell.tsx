@@ -67,7 +67,7 @@ function FrontHeader({ current }: { current: NavKey }) {
         <div className={clsx(classes.siteBrand)}>
           <Link to="/" className={clsx(classes.siteBrandLink)}>
             <span className={clsx(classes.siteBrandMark)} aria-hidden="true">
-              <span className="i-mdi-code-braces text-[15px]" />
+              <span className="i-material-symbols-fingerprint-outline text-xl" />
             </span>
             <span>
               <strong>逆向工程中心</strong>

@@ -39,7 +39,7 @@ const hubFeatures: readonly HubFeature[] = [
     title: '指纹分析',
     description: '针对请求特征、设备指纹和反爬标记进行对比分析，即将推出。',
     state: '即将推出',
-    iconClass: 'i-mdi-check-circle-outline',
+    iconClass: 'i-mdi-fingerprint',
   },
   // {
   //   title: '协议模拟',
@@ -72,7 +72,7 @@ const scopeEntries = [
 
 const runtimeStats = [
   { label: '在线工具', value: '03' },
-  { label: '即将上线', value: '02' },
+  { label: '即将上线', value: '01' },
   { label: '本地运行', value: '100%' },
 ] as const
 
