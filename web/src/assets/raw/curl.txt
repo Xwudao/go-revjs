@@ -1,0 +1,9 @@
+curl "https://api.example.com/v1/search?q=revjs&page=1" \
+  --location \
+  --request POST \
+  --header "accept: application/json" \
+  --header "content-type: application/json" \
+  --header "x-trace-id: revjs-demo-001" \
+  --cookie "session=abc123; theme=dark" \
+  --data-raw "{\"keyword\":\"curl 2 req\",\"limit\":20}" \
+  --compressed

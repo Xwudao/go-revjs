@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { AppSelect, type AppSelectOption } from '@/components/ui/app-select'
 import { CodeEditor, type CodeEditorLanguage } from '@/components/ui/code-editor'
 import classes from './curl-to-code.module.scss'
+import exampleCurl from '@/assets/raw/curl.txt'
 
 type CurlConverterModule = typeof import('curlconverter')
 type ConversionTarget =
@@ -44,15 +45,7 @@ interface TargetConfig {
 
 const storageKey = 'revjs:curl-to-code:state'
 
-const exampleCurl = `curl "https://api.example.com/v1/search?q=revjs&page=1" \\
-  --location \\
-  --request POST \\
-  --header "accept: application/json" \\
-  --header "content-type: application/json" \\
-  --header "x-trace-id: revjs-demo-001" \\
-  --cookie "session=abc123; theme=dark" \\
-  --data-raw "{\"keyword\":\"curl 2 req\",\"limit\":20}" \\
-  --compressed`
+
 
 const targetConfigs: Record<ConversionTarget, TargetConfig> = {
   'python-requests': {
