@@ -5,9 +5,7 @@ import useAppConfigStore from '@/store/useAppConfig'
 import { useAppConfig } from '@/provider/ConfigProvider'
 import classes from './front-shell.module.scss'
 
-type FrontShellProps = PropsWithChildren<{
-  isPending?: boolean
-}>
+type FrontShellProps = PropsWithChildren
 
 const navItems = [
   { key: 'home', label: '首页', to: '/' },
@@ -16,7 +14,7 @@ const navItems = [
 
 type NavKey = (typeof navItems)[number]['key']
 
-export function FrontShell({ isPending = false, children }: FrontShellProps) {
+export function FrontShell({ children }: FrontShellProps) {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
@@ -26,27 +24,23 @@ export function FrontShell({ isPending = false, children }: FrontShellProps) {
     <div className={clsx(classes.frontShell)}>
       <FrontHeader current={current} />
       <div className={clsx(classes.frontShellBody, classes.frontShellMain)}>
-        <div className={clsx(classes.frontShellOutlet)} aria-busy={isPending}>
-          {children}
-        </div>
-        <div
-          className={clsx(classes.routePending, isPending && classes.routePendingVisible)}
-          aria-hidden={!isPending}
-        >
-          <div
-            className={clsx(classes.routePendingCard)}
-            role="status"
-            aria-live="polite"
-          >
-            <span
-              className={clsx('i-mdi-loading animate-spin', classes.routePendingIcon)}
-              aria-hidden="true"
-            />
-            <span>页面切换中...</span>
-          </div>
-        </div>
+        <div className={clsx(classes.frontShellOutlet)}>{children}</div>
       </div>
       <FrontFooter />
+    </div>
+  )
+}
+
+export function RoutePending() {
+  return (
+    <div className={clsx(classes.routePendingViewport)}>
+      <div className={clsx(classes.routePendingCard)} role="status" aria-live="polite">
+        <span
+          className={clsx('i-mdi-loading animate-spin', classes.routePendingIcon)}
+          aria-hidden="true"
+        />
+        <span>页面切换中...</span>
+      </div>
     </div>
   )
 }

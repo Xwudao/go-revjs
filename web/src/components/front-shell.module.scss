@@ -19,27 +19,15 @@
   min-height: 100%;
 }
 
-.route-pending {
-  position: absolute;
+.route-pending-viewport {
+  position: fixed;
   inset: 0;
-  z-index: 70;
+  z-index: 90;
   display: grid;
   place-items: center;
   padding: var(--space-4);
-  background: color-mix(in srgb, var(--color-canvas) 62%, transparent);
+  background: color-mix(in srgb, var(--color-canvas) 72%, transparent);
   backdrop-filter: blur(10px);
-  border-radius: var(--radius-2xl);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition:
-    opacity var(--duration-fast) var(--ease-standard),
-    visibility var(--duration-fast) var(--ease-standard);
-}
-
-.route-pending-visible {
-  opacity: 1;
-  visibility: visible;
 }
 
 .route-pending-card {
@@ -53,6 +41,7 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   box-shadow: var(--shadow-md);
+  pointer-events: none;
 }
 
 .route-pending-icon {

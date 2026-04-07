@@ -5,6 +5,8 @@ import { AppCheckbox } from '@/components/ui/app-checkbox'
 import { AppSelect, type AppSelectOption } from '@/components/ui/app-select'
 import { CodeEditor } from '@/components/ui/code-editor'
 import JsDeobWorker from './js-deob.worker?worker'
+import JsFormatWorker from './js-format.worker?worker'
+import JsMinifyWorker from './js-minify.worker?worker'
 import classes from './js-deob.module.scss'
 
 type EditableOptions = Required<Omit<Options, 'sandbox'>>
@@ -19,6 +21,14 @@ type WorkerMessage =
   | { type: 'log'; message: string; timestamp: number }
   | { type: 'result'; code: string; parseTime: number }
   | { type: 'error'; message: string; timestamp?: number }
+
+type FormatWorkerResponse =
+  | { type: 'formatted'; code: string }
+  | { type: 'error'; message: string }
+
+type MinifyWorkerResponse =
+  | { type: 'minified'; code: string }
+  | { type: 'error'; message: string }
 
 const maxLogs = 200
 
@@ -133,6 +143,54 @@ const exampleCode = [
   'run();',
 ].join('\n')
 
+function formatSourceWithWorker(code: string) {
+  return new Promise<string>((resolve, reject) => {
+    const worker = new JsFormatWorker()
+
+    worker.onmessage = (event: MessageEvent<FormatWorkerResponse>) => {
+      worker.terminate()
+
+      if (event.data.type === 'formatted') {
+        resolve(event.data.code)
+        return
+      }
+
+      reject(new Error(event.data.message))
+    }
+
+    worker.onerror = () => {
+      worker.terminate()
+      reject(new Error('格式化失败，请检查输入代码是否完整。'))
+    }
+
+    worker.postMessage({ code })
+  })
+}
+
+function minifyOutputWithWorker(code: string) {
+  return new Promise<string>((resolve, reject) => {
+    const worker = new JsMinifyWorker()
+
+    worker.onmessage = (event: MessageEvent<MinifyWorkerResponse>) => {
+      worker.terminate()
+
+      if (event.data.type === 'minified') {
+        resolve(event.data.code)
+        return
+      }
+
+      reject(new Error(event.data.message))
+    }
+
+    worker.onerror = () => {
+      worker.terminate()
+      reject(new Error('压缩失败，请稍后重试。'))
+    }
+
+    worker.postMessage({ code })
+  })
+}
+
 function JsDeobPage() {
   const workerRef = useRef<Worker | null>(null)
   const spawnWorkerRef = useRef<() => void>(() => {})
@@ -143,6 +201,8 @@ function JsDeobPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [parseTime, setParseTime] = useState<number | null>(null)
   const [isRunning, setIsRunning] = useState(false)
+  const [isFormatting, setIsFormatting] = useState(false)
+  const [isMinifying, setIsMinifying] = useState(false)
   const [copyState, setCopyState] = useState<'idle' | 'done' | 'failed'>('idle')
   const [logs, setLogs] = useState<ConsoleEntry[]>([])
   const [options, setOptions] = useState<EditableOptions>(readStoredOptions)
@@ -270,6 +330,62 @@ function JsDeobPage() {
       code: trimmedCode,
       options: JSON.parse(JSON.stringify(options)) as EditableOptions,
     })
+  }
+
+  async function formatSourceCode() {
+    const trimmedCode = sourceCode.trim()
+
+    if (!trimmedCode) {
+      setErrorMessage('请先输入要格式化的 JS 代码。')
+      return
+    }
+
+    setIsFormatting(true)
+    setErrorMessage('')
+
+    try {
+      const formatted = await formatSourceWithWorker(sourceCode)
+
+      startTransition(() => {
+        setSourceCode(formatted)
+      })
+
+      pushLog(`已格式化输入代码 | ${sourceCode.length} -> ${formatted.length} 字符`)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '格式化失败，请检查输入代码。'
+      setErrorMessage(message)
+      pushLog(`格式化失败 | ${message}`)
+    } finally {
+      setIsFormatting(false)
+    }
+  }
+
+  async function minifyOutputCode() {
+    const trimmedCode = outputCode.trim()
+
+    if (!trimmedCode) {
+      setErrorMessage('当前没有可压缩的处理结果。')
+      return
+    }
+
+    setIsMinifying(true)
+    setErrorMessage('')
+
+    try {
+      const minified = await minifyOutputWithWorker(outputCode)
+
+      startTransition(() => {
+        setOutputCode(minified)
+      })
+
+      pushLog(`已压缩处理结果 | ${outputCode.length} -> ${minified.length} 字符`)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '压缩失败，请检查处理结果。'
+      setErrorMessage(message)
+      pushLog(`压缩失败 | ${message}`)
+    } finally {
+      setIsMinifying(false)
+    }
   }
 
   function cancelDeobfuscation() {
@@ -627,7 +743,7 @@ function JsDeobPage() {
                       type="button"
                       className={clsx(classes.jsDeobButton, classes.jsDeobButtonPrimary)}
                       onClick={runDeobfuscation}
-                      disabled={isRunning}
+                      disabled={isRunning || isFormatting || isMinifying}
                     >
                       <span
                         className={
@@ -655,6 +771,22 @@ function JsDeobPage() {
                     >
                       <span className="i-mdi-refresh" aria-hidden="true" />
                       清空重来
+                    </button>
+                    <button
+                      type="button"
+                      className={clsx(classes.jsDeobInlineAction)}
+                      onClick={formatSourceCode}
+                      disabled={isRunning || isFormatting || !sourceCode.trim()}
+                    >
+                      <span
+                        className={
+                          isFormatting
+                            ? 'i-mdi-loading animate-spin'
+                            : 'i-mdi-format-align-left'
+                        }
+                        aria-hidden="true"
+                      />
+                      {isFormatting ? '格式化中...' : '格式化输入'}
                     </button>
                     <button
                       type="button"
@@ -721,6 +853,22 @@ function JsDeobPage() {
                     >
                       <span className="i-mdi-download" aria-hidden="true" />
                       下载结果
+                    </button>
+                    <button
+                      type="button"
+                      className={clsx(classes.jsDeobInlineAction)}
+                      onClick={minifyOutputCode}
+                      disabled={!outputCode || isMinifying || isRunning}
+                    >
+                      <span
+                        className={
+                          isMinifying
+                            ? 'i-mdi-loading animate-spin'
+                            : 'i-mdi-arrow-collapse-horizontal'
+                        }
+                        aria-hidden="true"
+                      />
+                      {isMinifying ? '压缩中...' : '压缩输出'}
                     </button>
                     <button
                       type="button"
