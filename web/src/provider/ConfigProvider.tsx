@@ -1,10 +1,12 @@
 import { createContext, useContext, useEffect, type PropsWithChildren } from 'react'
 import useAppConfigStore, {
   type AccentPreset,
+  type ThemeMode,
 } from '@/store/useAppConfig'
 
 type ConfigContextValue = {
   accent: AccentPreset
+  theme: ThemeMode
 }
 
 const accentTokens: Record<
@@ -48,13 +50,18 @@ const ConfigContext = createContext<ConfigContextValue | null>(null)
 
 export function ConfigProvider({ children }: PropsWithChildren) {
   const accent = useAppConfigStore((state) => state.accent)
+  const theme = useAppConfigStore((state) => state.theme)
+
+  useEffect(() => {
+    const root = document.documentElement
+    root.dataset.theme = theme
+    root.style.colorScheme = theme
+  }, [theme])
 
   useEffect(() => {
     const root = document.documentElement
     const tokens = accentTokens[accent]
 
-    root.dataset.theme = 'dark'
-    root.style.colorScheme = 'dark'
     root.style.setProperty('--color-accent', tokens.accent)
     root.style.setProperty('--color-accent-hover', tokens.hover)
     root.style.setProperty('--color-accent-active', tokens.active)
@@ -70,6 +77,7 @@ export function ConfigProvider({ children }: PropsWithChildren) {
     <ConfigContext.Provider
       value={{
         accent,
+        theme,
       }}
     >
       {children}

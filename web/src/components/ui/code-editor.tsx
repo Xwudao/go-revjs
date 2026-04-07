@@ -22,7 +22,7 @@ export function CodeEditor({
   onChange,
   readOnly = false,
   height,
-  minHeight = '22rem',
+  minHeight = '33rem',
   compact = false,
 }: CodeEditorProps) {
   const { theme } = useAppConfig()

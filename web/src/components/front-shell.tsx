@@ -1,6 +1,8 @@
 import type { PropsWithChildren } from 'react'
 import clsx from 'clsx'
 import { Link, useRouterState } from '@tanstack/react-router'
+import useAppConfigStore from '@/store/useAppConfig'
+import { useAppConfig } from '@/provider/ConfigProvider'
 import classes from './front-shell.module.scss'
 
 type FrontShellProps = PropsWithChildren<{
@@ -50,6 +52,9 @@ export function FrontShell({ isPending = false, children }: FrontShellProps) {
 }
 
 function FrontHeader({ current }: { current: NavKey }) {
+  const { theme } = useAppConfig()
+  const toggleTheme = useAppConfigStore((state) => state.toggleTheme)
+
   return (
     <header className={clsx(classes.siteHeader)}>
       <div className={clsx(classes.siteHeaderInner)}>
@@ -77,6 +82,20 @@ function FrontHeader({ current }: { current: NavKey }) {
             </Link>
           ))}
         </nav>
+
+        <div className={clsx(classes.siteHeaderTools)}>
+          <button
+            type="button"
+            className={clsx(classes.siteToolButton)}
+            aria-label={theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}
+            onClick={toggleTheme}
+          >
+            <span
+              className={theme === 'dark' ? 'i-mdi-weather-sunny' : 'i-mdi-weather-night'}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
       </div>
     </header>
   )

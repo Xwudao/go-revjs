@@ -83,7 +83,7 @@
 
 .site-header-inner {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: var(--space-4);
   min-height: 3.75rem;
