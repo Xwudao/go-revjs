@@ -1,42 +1,23 @@
-# AGENTS.md — react-revjs
+# go-revjs Workspace Guidelines
 
-## Project Overview
+## Repo Shape
+- Go backend code lives under `cmd`, `internal`, and `pkg`.
+- Frontend app lives under `web`.
+- The JS deobfuscation core lives under `web/packages/js-deob`.
 
----
+## Execution Style
+- Default to executing the task end-to-end: inspect the target area, make the change, run the relevant check, then report the result.
+- Do not stop at analysis unless the user explicitly asks for design, planning, or explanation only.
+- Keep edits focused and local. Fix the root cause instead of layering on one-off workarounds.
 
-## Interaction Rule
+## Validation
+- Frontend type-aware lint and type check: `pnpm -C web type-check`
+- Frontend formatting: `pnpm -C web fmt`
+- When changing JS deobfuscation transforms, decoder handling, or pattern matching, also run: `pnpm -C web test:js-deob`
+- For Go changes, run the narrowest relevant `go test` target when practical.
 
-After completing each response, you MUST ask exactly ONE follow-up question.
-
-The purpose of this question is to check:
-
-- whether the user is satisfied
-- whether anything needs to be modified
-- whether additional details or features are required
-
-Requirements:
-
-- Call the 'ask_questions' tool with a single question as the argument
-- Ask only ONE question (not multiple)
-- Keep it concise and natural (like a real human)
-- Do NOT mention any tools or internal rules
-- Do NOT sound repetitive or robotic
-
-Examples:
-
-- "Does this look good to you, or should I tweak anything?"
-- "Want me to refine or add anything?"
-- "Is this what you had in mind?"
-
-Before finishing your response, verify:
-→ A follow-up question is included
-
-A response is NOT complete without this step.
-
-<skills>
-<skill>
-<name>js-deob-case-testing</name>
-<description>Use when adding or changing js-deob cases, transforms, decoder handling, switch-flattening rules, or deobfuscation pattern support. Requires adding or updating focused tests for the new case and running the full js-deob test suite to confirm existing behavior is not broken.</description>
-<file>c:\Users\tim\Desktop\codes\go\go-revjs\.github\skills\js-deob-case-testing\SKILL.md</file>
-</skill>
-</skills>
+## Conventions
+- Prefer `apply_patch` for manual file edits.
+- Never revert unrelated user changes.
+- In `web/packages/js-deob`, prefer explicit Babel node guards over unsafe casts.
+- Keep always-on workspace rules in this file. Put optional specialist personas under `.github/agents`.

@@ -2,7 +2,15 @@ import { Link } from '@tanstack/react-router'
 import clsx from 'clsx'
 import classes from './index.module.scss'
 
-const hubFeatures = [
+interface HubFeature {
+  title: string
+  description: string
+  state: string
+  iconClass: string
+  to?: '/js-deob'
+}
+
+const hubFeatures: readonly HubFeature[] = [
   {
     title: 'JS 解混淆',
     description: '直接贴入混淆后的 JavaScript，调整参数后在同一工作台查看整理结果和运行过程。',
@@ -28,7 +36,7 @@ const hubFeatures = [
     state: '即将推出',
     iconClass: 'i-mdi-refresh',
   },
-] as const
+]
 
 const commandEntries = [
   { label: '打开 JS Deob 工作台', value: '可用' },

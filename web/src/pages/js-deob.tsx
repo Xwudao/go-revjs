@@ -174,7 +174,7 @@ function JsDeobPage() {
   spawnWorkerRef.current = () => {
     workerRef.current?.terminate()
 
-    const worker = new JsDeobWorker({ type: 'module' })
+    const worker = new JsDeobWorker()
     workerRef.current = worker
 
     worker.onmessage = (event: MessageEvent<WorkerMessage>) => {

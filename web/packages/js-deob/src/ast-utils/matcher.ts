@@ -219,8 +219,11 @@ export function isTemporaryVariable(
 }
 
 export class AnySubListMatcher<T> extends m.Matcher<T[]> {
-  constructor(private readonly matchers: m.Matcher<T>[]) {
+  private readonly matchers: m.Matcher<T>[]
+
+  constructor(matchers: m.Matcher<T>[]) {
     super()
+    this.matchers = matchers
   }
 
   matchValue(array: unknown, keys: readonly PropertyKey[]): array is T[] {

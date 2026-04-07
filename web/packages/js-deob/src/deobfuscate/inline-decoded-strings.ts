@@ -10,7 +10,7 @@ export default {
   name: 'inline-decoded-strings',
   tags: ['unsafe'],
   scope: true,
-  async run(ast, state, options) {
+  async run(_ast, state, options) {
     if (!options) return
 
     const calls = options.vm.decoders.flatMap(decoder =>

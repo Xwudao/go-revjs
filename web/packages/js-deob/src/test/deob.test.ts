@@ -68,3 +68,42 @@ test('pipeline decodes wrapped concat string arrays', async () => {
   expect(code).not.toContain('decoder(')
   expect(code).not.toContain('jsjiami.com.v7')
 })
+
+test('pipeline supports module syntax when evaluating decoder setup code', async () => {
+  const { code } = await deob(`
+    import { jsx as _jsx } from './jsx-runtime.js';
+
+    const ignored = _jsx('span', {
+      hidden: true,
+    });
+
+    var seed = 'jsjiami.com.v7';
+
+    function arrWrap() {
+      var arr = [seed, 'decoded value'];
+      arrWrap = function () {
+        return arr;
+      };
+      return arrWrap();
+    }
+
+    function decoder(i) {
+      var values = arrWrap();
+      return values[i];
+    }
+
+    (function (source, seed) {
+      return source;
+    })(arrWrap, 0x10);
+
+    export const node = _jsx('div', {
+      title: decoder(1),
+    });
+  `)
+
+  expect(code).toMatch(/import\s+\{\s*jsx\s+as\s+_jsx\s*\}\s+from\s+['"]\.\/jsx-runtime\.js['"];/)
+  expect(code).toMatch(/_jsx\(['"]span['"], \{\s*hidden: true/s)
+  expect(code).toMatch(/export const node = _jsx\(['"]div['"], \{/)
+  expect(code).toMatch(/title: ['"]decoded value['"]/) 
+  expect(code).not.toContain('decoder(1)')
+})

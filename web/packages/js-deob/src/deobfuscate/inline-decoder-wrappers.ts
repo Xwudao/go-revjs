@@ -10,7 +10,7 @@ export default {
   name: 'inline-decoder-wrappers',
   tags: ['unsafe'],
   scope: true,
-  run(ast, state, decoder) {
+  run(_ast, state, decoder) {
     if (!decoder?.node.id) return
 
     const decoderName = decoder.node.id.name

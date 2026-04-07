@@ -2,11 +2,11 @@ import type { Binding, NodePath } from '@babel/traverse'
 import * as t from '@babel/types'
 import type { ArrayRotator } from '../deobfuscate/array-rotator'
 
-import * as parser from '@babel/parser'
 import traverse from '../interop/babel-traverse'
 import * as m from '@codemod/matchers'
-import { generate, deobLogger as logger, undefinedMatcher } from '../ast-utils'
+import { deobLogger as logger, undefinedMatcher } from '../ast-utils'
 import { Decoder } from '../deobfuscate/decoder'
+import { buildSetupCode } from './setup-code'
 
 /**
  * Checks if the array variable is passed as the first argument to an IIFE
@@ -289,17 +289,6 @@ function normalizeExpectedLength(expectedLength?: number) {
     : undefined
 }
 
-function getTopLevelStatement(path: NodePath<t.Node>) {
-  if (path.parentPath?.isProgram() && path.isStatement()) {
-    return path as NodePath<t.Statement>
-  }
-
-  return path.findParent(
-    (parent): parent is NodePath<t.Statement> =>
-      parent.parentPath?.isProgram() && parent.isStatement(),
-  )
-}
-
 export function findDecoderByArray(ast: t.Node, expectedLength?: number) {
   // 大数组 有可能是以函数形式包裹的
   let stringArray:
@@ -466,31 +455,9 @@ export function findDecoderByArray(ast: t.Node, expectedLength?: number) {
     },
   })
 
-  const generateOptions = {
-    compact: true,
-    shouldPrintComment: () => false,
-  }
-
-  const topLevelStatements = [
-    stringArray?.path,
-    ...rotators,
-    ...decoders.map((decoder) => decoder.path),
-  ]
-    .filter((value): value is NodePath<t.Node> => Boolean(value))
-    .map((path) => getTopLevelStatement(path))
-    .filter((value): value is NodePath<t.Statement> => Boolean(value))
-
-  let setupCode = ''
-  if (topLevelStatements.length > 0 && 'program' in ast) {
-    const lastStart = Math.max(...topLevelStatements.map((statement) => statement.node.start ?? -1))
-    const lastIndex = ast.program.body.findIndex((statement) => statement.start === lastStart)
-
-    if (lastIndex >= 0) {
-      const setupAst = parser.parse('')
-      setupAst.program.body = ast.program.body.slice(0, lastIndex + 1)
-      setupCode = generate(setupAst, generateOptions)
-    }
-  }
+  const setupCode = 'program' in ast
+    ? buildSetupCode(ast, [stringArray?.path, ...rotators, ...decoders.map((decoder) => decoder.path)])
+    : ''
 
   return {
     stringArray,

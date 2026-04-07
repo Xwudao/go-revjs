@@ -4,7 +4,6 @@ import type { ArrayRotator } from './deobfuscate/array-rotator'
 import type { Decoder } from './deobfuscate/decoder'
 import type { StringArray } from './deobfuscate/string-array'
 import type { Options } from './options'
-import { codeFrameColumns } from '@babel/code-frame'
 import { parse } from '@babel/parser'
 import {
   applyTransform,
@@ -60,27 +59,6 @@ export function parseCode(code: string): ParseResult<t.File> {
     errorRecovery: true,
     plugins: ['jsx'],
   })
-}
-
-// TODO: 错误输出处理 定位代码位置
-function _handleError(error: any, rawCode: string) {
-  if (error instanceof SyntaxError) {
-    const codeFrame = codeFrameColumns(
-      rawCode,
-      {
-        start: {
-          line: (error as any).loc.line,
-          column: (error as any).loc.column + 1,
-        },
-      },
-      {
-        highlightCode: true,
-        message: error.message,
-      },
-    )
-
-    console.error(codeFrame)
-  }
 }
 
 function buildDecryptionSummaryLog(map: Map<string, string>) {

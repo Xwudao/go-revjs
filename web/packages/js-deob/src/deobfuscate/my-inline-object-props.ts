@@ -26,7 +26,7 @@ import { getPropName } from '../ast-utils'
 export default {
   name: '对象属性引用替换',
   tags: ['safe'],
-  run(ast, state, objects) {
+  run(ast, _state, objects) {
     if (!objects) return
 
     const usedMap = new Map()

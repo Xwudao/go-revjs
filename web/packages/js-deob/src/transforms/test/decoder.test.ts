@@ -32,6 +32,34 @@ describe('decoder', async () => {
       "debugger";"
     `)
   })
+
+  it('find decoder by call count when exported', async () => {
+    const ast = parse(
+      `
+      export default function decoder(a){
+        return atob(a)
+      }
+
+      decoder("SGVsbG8sIHdvcmxk")
+      decoder("ZGVidWdnZXI=")
+      `,
+      { sourceType: 'module' },
+    )
+
+    const sandbox = createNodeSandbox()
+    const { decoders, setupCode } = findDecoderByCallCount(ast, 2)
+
+    await evalCode(sandbox, setupCode)
+    await decodeStrings(sandbox, decoders)
+
+    decoders.forEach((d) => d.path.remove())
+
+    expect(decoders[0].name).toBe('decoder')
+    expect(generate(ast)).toMatchInlineSnapshot(`
+      "\"Hello, world\";\n\"debugger\";"
+    `)
+  })
+
   it('find decoder by array', async () => {
     const ast = parse(`
       var arr = ["hello,world", "debugger"]
@@ -62,6 +90,41 @@ describe('decoder', async () => {
     expect(generate(ast)).toMatchInlineSnapshot(`
       ""hello,world";
       "debugger";"
+    `)
+  })
+
+  it('find decoder by array when exported', async () => {
+    const ast = parse(
+      `
+      var arr = ["hello,world", "debugger"]
+      export function decoder(i){
+        return arr[i]
+      }
+      (function(a, b) {
+        // rotator function
+      })(arr, 0x128)
+
+      export const first = decoder(0)
+      decoder(1)
+      `,
+      { sourceType: 'module' },
+    )
+
+    const sandbox = createNodeSandbox()
+
+    const { stringArray, decoders, rotators, setupCode } = findDecoderByArray(ast)
+
+    await evalCode(sandbox, setupCode)
+    await decodeStrings(sandbox, decoders)
+
+    stringArray?.path.remove()
+    decoders.forEach((d) => d.path.remove())
+    rotators.forEach((r) => r.remove())
+    expect(stringArray!.name).toBe('arr')
+    expect(decoders[0].name).toBe('decoder')
+
+    expect(generate(ast)).toMatchInlineSnapshot(`
+      "export const first = \"hello,world\";\n\"debugger\";"
     `)
   })
 

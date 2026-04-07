@@ -1,3 +1,3 @@
 export function isBrowser(): boolean {
-  return typeof window !== 'undefined' || typeof importScripts !== 'undefined'
+  return 'window' in globalThis || 'importScripts' in globalThis
 }

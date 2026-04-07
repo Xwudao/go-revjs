@@ -1,8 +1,15 @@
 import type * as t from '@babel/types'
-import * as parser from '@babel/parser'
 import traverse from '../interop/babel-traverse'
-import { generate, deobLogger as logger } from '../ast-utils'
+import { deobLogger as logger } from '../ast-utils'
 import { Decoder } from '../deobfuscate/decoder'
+import { buildSetupCode } from './setup-code'
+
+function isTopLevelExportedFunction(path: import('@babel/traverse').NodePath<t.FunctionDeclaration>) {
+  return (
+    (path.parentPath.isExportNamedDeclaration() || path.parentPath.isExportDefaultDeclaration())
+    && path.parentPath.parentPath?.isProgram()
+  )
+}
 
 /**
  * 根据解密器调用次数寻找到解密器
@@ -38,8 +45,6 @@ import { Decoder } from '../deobfuscate/decoder'
  * @returns 包含 setupCode 和 decoders 的对象
  */
 export function findDecoderByCallCount(ast: t.File, count = 100) {
-  let index = 0
-
   const decoders: Decoder[] = []
 
   traverse(ast, {
@@ -51,7 +56,7 @@ export function findDecoderByCallCount(ast: t.File, count = 100) {
      */
     FunctionDeclaration(path) {
       // 只处理顶层函数（直接在 Program 下的函数声明）
-      if (path.parentPath.isProgram()) {
+      if (path.parentPath.isProgram() || isTopLevelExportedFunction(path)) {
         const fnName = path.node.id!.name
 
         // 获取函数名的绑定信息，包含所有引用路径
@@ -65,27 +70,12 @@ export function findDecoderByCallCount(ast: t.File, count = 100) {
           )
           decoders.push(new Decoder(fnName, fnName, path))
 
-          const body = (path.parentPath!.scope.block as t.Program).body
-
-          for (let i = 0; i < body.length; i++) {
-            const statement = body[i]
-            if (statement.start === path.node.start) {
-              index = i + 1
-            }
-          }
         }
       }
     },
   })
 
-  const generateOptions = {
-    compact: true,
-    shouldPrintComment: () => false,
-  }
-
-  const newAst = parser.parse('')
-  newAst.program.body = ast.program.body.slice(0, index)
-  const setupCode = generate(newAst, generateOptions)
+  const setupCode = buildSetupCode(ast, decoders.map((decoder) => decoder.path))
 
   if (!decoders.length) logger(`未找到调用次数 >= ${count} 的解密器`)
   else logger(`解密器列表: ${decoders.map((d) => d.name).join(', ')}`)

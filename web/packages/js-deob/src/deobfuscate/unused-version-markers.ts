@@ -18,7 +18,9 @@ export default {
         if (!binding) return
         if (binding.referencePaths.length > 0 || binding.constantViolations.length > 0) return
 
-        if (path.parent.declarations.length === 1) {
+        if (!path.parentPath?.isVariableDeclaration()) return
+
+        if (path.parentPath.node.declarations.length === 1) {
           path.parentPath.remove()
         } else {
           path.remove()
