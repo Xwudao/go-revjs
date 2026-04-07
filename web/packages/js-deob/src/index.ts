@@ -32,6 +32,7 @@ import { defaultOptions, mergeOptions } from './options'
 import { collectDecoders } from './transforms/collect-decoders'
 import { decodeStrings } from './transforms/decode-strings'
 import { findDecoderByArray } from './transforms/find-decoder-by-array'
+import { buildPreRotatedSetupCode, findBestRotation } from './transforms/find-rotation'
 import { findDecoderByCallCount } from './transforms/find-decoder-by-call-count'
 import mangle from './transforms/mangle'
 import { markKeyword } from './transforms/mark-keyword'
@@ -147,7 +148,35 @@ export async function deob(rawCode: string, options: Options = {}): Promise<Deob
         `${stringArray ? `字符串数组: ${stringArray?.name} (共 ${stringArray?.length} 项) 被引用 ${stringArray?.references.length} 处` : '没找到字符串数组'} | ${decoders.length ? `解密器函数: ${decoders.map((d) => d.name)}` : '没找到解密器函数'}`,
       )
 
-      await evalCode(opts.sandbox!, setupCode)
+      // Try normal evalCode first; if the rotator times-out (e.g. jsjiami.cn.v7),
+      // fall back to brute-forcing the correct rotation count.
+      let setupCodeToEval = setupCode
+      if (stringArray && decoders.length > 0) {
+        try {
+          await evalCode(opts.sandbox!, setupCode)
+        } catch {
+          logger('evalCode failed, trying brute-force rotation fallback...')
+          const primaryDecoder = decoders[0]
+          const rotation = findBestRotation(
+            ast,
+            stringArray.path as any,
+            decoders.map((d) => d.path as any),
+            primaryDecoder.name,
+            stringArray.name,
+            stringArray.length,
+          )
+          setupCodeToEval = buildPreRotatedSetupCode(
+            ast,
+            stringArray.path as any,
+            decoders.map((d) => d.path as any),
+            stringArray.name,
+            rotation,
+          )
+          await evalCode(opts.sandbox!, setupCodeToEval)
+        }
+      } else {
+        await evalCode(opts.sandbox!, setupCode)
+      }
 
       for (const decoder of decoders) {
         applyTransform(ast, inlineDecoderWrappers, decoder.path)

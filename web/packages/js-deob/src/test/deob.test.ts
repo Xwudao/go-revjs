@@ -304,3 +304,68 @@ test('pipeline removes self-defending wrappers with setup declarations', async (
   expect(code).not.toContain('guarded()')
   expect(code).not.toContain('_0xbeef01')
 })
+
+// jsjiami.cn.v7: rotator IIFE compares a checksum of decoded strings (runs many iterations)
+// and would exceed the sandbox timeout. The pipeline must fall back to brute-force rotation.
+//
+// Array: ['jWy/pA==','Enkimg==','UsLVXxs=','3LB468M=','zc1G/eGF7g==','m/JC']
+// Decoded after rotation=2 with keys k0..k5: hello, world, console, log, test, done
+test('pipeline uses brute-force rotation fallback for jsjiami.cn.v7 slow rotator', async () => {
+  const { code } = await deob(`
+    function _getArr() {
+      var _a = ['jWy/pA==', 'Enkimg==', 'UsLVXxs=', '3LB468M=', 'zc1G/eGF7g==', 'm/JC'];
+      _getArr = function () { return _a; };
+      return _getArr();
+    }
+    function _dec(idx, key) {
+      var a = _getArr();
+      idx = idx - 0;
+      var enc = a[idx];
+      if (!_dec.b64) {
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+        _dec.b64 = function (b64) {
+          var bs = '', i2 = 0, c1, c2, c3, d1, d2, d3, d4;
+          b64 = b64.replace(/[^A-Za-z0-9+/=]/g, '');
+          do {
+            d1 = chars.indexOf(b64.charAt(i2++)); d2 = chars.indexOf(b64.charAt(i2++));
+            d3 = chars.indexOf(b64.charAt(i2++)); d4 = chars.indexOf(b64.charAt(i2++));
+            c1 = (d1 << 2) | (d2 >> 4); c2 = ((d2 & 15) << 4) | (d3 >> 2); c3 = ((d3 & 3) << 6) | d4;
+            bs += String.fromCharCode(c1);
+            if (d3 !== 64) bs += String.fromCharCode(c2);
+            if (d4 !== 64) bs += String.fromCharCode(c3);
+          } while (i2 < b64.length);
+          return bs;
+        };
+      }
+      if (!_dec.rc4) {
+        _dec.rc4 = function (key, str) {
+          var s = [], j = 0, x, res = '';
+          for (var i = 0; i < 256; i++) s[i] = i;
+          for (var i = 0; i < 256; i++) { j = (j + s[i] + key.charCodeAt(i % key.length)) % 256; x = s[i]; s[i] = s[j]; s[j] = x; }
+          i = 0; j = 0;
+          for (var y = 0; y < str.length; y++) { i = (i + 1) % 256; j = (j + s[i]) % 256; x = s[i]; s[i] = s[j]; s[j] = x; res += String.fromCharCode(str.charCodeAt(y) ^ s[(s[i] + s[j]) % 256]); }
+          return res;
+        };
+      }
+      return _dec.rc4(key, _dec.b64(enc));
+    }
+    (function (arrFn, checksum) {
+      var arr = arrFn();
+      var target = function () { return checksum; };
+      while (true) {
+        try {
+          var total = _dec(0, 'k0') + _dec(1, 'k1') + _dec(2, 'k2') + _dec(3, 'k3') + _dec(4, 'k4') + _dec(5, 'k5');
+          if (total === target()) break;
+          arr.push(arr.shift());
+        } catch (e) {
+          arr.push(arr.shift());
+        }
+      }
+    }(_getArr, 'helloworldconsolelogtestdone'));
+    var result = _dec(0, 'k0') + ' ' + _dec(1, 'k1');
+    console.log(result);
+  `)
+
+  expect(code).not.toContain('_dec(')
+  expect(code).toContain('"hello world"')
+})
