@@ -59,7 +59,7 @@ const fnDefs: FnDef[] = [
   { id: 'camelCase', name: 'camelCase', icon: 'i-mdi-format-letter-case', category: 'case' },
   { id: 'pascalCase', name: 'PascalCase', icon: 'i-mdi-format-letter-case', category: 'case' },
   { id: 'kebabCase', name: 'kebab-case', icon: 'i-mdi-minus', category: 'case' },
-  { id: 'snakeCase', name: 'snake_case', icon: 'i-mdi-underscore', category: 'case' },
+  { id: 'snakeCase', name: 'snake_case', icon: 'i-material-symbols-format-underlined', category: 'case' },
   { id: 'invertCase', name: '大小写互换', icon: 'i-mdi-swap-horizontal', category: 'case' },
   // Extract
   { id: 'extractEmails', name: '提取 Email', icon: 'i-mdi-email-outline', category: 'extract' },
