@@ -1,7 +1,8 @@
 import type { Binding, NodePath } from '@babel/traverse'
-import type * as t from '@babel/types'
+import * as t from '@babel/types'
 import type { ArrayRotator } from '../deobfuscate/array-rotator'
 
+import * as parser from '@babel/parser'
 import traverse from '../interop/babel-traverse'
 import * as m from '@codemod/matchers'
 import { generate, deobLogger as logger, undefinedMatcher } from '../ast-utils'
@@ -36,6 +37,132 @@ function hasMemberAccessInFunction(binding: Binding): boolean {
     // Check if this reference is inside a function
     return refPath.findParent((p) => p.isFunction()) !== null
   })
+}
+
+function getStringArrayLength(node: t.Node | null | undefined): number | undefined {
+  if (!node) return
+
+  if (t.isArrayExpression(node)) {
+    let length = 0
+    for (const element of node.elements) {
+      if (
+        element === null
+        || t.isIdentifier(element, { name: 'undefined' })
+        || t.isIdentifier(element)
+      ) {
+        length++
+        continue
+      }
+      if (!t.isStringLiteral(element)) {
+        return
+      }
+      length++
+    }
+    return length
+  }
+
+  if (
+    t.isCallExpression(node)
+    && t.isMemberExpression(node.callee)
+    && !node.callee.computed
+    && t.isIdentifier(node.callee.property, { name: 'concat' })
+  ) {
+    const baseLength = getStringArrayLength(node.callee.object)
+    if (baseLength === undefined) return
+
+    let totalLength = baseLength
+    for (const argument of node.arguments) {
+      if (!t.isExpression(argument)) {
+        return
+      }
+
+      const argumentLength = getStringArrayLength(argument)
+      if (argumentLength === undefined) return
+      totalLength += argumentLength
+    }
+
+    return totalLength
+  }
+
+  if (
+    t.isCallExpression(node)
+    && (t.isFunctionExpression(node.callee) || t.isArrowFunctionExpression(node.callee))
+    && node.arguments.length === 0
+  ) {
+    if (t.isBlockStatement(node.callee.body)) {
+      if (node.callee.body.body.length !== 1) return
+      const [statement] = node.callee.body.body
+      if (!t.isReturnStatement(statement)) return
+      return getStringArrayLength(statement.argument)
+    }
+
+    return getStringArrayLength(node.callee.body)
+  }
+}
+
+function getWrappedStringArrayInfo(path: NodePath<t.FunctionDeclaration>) {
+  const { id, params, body } = path.node
+  if (!id || params.length !== 0 || body.body.length < 2) return
+
+  const [firstStatement] = body.body
+  if (!t.isVariableDeclaration(firstStatement) || firstStatement.declarations.length !== 1) {
+    return
+  }
+
+  const [declarator] = firstStatement.declarations
+  if (!t.isIdentifier(declarator.id)) return
+
+  const length = getStringArrayLength(declarator.init)
+  if (length === undefined) return
+
+  const arrayIdentifier = declarator.id.name
+  const tailStatements = body.body.slice(1)
+
+  const isArrayGetter = (fn: t.FunctionExpression | t.ArrowFunctionExpression) => {
+    if (fn.params.length !== 0) return false
+
+    if (t.isBlockStatement(fn.body)) {
+      if (fn.body.body.length !== 1) return false
+      const [statement] = fn.body.body
+      return t.isReturnStatement(statement)
+        && t.isIdentifier(statement.argument, { name: arrayIdentifier })
+    }
+
+    return t.isIdentifier(fn.body, { name: arrayIdentifier })
+  }
+
+  const isSelfAssignment = (expression: t.AssignmentExpression) => {
+    return t.isIdentifier(expression.left, { name: id.name })
+      && (t.isFunctionExpression(expression.right) || t.isArrowFunctionExpression(expression.right))
+      && isArrayGetter(expression.right)
+  }
+
+  if (tailStatements.length === 1) {
+    const [statement] = tailStatements
+    if (
+      t.isReturnStatement(statement)
+      && t.isCallExpression(statement.argument)
+      && t.isAssignmentExpression(statement.argument.callee)
+      && isSelfAssignment(statement.argument.callee)
+    ) {
+      return { name: id.name, length }
+    }
+  }
+
+  if (tailStatements.length === 2) {
+    const [assignmentStatement, returnStatement] = tailStatements
+    if (
+      t.isExpressionStatement(assignmentStatement)
+      && t.isAssignmentExpression(assignmentStatement.expression)
+      && isSelfAssignment(assignmentStatement.expression)
+      && t.isReturnStatement(returnStatement)
+      && t.isCallExpression(returnStatement.argument)
+      && t.isIdentifier(returnStatement.argument.callee, { name: id.name })
+      && returnStatement.argument.arguments.length === 0
+    ) {
+      return { name: id.name, length }
+    }
+  }
 }
 
 /**
@@ -162,6 +289,17 @@ function normalizeExpectedLength(expectedLength?: number) {
     : undefined
 }
 
+function getTopLevelStatement(path: NodePath<t.Node>) {
+  if (path.parentPath?.isProgram() && path.isStatement()) {
+    return path as NodePath<t.Statement>
+  }
+
+  return path.findParent(
+    (parent): parent is NodePath<t.Statement> =>
+      parent.parentPath?.isProgram() && parent.isStatement(),
+  )
+}
+
 export function findDecoderByArray(ast: t.Node, expectedLength?: number) {
   // 大数组 有可能是以函数形式包裹的
   let stringArray:
@@ -194,6 +332,36 @@ export function findDecoderByArray(ast: t.Node, expectedLength?: number) {
     // }
     FunctionDeclaration(path) {
       if (stringArray) return // Already found
+
+      const wrappedInfo = getWrappedStringArrayInfo(path)
+
+      if (wrappedInfo) {
+        const { name, length } = wrappedInfo
+
+        if (targetLength !== undefined && length !== targetLength) {
+          logger(`跳过包装字符串数组函数: ${name}，长度 ${length}，期望 ${targetLength}`)
+          return
+        }
+
+        const binding = path.scope.getBinding(name)
+
+        if (!binding) return
+
+        logger(`发现包装的字符串数组函数: ${name}`)
+
+        stringArray = {
+          path,
+          references: binding.referencePaths,
+          name,
+          length,
+        }
+
+        // 通过引用 找到 数组乱序代码 与 解密函数代码
+        processReferences(binding, name, rotators, decoders)
+
+        path.skip()
+        return
+      }
 
       if (wrappedArrayMatcher.match(path.node)) {
         const name = wrappedFunctionName.current!
@@ -302,17 +470,27 @@ export function findDecoderByArray(ast: t.Node, expectedLength?: number) {
     compact: true,
     shouldPrintComment: () => false,
   }
-  const stringArrayCode = stringArray
-    ? generate(stringArray.path.node, generateOptions)
-    : ''
-  const rotatorCode = rotators
-    .map((rotator) => generate(rotator.node, generateOptions))
-    .join(';\n')
-  const decoderCode = decoders
-    .map((decoder) => generate(decoder.path.node, generateOptions))
-    .join(';\n')
 
-  const setupCode = [stringArrayCode, rotatorCode, decoderCode].join(';\n')
+  const topLevelStatements = [
+    stringArray?.path,
+    ...rotators,
+    ...decoders.map((decoder) => decoder.path),
+  ]
+    .filter((value): value is NodePath<t.Node> => Boolean(value))
+    .map((path) => getTopLevelStatement(path))
+    .filter((value): value is NodePath<t.Statement> => Boolean(value))
+
+  let setupCode = ''
+  if (topLevelStatements.length > 0 && 'program' in ast) {
+    const lastStart = Math.max(...topLevelStatements.map((statement) => statement.node.start ?? -1))
+    const lastIndex = ast.program.body.findIndex((statement) => statement.start === lastStart)
+
+    if (lastIndex >= 0) {
+      const setupAst = parser.parse('')
+      setupAst.program.body = ast.program.body.slice(0, lastIndex + 1)
+      setupCode = generate(setupAst, generateOptions)
+    }
+  }
 
   return {
     stringArray,

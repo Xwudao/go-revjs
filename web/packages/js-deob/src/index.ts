@@ -23,6 +23,7 @@ import evaluateGlobals from './deobfuscate/evaluate-globals'
 import inlineDecoderWrappers from './deobfuscate/inline-decoder-wrappers'
 import inlineObjectProps from './deobfuscate/inline-object-props'
 import mergeObjectAssignments from './deobfuscate/merge-object-assignments'
+import unusedVersionMarkers from './deobfuscate/unused-version-markers'
 
 import selfDefending from './deobfuscate/self-defending'
 import varFunctions from './deobfuscate/var-functions'
@@ -210,6 +211,8 @@ export async function deob(rawCode: string, options: Options = {}): Promise<Deob
     () => applyTransforms(ast, [[selfDefending, debugProtection]].flat()),
     // 合并对象
     () => applyTransforms(ast, [mergeObjectAssignments, evaluateGlobals]),
+    // 清理解密后遗留的版本哨兵变量
+    () => applyTransforms(ast, [unusedVersionMarkers]),
 
     opts.isMarkEnable &&
       (() => {

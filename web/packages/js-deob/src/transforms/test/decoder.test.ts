@@ -89,4 +89,52 @@ describe('decoder', async () => {
     expect(stringArray?.name).toBe('arr')
     expect(decoders[0]?.name).toBe('decoder')
   })
+
+  it('finds wrapped string arrays built via concat iifes', async () => {
+    const ast = parse(`
+      var seed = "jsjiami.com.v7"
+
+      function arrWrap() {
+        var arr = [seed, "hello"].concat((function () {
+          return ["world"].concat((function () {
+            return ["debugger"];
+          })());
+        })());
+        arrWrap = function () {
+          return arr;
+        };
+        return arrWrap();
+      }
+
+      function decoder(i) {
+        var values = arrWrap();
+        return values[i];
+      }
+
+      (function (source, seed) {
+        // rotator function
+      })(arrWrap, 0x128)
+
+      decoder(1)
+      decoder(2)
+      decoder(3)
+    `)
+
+    const sandbox = createNodeSandbox()
+    const { stringArray, decoders, rotators, setupCode } = findDecoderByArray(ast)
+
+    await evalCode(sandbox, setupCode)
+    await decodeStrings(sandbox, decoders)
+
+    stringArray?.path.remove()
+    decoders.forEach((d) => d.path.remove())
+    rotators.forEach((r) => r.remove())
+
+    expect(stringArray?.name).toBe('arrWrap')
+    expect(stringArray?.length).toBe(4)
+    expect(decoders[0]?.name).toBe('decoder')
+    expect(generate(ast)).toMatchInlineSnapshot(`
+      "var seed = \"jsjiami.com.v7\";\n\"hello\";\n\"world\";\n\"debugger\";"
+    `)
+  })
 })
