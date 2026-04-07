@@ -1,0 +1,36 @@
+@function color-token($name) {
+  @return var(--color-#{$name});
+}
+
+@function space($step) {
+  @return var(--space-#{$step});
+}
+
+@function radius($size) {
+  @return var(--radius-#{$size});
+}
+
+@function font-size($size) {
+  @return var(--font-size-#{$size});
+}
+
+@mixin focus-ring($color: var(--color-accent-border), $offset: 2px) {
+  outline: 2px solid $color;
+  outline-offset: $offset;
+}
+
+@mixin interactive-surface {
+  transition:
+    background-color var(--duration-normal) var(--ease-standard),
+    border-color var(--duration-normal) var(--ease-standard),
+    color var(--duration-normal) var(--ease-standard),
+    box-shadow var(--duration-normal) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+@mixin card-surface {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-sm);
+}

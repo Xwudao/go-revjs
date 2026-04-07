@@ -1,0 +1,42 @@
+#root {
+  min-height: 100svh;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--heading);
+  color: var(--text-h);
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+code,
+pre,
+textarea {
+  font-family: var(--mono);
+}
+
+code {
+  border-radius: var(--radius-sm);
+  color: var(--text-h);
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  padding: 0.125rem 0.375rem;
+  background: var(--code-bg);
+}
+
+a {
+  text-decoration: none;
+}

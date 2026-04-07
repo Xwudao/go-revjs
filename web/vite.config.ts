@@ -1,0 +1,85 @@
+import react, { reactCompilerPreset } from '@vitejs/plugin-react'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
+import babel from '@rolldown/plugin-babel'
+import * as path from 'path'
+import AutoImport from 'unplugin-auto-import/vite'
+import IconsResolver from 'unplugin-icons/resolver'
+import Icons from 'unplugin-icons/vite'
+import { defineConfig } from 'vite'
+import checker from 'vite-plugin-checker'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import UnoCSS from 'unocss/vite'
+
+const resolve = (p: string) => path.resolve(__dirname, p)
+
+// https://vite.dev/config/
+export default defineConfig({
+  define: {
+    'process.env': JSON.stringify({}),
+    'process.versions.node': JSON.stringify('20.0.0'),
+  },
+  optimizeDeps: {
+    exclude: ['isolated-vm'],
+  },
+  resolve: {
+    alias: {
+      '@babel/core': resolve('src/shims/empty.ts'),
+      '@': resolve('src'),
+      '@revjs/js-deob': resolve('packages/js-deob/src/index.ts'),
+      'isolated-vm': resolve('src/shims/empty.ts'),
+    },
+  },
+  plugins: [
+    tanstackRouter({
+      target: 'react',
+    }),
+    nodePolyfills({ exclude: ['fs'] }),
+    react(),
+    babel({ presets: [reactCompilerPreset()] }),
+    checker({
+      oxlint: true,
+    }),
+    UnoCSS({
+      configFile: resolve('./uno.config.ts'),
+    }),
+    AutoImport({
+      dts: resolve('./src/auto-imports.d.ts'),
+      imports: [
+        'react',
+        {
+          '@tanstack/react-router': [
+            'Link',
+            'Outlet',
+            'useNavigate',
+            'useRouter',
+            'useRouterState',
+          ],
+        },
+      ],
+      resolvers: [
+        IconsResolver({
+          prefix: 'Icon',
+        }),
+      ],
+    }),
+    Icons({
+      autoInstall: true,
+      jsx: 'react',
+      compiler: 'jsx',
+      iconCustomizer(_collection, _icon, props) {
+        props.width = '1em'
+        props.height = '1em'
+      },
+    }),
+  ],
+  css: {
+    modules: {
+      localsConvention: 'camelCase',
+    },
+    preprocessorOptions: {
+      scss: {
+        additionalData: '@use "@/styles/mixins" as *;',
+      },
+    },
+  },
+})

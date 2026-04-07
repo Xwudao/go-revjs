@@ -1,0 +1,34 @@
+app:
+  mode: debug
+  port: 8080
+  pprof: false
+  host: true
+cors:
+  allowCredentials: true
+  domains:
+    - localhost
+    - 127.0.0.1
+  maxAge: 24h
+db:
+  database: nr-demo
+  dialect: mysql
+  host: 192.168.1.21
+  username: root
+  password: 123456
+  port: 3306
+  autoMigrate: true
+jwt:
+  secret: thisstringmustbeverylongandrandom
+  expire: 24h
+  issuer: neter
+log:
+  format: text
+  level: debug
+  linkName: current.log
+  path: ./logs
+
+redis:
+  addr: 192.168.1.21:6379
+  db: 0
+  password: ""
+  prefix: ""

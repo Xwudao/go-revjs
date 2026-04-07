@@ -1,0 +1,198 @@
+.front-page {
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+}
+
+.front-card {
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--color-surface) 95%, transparent);
+  box-shadow: var(--shadow-xs);
+}
+
+.front-page-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.85fr);
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--color-accent) 10%, transparent),
+      transparent 32%
+    ),
+    color-mix(in srgb, var(--color-surface) 95%, transparent);
+}
+
+.front-page-hero-main {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.front-page-eyebrow,
+.front-page-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.front-page-eyebrow {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.front-page-title {
+  color: var(--color-text-strong);
+  font-size: clamp(1.75rem, 2.2vw, 2.375rem);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.front-page-copy,
+.front-page-panel-head p,
+.front-page-metric span,
+.front-page-list span {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.front-page-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.front-page-action,
+.front-page-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: fit-content;
+  min-height: 2.25rem;
+  padding: 0.4375rem 0.875rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.front-page-action {
+  border: 1px solid var(--color-accent-border);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.front-page-action-primary {
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
+.front-page-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.front-page-tags span,
+.front-page-badge {
+  border: 1px solid var(--color-border-soft);
+  background: color-mix(in srgb, var(--color-surface-muted) 72%, transparent);
+  color: var(--color-text-strong);
+}
+
+.front-page-tags span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.875rem;
+  padding: 0.3125rem 0.625rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+}
+
+.front-page-hero-side,
+.front-page-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.front-page-metric,
+.front-page-list > div {
+  display: grid;
+  gap: var(--space-1);
+  padding: 0.9375rem;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-surface-muted) 48%, transparent);
+}
+
+.front-page-metric strong,
+.front-page-panel-head h2,
+.front-page-list strong {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+.front-page-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.front-page-panel {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.front-page-panel-feature {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-accent) 5%, transparent),
+      transparent 42%
+    ),
+    color-mix(in srgb, var(--color-surface) 94%, transparent);
+}
+
+.front-page-panel-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.front-page-text-link {
+  color: var(--color-accent);
+}
+
+@media (max-width: 960px) {
+  .front-page-hero,
+  .front-page-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .front-page {
+    padding-top: var(--space-3);
+  }
+
+  .front-page-hero,
+  .front-page-panel {
+    padding: var(--space-4);
+  }
+
+  .front-page-panel-head {
+    flex-direction: column;
+  }
+}

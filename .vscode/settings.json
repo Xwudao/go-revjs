@@ -1,0 +1,25 @@
+{
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSaveMode": "file",
+  "oxc.configPath": "web/.oxlintrc.json",
+  "oxc.fmt.configPath": "web/.oxfmtrc.json",
+  "[javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.formatOnSave": true
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.formatOnSave": true
+  },
+  "oxc.requireConfig": true,
+  "oxc.lint.run": "onSave",
+  "chat.tools.terminal.autoApprove": {
+    "pnpm": true
+  },
+}

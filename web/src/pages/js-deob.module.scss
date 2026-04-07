@@ -1,0 +1,366 @@
+.js-deob-page {
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+}
+
+.js-deob-hidden-input {
+  display: none;
+}
+
+.js-deob-shell {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.js-deob-panel {
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--color-surface) 95%, transparent);
+  box-shadow: var(--shadow-xs);
+}
+
+.js-deob-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--color-accent) 10%, transparent),
+      transparent 34%
+    ),
+    color-mix(in srgb, var(--color-surface) 95%, transparent);
+}
+
+.js-deob-hero-main,
+.js-deob-section-head,
+.js-deob-field,
+.js-deob-form,
+.js-deob-sidebar,
+.js-deob-workbench,
+.js-deob-side-notes {
+  display: grid;
+}
+
+.js-deob-hero-main,
+.js-deob-section-head {
+  gap: var(--space-3);
+}
+
+.js-deob-kicker,
+.js-deob-status-badge,
+.js-deob-highlights span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: fit-content;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.js-deob-kicker {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.js-deob-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.js-deob-title {
+  color: var(--color-text-strong);
+  font-size: clamp(1.6rem, 2vw, 2.1rem);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.js-deob-copy,
+.js-deob-section-copy,
+.js-deob-field-hint,
+.js-deob-editor-head p,
+.js-deob-side-notes li,
+.js-deob-console-empty {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.js-deob-status-badge {
+  border: 1px solid color-mix(in srgb, var(--color-success) 28%, var(--color-border-soft));
+  background: color-mix(in srgb, var(--color-success) 8%, transparent);
+  color: var(--color-success);
+
+  &[data-running='true'] {
+    border-color: color-mix(in srgb, var(--color-warning) 28%, var(--color-border-soft));
+    background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+    color: var(--color-warning);
+  }
+}
+
+.js-deob-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.js-deob-highlights span {
+  border: 1px solid var(--color-border-soft);
+  background: color-mix(in srgb, var(--color-surface-muted) 74%, transparent);
+  color: var(--color-text-strong);
+}
+
+.js-deob-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: end;
+  gap: var(--space-2);
+  align-content: start;
+}
+
+.js-deob-button,
+.js-deob-inline-action,
+.js-deob-input {
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.js-deob-button,
+.js-deob-inline-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.25rem;
+  padding: 0.4375rem 0.875rem;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-surface-muted) 60%, transparent);
+  color: var(--color-text-strong);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--color-accent-border);
+    color: var(--color-accent);
+  }
+
+  &:disabled {
+    opacity: 0.56;
+    cursor: not-allowed;
+  }
+}
+
+.js-deob-button-primary {
+  border-color: var(--color-accent-border);
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+
+  &:hover {
+    color: var(--color-accent-contrast);
+    background: var(--color-accent-hover);
+  }
+}
+
+.js-deob-section-title,
+.js-deob-editor-head h2 {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+.js-deob-grid {
+  display: grid;
+  grid-template-columns: 21rem minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.js-deob-sidebar,
+.js-deob-workbench {
+  gap: var(--space-4);
+}
+
+.js-deob-section {
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.js-deob-form {
+  gap: var(--space-2);
+}
+
+.js-deob-field-label {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+.js-deob-input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0 0.875rem;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+  color: var(--color-text-strong);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-accent-border);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14%, transparent);
+  }
+}
+
+.js-deob-tips {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-accent) 4%, transparent),
+      transparent 38%
+    ),
+    color-mix(in srgb, var(--color-surface) 95%, transparent);
+}
+
+.js-deob-side-notes {
+  margin: 0;
+  padding-left: 1rem;
+  gap: var(--space-2);
+}
+
+.js-deob-editors-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.js-deob-editor-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.js-deob-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: var(--space-2);
+}
+
+.js-deob-editor-meta {
+  display: inline-flex;
+  align-items: center;
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.js-deob-note,
+.js-deob-error {
+  margin-bottom: var(--space-4);
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+}
+
+.js-deob-note {
+  background: color-mix(in srgb, var(--color-info) 8%, transparent);
+  color: var(--color-info);
+}
+
+.js-deob-error {
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+  color: var(--color-danger);
+}
+
+.js-deob-console {
+  display: grid;
+  gap: var(--space-3);
+  max-height: 21rem;
+  padding: var(--space-4);
+  overflow: auto;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-surface-muted) 44%, transparent);
+}
+
+.js-deob-console-entry {
+  padding: var(--space-3);
+  border: 1px solid color-mix(in srgb, var(--color-border-soft) 84%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+}
+
+.js-deob-console-time {
+  display: block;
+  color: var(--color-success);
+  font-size: var(--font-size-2xs);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.js-deob-console-message {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-strong);
+  font-size: var(--font-size-xs);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.js-deob-console-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 8rem;
+  text-align: center;
+}
+
+@media (max-width: 1120px) {
+  .js-deob-hero,
+  .js-deob-grid,
+  .js-deob-editors-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .js-deob-actions {
+    justify-content: start;
+  }
+}
+
+@media (max-width: 720px) {
+  .js-deob-page {
+    padding-top: var(--space-3);
+  }
+
+  .js-deob-hero,
+  .js-deob-section {
+    padding: var(--space-4);
+  }
+
+  .js-deob-editor-head {
+    flex-direction: column;
+  }
+
+  .js-deob-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
