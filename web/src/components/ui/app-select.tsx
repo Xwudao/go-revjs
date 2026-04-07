@@ -14,6 +14,7 @@ interface AppSelectProps<T extends string> {
   onChange: (value: T) => void
   disabled?: boolean
   ariaLabel?: string
+  menuMaxHeight?: string
 }
 
 export function AppSelect<T extends string>({
@@ -22,6 +23,7 @@ export function AppSelect<T extends string>({
   onChange,
   disabled = false,
   ariaLabel,
+  menuMaxHeight = '16rem',
 }: AppSelectProps<T>) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement | null>(null)
@@ -92,36 +94,45 @@ export function AppSelect<T extends string>({
       </button>
 
       {open && (
-        <div className={clsx(classes.appSelectMenu)} id={listboxId} role="listbox">
-          {options.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className={clsx(classes.appSelectOption)}
-              role="option"
-              aria-selected={option.value === value}
-              data-selected={option.value === value}
-              onClick={() => {
-                onChange(option.value)
-                setOpen(false)
-              }}
-            >
-              <span className={clsx(classes.appSelectOptionCopy)}>
-                <span className={clsx(classes.appSelectOptionLabel)}>{option.label}</span>
-                {option.description && (
-                  <span className={clsx(classes.appSelectOptionDescription)}>
-                    {option.description}
-                  </span>
+        <div
+          className={clsx(classes.appSelectMenu)}
+          id={listboxId}
+          role="listbox"
+        >
+          <div
+            className={clsx(classes.appSelectScroll)}
+            style={{ maxHeight: menuMaxHeight }}
+          >
+            {options.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className={clsx(classes.appSelectOption)}
+                role="option"
+                aria-selected={option.value === value}
+                data-selected={option.value === value}
+                onClick={() => {
+                  onChange(option.value)
+                  setOpen(false)
+                }}
+              >
+                <span className={clsx(classes.appSelectOptionCopy)}>
+                  <span className={clsx(classes.appSelectOptionLabel)}>{option.label}</span>
+                  {option.description && (
+                    <span className={clsx(classes.appSelectOptionDescription)}>
+                      {option.description}
+                    </span>
+                  )}
+                </span>
+                {option.value === value && (
+                  <span
+                    className={clsx('i-mdi-check', classes.appSelectCheck)}
+                    aria-hidden="true"
+                  />
                 )}
-              </span>
-              {option.value === value && (
-                <span
-                  className={clsx('i-mdi-check', classes.appSelectCheck)}
-                  aria-hidden="true"
-                />
-              )}
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

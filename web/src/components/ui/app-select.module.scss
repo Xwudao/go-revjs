@@ -84,14 +84,18 @@
   left: 0;
   right: 0;
   z-index: 30;
-  display: grid;
-  gap: var(--space-2);
   padding: var(--space-2);
   border: 1px solid var(--color-border-soft);
   border-radius: var(--radius-xl);
   background: color-mix(in srgb, var(--color-surface) 98%, transparent);
   box-shadow: var(--shadow-md);
   backdrop-filter: blur(12px);
+}
+
+.app-select-scroll {
+  display: grid;
+  gap: var(--space-2);
+  overflow-y: auto;
 }
 
 .app-select-option {
