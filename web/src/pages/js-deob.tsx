@@ -434,39 +434,6 @@ function JsDeobPage() {
             </div>
           </div>
 
-          <div className={clsx(classes.jsDeobActions)}>
-            <button
-              type="button"
-              className={clsx(classes.jsDeobButton, classes.jsDeobButtonPrimary)}
-              onClick={runDeobfuscation}
-              disabled={isRunning}
-            >
-              <span
-                className={
-                  isRunning ? 'i-mdi-loading animate-spin' : 'i-mdi-play-circle-outline'
-                }
-                aria-hidden="true"
-              />
-              {isRunning ? '处理中...' : '开始处理'}
-            </button>
-            <button
-              type="button"
-              className={clsx(classes.jsDeobButton)}
-              onClick={cancelDeobfuscation}
-              disabled={!isRunning}
-            >
-              <span className="i-mdi-stop-circle-outline" aria-hidden="true" />
-              停止
-            </button>
-            <button
-              type="button"
-              className={clsx(classes.jsDeobButton)}
-              onClick={resetAll}
-            >
-              <span className="i-mdi-refresh" aria-hidden="true" />
-              清空重来
-            </button>
-          </div>
         </section>
 
         <section className={clsx(classes.jsDeobGrid)}>
@@ -698,6 +665,39 @@ function JsDeobPage() {
                   </div>
 
                   <div className={clsx(classes.jsDeobEditorActions)}>
+                    <button
+                      type="button"
+                      className={clsx(classes.jsDeobButton, classes.jsDeobButtonPrimary)}
+                      onClick={runDeobfuscation}
+                      disabled={isRunning}
+                    >
+                      <span
+                        className={
+                          isRunning
+                            ? 'i-mdi-loading animate-spin'
+                            : 'i-mdi-play-circle-outline'
+                        }
+                        aria-hidden="true"
+                      />
+                      {isRunning ? '处理中...' : '开始处理'}
+                    </button>
+                    <button
+                      type="button"
+                      className={clsx(classes.jsDeobButton)}
+                      onClick={cancelDeobfuscation}
+                      disabled={!isRunning}
+                    >
+                      <span className="i-mdi-stop-circle-outline" aria-hidden="true" />
+                      停止
+                    </button>
+                    <button
+                      type="button"
+                      className={clsx(classes.jsDeobButton)}
+                      onClick={resetAll}
+                    >
+                      <span className="i-mdi-refresh" aria-hidden="true" />
+                      清空重来
+                    </button>
                     <button
                       type="button"
                       className={clsx(classes.jsDeobInlineAction)}

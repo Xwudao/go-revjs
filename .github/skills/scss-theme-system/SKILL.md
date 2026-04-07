@@ -23,6 +23,7 @@ Use this skill when working on the visual system of react-revjs.
 4. If accent behavior changes at runtime, update `ConfigProvider.tsx` instead of scattering overrides across components.
 5. For new SCSS files, rely on the shared helpers injected by Vite from `@/styles/mixins`.
 6. Preserve compatibility aliases like `--text`, `--bg`, and `--accent` unless the old consumers are migrated together.
+7. Do not add `background-color` or `color` transitions to page-level surfaces or shared controls unless the motion is explicitly required; theme switches will animate those token changes and cause visible flicker.
 
 ## Token Families
 
@@ -46,3 +47,4 @@ Use this skill when working on the visual system of react-revjs.
 - Hard-coded hex values inside component SCSS unless adding a new shared token at the same time
 - Separate dark-mode classes when a token override is enough
 - Replacing the provider/store contract with local component state for global theme concerns
+- Adding generic background/color transitions to body, panels, buttons, or form controls when the page does not need that motion

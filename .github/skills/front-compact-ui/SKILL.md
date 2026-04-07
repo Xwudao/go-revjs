@@ -50,6 +50,7 @@ Build frontend pages that read like capable product surfaces, not promotional he
 - Prefer compact cards, split panels, and two-column utility layouts over full-bleed marketing compositions.
 - Keep explanatory copy short; tool pages should show state, controls, and output early.
 - On tool pages, prioritize the work surface: controls first, editor/result regions early, and logs or secondary notes after the main task flow.
+- For code-heavy tool pages, prefer a full-width control strip above the workspace so source/result editors can keep an equal two-column split on desktop.
 
 ## Avoid
 

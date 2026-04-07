@@ -29,6 +29,9 @@ export default defineConfig({
       'isolated-vm': resolve('src/shims/empty.ts'),
     },
   },
+  build: {
+    manifest:true,
+  },
   plugins: [
     tanstackRouter({
       target: 'react',

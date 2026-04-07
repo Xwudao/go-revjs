@@ -72,6 +72,12 @@ func (m *SpaMdw) acceptsGzip(c *gin.Context) bool {
 	return strings.Contains(strings.ToLower(acceptEncoding), "gzip")
 }
 
+// acceptsBrotli 检查客户端是否支持 brotli 压缩
+func (m *SpaMdw) acceptsBrotli(c *gin.Context) bool {
+	acceptEncoding := c.GetHeader("Accept-Encoding")
+	return strings.Contains(strings.ToLower(acceptEncoding), "br")
+}
+
 // servePrecompressed 尝试提供预压缩的静态文件
 func (m *SpaMdw) servePrecompressed(c *gin.Context, path string) bool {
 	// 检查客户端是否支持 gzip
@@ -117,6 +123,44 @@ func (m *SpaMdw) servePrecompressed(c *gin.Context, path string) bool {
 	return true
 }
 
+// servePrecompressedBrotli 尝试提供预压缩的 brotli 静态文件
+func (m *SpaMdw) servePrecompressedBrotli(c *gin.Context, path string) bool {
+	if !m.acceptsBrotli(c) {
+		return false
+	}
+
+	fd := EmbedFolder(m.fsData, m.target)
+	brPath := path + ".br"
+
+	if !fd.Exists("", brPath) {
+		return false
+	}
+
+	brFile, err := fd.Open(brPath)
+	if err != nil {
+		return false
+	}
+	defer brFile.Close()
+
+	brContent, err := io.ReadAll(brFile)
+	if err != nil {
+		return false
+	}
+
+	mimeType := mime.TypeByExtension(filepath.Ext(path))
+	if mimeType == "" {
+		mimeType = "application/octet-stream"
+	}
+
+	c.Header("Content-Encoding", "br")
+	c.Header("Content-Type", mimeType)
+	c.Header("Vary", "Accept-Encoding")
+	c.Header("Cache-Control", "public, max-age=604800")
+
+	c.Data(http.StatusOK, mimeType, brContent)
+	return true
+}
+
 func (m *SpaMdw) Serve(urlPrefix string) gin.HandlerFunc {
 	fd := EmbedFolder(m.fsData, m.target)
 	fileServer := http.FileServer(fd)
@@ -128,7 +172,12 @@ func (m *SpaMdw) Serve(urlPrefix string) gin.HandlerFunc {
 		var path = c.Request.URL.Path
 		switch {
 		case m.mf.IsStaticFileExists(path):
-			// 尝试提供 gzip 预压缩文件
+			// 优先尝试提供 brotli 预压缩文件
+			if m.servePrecompressedBrotli(c, path) {
+				c.Abort()
+				return
+			}
+			// 其次尝试提供 gzip 预压缩文件
 			if m.servePrecompressed(c, path) {
 				c.Abort()
 				return
@@ -158,6 +207,11 @@ func (m *SpaMdw) Serve(urlPrefix string) gin.HandlerFunc {
 
 func (m *SpaMdw) hasStaticFile(path string) bool {
 	pw, _ := os.Getwd()
+	// 优先检查 brotli 文件
+	brPath := filepath.Join(pw, "static", path+".br")
+	if info, err := os.Stat(brPath); err == nil && !info.IsDir() {
+		return true
+	}
 	// 检查 gzip 文件
 	gzPath := filepath.Join(pw, "static", path+".gz")
 	if info, err := os.Stat(gzPath); err == nil && !info.IsDir() {
@@ -175,6 +229,18 @@ func (m *SpaMdw) hasStaticFile(path string) bool {
 
 func (m *SpaMdw) readStaticFile(path string, c *gin.Context) ([]byte, string) {
 	pw, _ := os.Getwd()
+
+	// 优先尝试 brotli 文件
+	if m.acceptsBrotli(c) {
+		brPath := filepath.Join(pw, "static", path+".br")
+		if brCnt, err := os.ReadFile(brPath); err == nil {
+			mimeType := mime.TypeByExtension(filepath.Ext(path))
+			c.Header("Content-Encoding", "br")
+			c.Header("Vary", "Accept-Encoding")
+			c.Header("Cache-Control", "public, max-age=604800")
+			return brCnt, mimeType
+		}
+	}
 
 	// 优先尝试 gzip 文件
 	if m.acceptsGzip(c) {
@@ -222,7 +288,6 @@ func (m *SpaMdw) modifierIndex(fs ServeFileSystem, c *gin.Context) *payloads.Seo
 		return rtn
 	}
 	return ret
-
 }
 
 type embedFileSystem struct {
