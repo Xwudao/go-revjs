@@ -21,3 +21,18 @@
 - Never revert unrelated user changes.
 - In `web/packages/js-deob`, prefer explicit Babel node guards over unsafe casts.
 - Keep always-on workspace rules in this file. Put optional specialist personas under `.github/agents`.
+
+<!-- intent-skills:start -->
+# Skill mappings - when working in these areas, load the linked skill file into context.
+skills:
+	- task: "working on TanStack Router setup, route trees, generated route files, or route file naming"
+		load: "node_modules/@tanstack/router-core/skills/router-core/SKILL.md"
+	- task: "adding or changing route loaders, pending states, cache behavior, or deferred route data"
+		load: "node_modules/@tanstack/router-core/skills/router-core/data-loading/SKILL.md"
+	- task: "changing links, navigate flows, preloading on intent, or scroll restoration"
+		load: "node_modules/@tanstack/router-core/skills/router-core/navigation/SKILL.md"
+	- task: "working with dynamic route segments, path params, or search params in URLs"
+		load: "node_modules/@tanstack/router-core/skills/router-core/path-params/SKILL.md"
+	- task: "changing the Vite TanStack Router plugin, generated routes, or automatic route code splitting"
+		load: "node_modules/@tanstack/router-plugin/skills/router-plugin/SKILL.md"
+<!-- intent-skills:end -->

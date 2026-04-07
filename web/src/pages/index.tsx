@@ -7,10 +7,18 @@ interface HubFeature {
   description: string
   state: string
   iconClass: string
-  to?: '/js-deob'
+  to?: '/crypto-lab' | '/js-deob'
 }
 
 const hubFeatures: readonly HubFeature[] = [
+  {
+    title: 'Crypto Lab',
+    description:
+      '统一测试 AES、DES、TripleDES、Rabbit、RC4、RC4Drop 等算法，支持常见模式、填充、编码和一键互转。',
+    state: '已上线',
+    iconClass: 'i-mdi-lock-outline',
+    to: '/crypto-lab',
+  },
   {
     title: 'JS 解混淆',
     description: '直接贴入混淆后的 JavaScript，调整参数后在同一工作台查看整理结果和运行过程。',
@@ -39,19 +47,21 @@ const hubFeatures: readonly HubFeature[] = [
 ]
 
 const commandEntries = [
+  { label: '打开 Crypto Lab', value: '可用' },
   { label: '打开 JS Deob 工作台', value: '可用' },
   { label: '指纹分析', value: '即将推出' },
   { label: '协议模拟', value: '即将推出' },
 ] as const
 
 const scopeEntries = [
+  '已上线对称加解密实验台，适合快速验证 AES、DES、TripleDES 等参数组合。',
   '当前已上线 JS 解混淆工具，可直接粘贴混淆代码开始分析。',
   '更多分析模块正在开发中，敬请期待。',
   '所有工具均在本地浏览器中运行，代码不会上传至服务器。',
 ] as const
 
 const runtimeStats = [
-  { label: '在线工具', value: '01' },
+  { label: '在线工具', value: '02' },
   { label: '即将上线', value: '03' },
   { label: '本地运行', value: '100%' },
 ] as const
@@ -77,8 +87,15 @@ function IndexPage() {
 
           <div className={clsx(classes.frontPageActions)}>
             <Link
-              to="/js-deob"
+              to="/crypto-lab"
               className={clsx(classes.frontPageAction, classes.frontPageActionPrimary)}
+            >
+              <span className="i-mdi-lock-open-variant-outline" aria-hidden="true" />
+              打开 Crypto Lab
+            </Link>
+            <Link
+              to="/js-deob"
+              className={clsx(classes.frontPageAction)}
             >
               <span className="i-mdi-play-circle-outline" aria-hidden="true" />
               打开 JS Deob
@@ -91,6 +108,7 @@ function IndexPage() {
 
           <div className={clsx(classes.frontPageTags)} aria-label="首页亮点">
             <span>本地运行，代码不上传</span>
+            <span>多算法一页联调</span>
             <span>开箱即用</span>
             <span>持续更新</span>
           </div>

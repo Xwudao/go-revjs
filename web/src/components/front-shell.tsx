@@ -9,6 +9,7 @@ type FrontShellProps = PropsWithChildren
 
 const navItems = [
   { key: 'home', label: '首页', to: '/' },
+  { key: 'crypto-lab', label: 'Crypto Lab', to: '/crypto-lab' },
   { key: 'js-deob', label: 'JS Deob', to: '/js-deob' },
 ] as const
 
@@ -18,7 +19,11 @@ export function FrontShell({ children }: FrontShellProps) {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
-  const current = pathname.startsWith('/js-deob') ? 'js-deob' : 'home'
+  const current = pathname.startsWith('/js-deob')
+    ? 'js-deob'
+    : pathname.startsWith('/crypto-lab')
+      ? 'crypto-lab'
+      : 'home'
 
   return (
     <div className={clsx(classes.frontShell)}>

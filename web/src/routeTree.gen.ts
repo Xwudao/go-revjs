@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as JsDeobRouteImport } from './routes/js-deob'
+import { Route as CryptoLabRouteImport } from './routes/crypto-lab'
 import { Route as IndexRouteImport } from './routes/index'
 
 const JsDeobRoute = JsDeobRouteImport.update({
   id: '/js-deob',
   path: '/js-deob',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CryptoLabRoute = CryptoLabRouteImport.update({
+  id: '/crypto-lab',
+  path: '/crypto-lab',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -25,27 +31,31 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/crypto-lab': typeof CryptoLabRoute
   '/js-deob': typeof JsDeobRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/crypto-lab': typeof CryptoLabRoute
   '/js-deob': typeof JsDeobRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/crypto-lab': typeof CryptoLabRoute
   '/js-deob': typeof JsDeobRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/js-deob'
+  fullPaths: '/' | '/crypto-lab' | '/js-deob'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/js-deob'
-  id: '__root__' | '/' | '/js-deob'
+  to: '/' | '/crypto-lab' | '/js-deob'
+  id: '__root__' | '/' | '/crypto-lab' | '/js-deob'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CryptoLabRoute: typeof CryptoLabRoute
   JsDeobRoute: typeof JsDeobRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/js-deob'
       fullPath: '/js-deob'
       preLoaderRoute: typeof JsDeobRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/crypto-lab': {
+      id: '/crypto-lab'
+      path: '/crypto-lab'
+      fullPath: '/crypto-lab'
+      preLoaderRoute: typeof CryptoLabRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CryptoLabRoute: CryptoLabRoute,
   JsDeobRoute: JsDeobRoute,
 }
 export const routeTree = rootRouteImport

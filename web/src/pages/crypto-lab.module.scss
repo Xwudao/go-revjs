@@ -1,0 +1,400 @@
+.crypto-lab-page {
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+}
+
+.crypto-lab-panel {
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--color-surface) 95%, transparent);
+  box-shadow: var(--shadow-xs);
+}
+
+.crypto-lab-hero {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--color-accent) 9%, transparent), transparent 32%),
+    radial-gradient(circle at left, color-mix(in srgb, var(--color-info) 6%, transparent), transparent 28%),
+    color-mix(in srgb, var(--color-surface) 95%, transparent);
+}
+
+.crypto-lab-hero-main,
+.crypto-lab-hero-head,
+.crypto-lab-controls,
+.crypto-lab-toolbar,
+.crypto-lab-field,
+.crypto-lab-form,
+.crypto-lab-workbench,
+.crypto-lab-editors,
+.crypto-lab-info-grid,
+.crypto-lab-editor-card,
+.crypto-lab-section-head,
+.crypto-lab-info-card,
+.crypto-lab-action-bar,
+.crypto-lab-action-bar-copy {
+  display: grid;
+}
+
+.crypto-lab-hero-main,
+.crypto-lab-section-head,
+.crypto-lab-editor-card,
+.crypto-lab-info-card {
+  gap: var(--space-3);
+}
+
+.crypto-lab-kicker,
+.crypto-lab-status,
+.crypto-lab-highlights span,
+.crypto-lab-meta,
+.crypto-lab-action-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: fit-content;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.crypto-lab-hero-head {
+  grid-template-columns: auto auto;
+  gap: var(--space-2);
+  justify-content: start;
+  align-items: center;
+}
+
+.crypto-lab-kicker {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.crypto-lab-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.crypto-lab-title {
+  color: var(--color-text-strong);
+  font-size: clamp(1.6rem, 2vw, 2.15rem);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.crypto-lab-status {
+  border: 1px solid color-mix(in srgb, var(--color-success) 28%, var(--color-border-soft));
+  background: color-mix(in srgb, var(--color-success) 8%, transparent);
+  color: var(--color-success);
+}
+
+.crypto-lab-copy,
+.crypto-lab-toolbar-note,
+.crypto-lab-hint,
+.crypto-lab-editor-head p,
+.crypto-lab-empty,
+.crypto-lab-action-hint,
+.crypto-lab-bullet-list li,
+.crypto-lab-number-list li,
+.crypto-lab-note,
+.crypto-lab-error,
+.crypto-lab-section-head p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.crypto-lab-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.crypto-lab-highlights span,
+.crypto-lab-meta {
+  border: 1px solid var(--color-border-soft);
+  background: color-mix(in srgb, var(--color-surface-muted) 74%, transparent);
+  color: var(--color-text-strong);
+}
+
+.crypto-lab-toolbar-actions,
+.crypto-lab-editor-actions,
+.crypto-lab-action-bar-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.crypto-lab-button,
+.crypto-lab-inline-action,
+.crypto-lab-input {
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.crypto-lab-button,
+.crypto-lab-inline-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.25rem;
+  padding: 0.4375rem 0.875rem;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-surface-muted) 60%, transparent);
+  color: var(--color-text-strong);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--color-accent-border);
+    color: var(--color-accent);
+  }
+
+  &:disabled {
+    opacity: 0.56;
+    cursor: not-allowed;
+  }
+}
+
+.crypto-lab-button-primary {
+  border-color: var(--color-accent-border);
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+
+  &:hover {
+    color: var(--color-accent-contrast);
+    background: var(--color-accent-hover);
+  }
+}
+
+.crypto-lab-controls,
+.crypto-lab-editors,
+.crypto-lab-info-card,
+.crypto-lab-workbench {
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+.crypto-lab-toolbar {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: end;
+}
+
+.crypto-lab-toolbar-note {
+  margin: 0;
+}
+
+.crypto-lab-form {
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.crypto-lab-field {
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.crypto-lab-field-checkbox {
+  align-content: center;
+}
+
+.crypto-lab-field-label,
+.crypto-lab-editor-head h2,
+.crypto-lab-section-head h2 {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+.crypto-lab-input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0 0.875rem;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+  color: var(--color-text-strong);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-accent-border);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14%, transparent);
+  }
+}
+
+.crypto-lab-workbench {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.crypto-lab-editors {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.crypto-lab-editor-card {
+  min-width: 0;
+}
+
+.crypto-lab-action-bar {
+  position: sticky;
+  top: calc(4rem + var(--space-3));
+  z-index: 3;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-border-strong) 64%, transparent);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-surface-elevated) 96%, transparent);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-sm);
+}
+
+.crypto-lab-action-bar-copy {
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.crypto-lab-action-title {
+  color: var(--color-text-strong);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  min-height: auto;
+}
+
+.crypto-lab-action-hint {
+  font-size: var(--font-size-xs);
+}
+
+.crypto-lab-inline-feedback {
+  margin-top: calc(var(--space-2) * -1);
+}
+
+.crypto-lab-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.crypto-lab-editor-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.crypto-lab-note,
+.crypto-lab-error {
+  display: flex;
+  align-items: start;
+  gap: var(--space-2);
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+}
+
+.crypto-lab-note {
+  background: color-mix(in srgb, var(--color-info) 8%, transparent);
+  color: var(--color-info);
+}
+
+.crypto-lab-error {
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+  color: var(--color-danger);
+}
+
+.crypto-lab-bullet-list,
+.crypto-lab-number-list {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.crypto-lab-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.crypto-lab-summary div {
+  display: grid;
+  gap: var(--space-1);
+  padding: 0.75rem;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-surface-muted) 48%, transparent);
+}
+
+.crypto-lab-summary dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.crypto-lab-summary dd {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.crypto-lab-empty {
+  margin: 0;
+}
+
+@media (max-width: 1180px) {
+  .crypto-lab-hero,
+  .crypto-lab-editors,
+  .crypto-lab-info-grid,
+  .crypto-lab-action-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .crypto-lab-action-bar {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .crypto-lab-page {
+    padding-top: var(--space-3);
+  }
+
+  .crypto-lab-hero,
+  .crypto-lab-controls,
+  .crypto-lab-editors,
+  .crypto-lab-info-card,
+  .crypto-lab-workbench {
+    padding: var(--space-4);
+  }
+
+  .crypto-lab-hero-head,
+  .crypto-lab-toolbar,
+  .crypto-lab-summary,
+  .crypto-lab-title-row {
+    grid-template-columns: 1fr;
+  }
+
+  .crypto-lab-toolbar-actions,
+  .crypto-lab-editor-actions,
+  .crypto-lab-action-bar-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
