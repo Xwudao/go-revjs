@@ -27,7 +27,7 @@
   padding: var(--space-2) var(--space-3);
   flex-shrink: 0;
   position: sticky;
-  top: 3.75rem;
+  top: var(--header-h);
   z-index: calc(var(--z-header) - 1);
 }
 

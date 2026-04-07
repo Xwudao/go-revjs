@@ -104,6 +104,9 @@
   --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.48);
   --shadow-lg: 0 16px 52px rgba(0, 0, 0, 0.6);
 
+  /* Layout */
+  --header-h: 3.75rem;
+
   /* Z-index layers */
   --z-raised: 1;
   --z-dropdown: 30;
@@ -167,4 +170,11 @@
   --accent-border: var(--color-accent-border);
   --social-bg: rgba(243, 244, 246, 0.8);
   --shadow: var(--shadow-sm);
+}
+
+/* Header height changes at the same breakpoint as front-shell layout */
+@media (max-width: 900px) {
+  :root {
+    --header-h: 11rem;
+  }
 }
