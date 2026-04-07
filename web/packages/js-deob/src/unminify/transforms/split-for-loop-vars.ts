@@ -22,17 +22,15 @@ export default {
 
         for (let i = 0; i < declarations.length; i++) {
           const declarator = declarations[i]
-          const binding = path.scope.getBinding(
-            (declarator.id as t.Identifier).name,
-          )
+          const binding = path.scope.getBinding((declarator.id as t.Identifier).name)
           if (!binding) break
 
-          const isUsedInTestOrUpdate
-            = binding.constantViolations.some(reference =>
-              reference.find(p => p.node === test || p.node === update),
-            )
-            || binding.referencePaths.some(reference =>
-              reference.find(p => p.node === test || p.node === update),
+          const isUsedInTestOrUpdate =
+            binding.constantViolations.some((reference) =>
+              reference.find((p) => p.node === test || p.node === update),
+            ) ||
+            binding.referencePaths.some((reference) =>
+              reference.find((p) => p.node === test || p.node === update),
             )
           if (isUsedInTestOrUpdate) break
 

@@ -11,10 +11,10 @@ export function generateUid(scope: Scope, name: string = 'temp'): string {
     uid = toIdentifier(i > 1 ? `${name}${i}` : name)
     i++
   } while (
-    scope.hasLabel(uid)
-    || scope.hasBinding(uid)
-    || scope.hasGlobal(uid)
-    || scope.hasReference(uid)
+    scope.hasLabel(uid) ||
+    scope.hasBinding(uid) ||
+    scope.hasGlobal(uid) ||
+    scope.hasReference(uid)
   )
 
   const program = scope.getProgramParent()

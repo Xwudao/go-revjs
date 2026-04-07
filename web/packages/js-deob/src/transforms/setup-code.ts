@@ -14,13 +14,20 @@ function getTopLevelStatement(path: NodePath<t.Node>) {
 }
 
 function isImportBinding(path: NodePath<t.Node>): boolean {
-  return path.isImportSpecifier() || path.isImportDefaultSpecifier() || path.isImportNamespaceSpecifier()
+  return (
+    path.isImportSpecifier() ||
+    path.isImportDefaultSpecifier() ||
+    path.isImportNamespaceSpecifier()
+  )
 }
 
-export function buildSetupCode(ast: t.File, seedPaths: Array<NodePath<t.Node> | null | undefined>) {
+export function buildSetupCode(
+  ast: t.File,
+  seedPaths: Array<NodePath<t.Node> | null | undefined>,
+) {
   const queue = seedPaths
     .filter((value): value is NodePath<t.Node> => Boolean(value))
-    .map(path => getTopLevelStatement(path))
+    .map((path) => getTopLevelStatement(path))
     .filter((value): value is NodePath<t.Node> => Boolean(value))
 
   if (queue.length === 0) {
@@ -58,7 +65,7 @@ export function buildSetupCode(ast: t.File, seedPaths: Array<NodePath<t.Node> | 
     })
   }
 
-  const body = ast.program.body.filter(statement => selectedStatements.has(statement))
+  const body = ast.program.body.filter((statement) => selectedStatements.has(statement))
   const setupAst = parser.parse('', { sourceType: 'script' })
   setupAst.program.body = body
 

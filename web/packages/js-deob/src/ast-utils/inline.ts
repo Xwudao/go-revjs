@@ -129,11 +129,17 @@ export function inlineFunctionCall(
   fn: t.FunctionExpression | t.FunctionDeclaration,
   caller: NodePath<t.CallExpression>,
 ): void {
-  if (!caller.node || !t.isCallExpression(caller.node) || !Array.isArray(caller.node.arguments)) {
+  if (
+    !caller.node ||
+    !t.isCallExpression(caller.node) ||
+    !Array.isArray(caller.node.arguments)
+  ) {
     return
   }
 
-  const callArguments = caller.node.arguments.map(argument => t.cloneNode(argument, true))
+  const callArguments = caller.node.arguments.map((argument) =>
+    t.cloneNode(argument, true),
+  )
 
   if (t.isRestElement(fn.params[1])) {
     const callee = callArguments[0]
@@ -142,12 +148,7 @@ export function inlineFunctionCall(
       return
     }
 
-    caller.replaceWith(
-      t.callExpression(
-        callee,
-        callArguments.slice(1),
-      ),
-    )
+    caller.replaceWith(t.callExpression(callee, callArguments.slice(1)))
     return
   }
 
@@ -162,8 +163,7 @@ export function inlineFunctionCall(
       )
       if (paramIndex !== -1) {
         path.replaceWith(
-          callArguments[paramIndex] ??
-            t.unaryExpression('void', t.numericLiteral(0)),
+          callArguments[paramIndex] ?? t.unaryExpression('void', t.numericLiteral(0)),
         )
         path.skip()
       }

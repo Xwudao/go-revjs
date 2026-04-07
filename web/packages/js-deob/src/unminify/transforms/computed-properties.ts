@@ -7,9 +7,7 @@ export default {
   name: 'computed-properties',
   tags: ['safe'],
   visitor() {
-    const stringMatcher = m.capture(
-      m.stringLiteral(m.matcher(isIdentifierName)),
-    )
+    const stringMatcher = m.capture(m.stringLiteral(m.matcher(isIdentifierName)))
     const propertyMatcher = m.or(
       m.memberExpression(m.anything(), stringMatcher, true),
       m.optionalMemberExpression(m.anything(), stringMatcher, true),
@@ -34,10 +32,10 @@ export default {
         exit(path) {
           if (!keyMatcher.match(path.node)) return
           if (
-            (path.type === 'ClassMethod'
-              && stringMatcher.current!.value === 'constructor')
-            || (path.type === 'ObjectProperty'
-              && stringMatcher.current!.value === '__proto__')
+            (path.type === 'ClassMethod' &&
+              stringMatcher.current!.value === 'constructor') ||
+            (path.type === 'ObjectProperty' &&
+              stringMatcher.current!.value === '__proto__')
           ) {
             return
           }

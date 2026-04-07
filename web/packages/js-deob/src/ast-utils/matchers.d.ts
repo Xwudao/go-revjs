@@ -8,10 +8,7 @@ declare module '@codemod/matchers' {
 
   export function or(): Matcher<never>
   export function or<T>(first: Matcher<T> | T): Matcher<T>
-  export function or<T, U>(
-    first: Matcher<T> | T,
-    second: Matcher<U> | U,
-  ): Matcher<T | U>
+  export function or<T, U>(first: Matcher<T> | T, second: Matcher<U> | U): Matcher<T | U>
   export function or<T, U, V>(
     first: Matcher<T> | T,
     second: Matcher<U> | U,

@@ -98,9 +98,7 @@ function stripModuleSyntaxForEval(code: string): string {
 }
 
 export function createNodeSandbox(): Sandbox {
-  let contextPromise:
-    | Promise<{ context: any }>
-    | undefined
+  let contextPromise: Promise<{ context: any }> | undefined
 
   async function getContext() {
     if (!contextPromise) {
@@ -200,7 +198,7 @@ export class VMDecoder {
     try {
       const result = await this.sandbox(code)
       return result as unknown[]
-    } catch  {
+    } catch {
       // eslint-disable-next-line unused-imports/no-unused-vars
       // ignore
     }

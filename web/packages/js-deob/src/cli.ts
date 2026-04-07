@@ -11,7 +11,7 @@ import { deob } from './index.js'
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 const { version, description } = JSON.parse(
   readFileSync(join(__dirname, '..', 'package.json'), 'utf8'),
-) as { version: string, description: string }
+) as { version: string; description: string }
 
 debug.enable('deob:*')
 
@@ -39,8 +39,7 @@ program
 
     if (output) {
       await result.save(output)
-    }
-    else {
+    } else {
       console.log(result.code)
     }
   })

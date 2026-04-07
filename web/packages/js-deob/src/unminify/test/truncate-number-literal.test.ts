@@ -4,8 +4,7 @@ import { truncateNumberLiteral } from '../transforms'
 
 const expectJS = testTransform(truncateNumberLiteral)
 
-test('truncate float', () =>
-  expectJS('!(a | 12.34)').toMatchInlineSnapshot(`!(a | 12);`))
+test('truncate float', () => expectJS('!(a | 12.34)').toMatchInlineSnapshot(`!(a | 12);`))
 
 test('truncate overflow', () =>
   expectJS('!(a ^ 0xfffffffff)').toMatchInlineSnapshot(`!(a ^ -1);`))

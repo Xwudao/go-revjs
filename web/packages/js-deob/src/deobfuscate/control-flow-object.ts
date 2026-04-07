@@ -25,7 +25,7 @@ export default {
   scope: true,
   visitor() {
     const varId = m.capture(m.identifier())
-    const propertyName = m.matcher<string>(name => /^[$_a-z][$_\w]*$/i.test(name))
+    const propertyName = m.matcher<string>((name) => /^[$_a-z][$_\w]*$/i.test(name))
     const propertyKey = constKey(propertyName)
     const literalPropertyValue = m.or(
       m.stringLiteral(),
@@ -49,8 +49,8 @@ export default {
       // E.g. function (a, b, c) { return a(b, c) } with an arbitrary number of arguments
       m.matcher<FunctionExpression>((node) => {
         return (
-          t.isFunctionExpression(node)
-          && createFunctionMatcher(node.params.length, (...params) => [
+          t.isFunctionExpression(node) &&
+          createFunctionMatcher(node.params.length, (...params) => [
             m.returnStatement(m.callExpression(params[0], params.slice(1))),
           ]).match(node)
         )
@@ -112,10 +112,7 @@ export default {
     )
     // Relaxed matcher: accepts literal-key OR computed-call-key member accesses
     const relaxedMemberAccess = m.or(memberAccess, computedCallAccess)
-    const varMatcher = m.variableDeclarator(
-      varId,
-      m.objectExpression(objectProperties),
-    )
+    const varMatcher = m.variableDeclarator(varId, m.objectExpression(objectProperties))
     // Example: { YhxvC: "default" }.YhxvC
     const inlineMatcher = constMemberExpression(
       m.objectExpression(objectProperties),
@@ -140,19 +137,23 @@ export default {
         if (!isReadonlyObject(binding, relaxedMemberAccess)) return changes
 
         const props = new Map(
-          objectProperties.current!.map(p => [
+          objectProperties.current!.map((p) => [
             getPropName(p.key),
-            p.value as t.FunctionExpression | t.StringLiteral | t.BooleanLiteral | t.NumericLiteral,
+            p.value as
+              | t.FunctionExpression
+              | t.StringLiteral
+              | t.BooleanLiteral
+              | t.NumericLiteral,
           ]),
         )
         if (!props.size) return changes
 
-        const oldRefs = [...binding.referencePaths];
-        let hasUnresolvedComputedRefs = false;
+        const oldRefs = [...binding.referencePaths]
+        let hasUnresolvedComputedRefs = false
 
         // Have to loop backwards because we might replace a node that
         // contains another reference to the binding (https://github.com/babel/babel/issues/12943)
-        [...binding.referencePaths].reverse().forEach((ref) => {
+        ;[...binding.referencePaths].reverse().forEach((ref) => {
           const memberPath = ref.parentPath as NodePath<t.MemberExpression>
           const propName = getPropName(memberPath.node.property)
           if (propName === undefined) {
@@ -169,12 +170,8 @@ export default {
 
           if (t.isLiteral(value)) {
             memberPath.replaceWith(value)
-          }
-          else {
-            inlineFunctionCall(
-              value,
-              memberPath.parentPath as NodePath<t.CallExpression>,
-            )
+          } else {
+            inlineFunctionCall(value, memberPath.parentPath as NodePath<t.CallExpression>)
           }
           changes++
         })
@@ -218,13 +215,9 @@ export default {
 
         if (assignment.match(statement)) {
           properties.push(
-            t.objectProperty(
-              t.identifier(assignedKey.current!),
-              assignedValue.current!,
-            ),
+            t.objectProperty(t.identifier(assignedKey.current!), assignedValue.current!),
           )
-        }
-        else {
+        } else {
           break
         }
       }
@@ -260,17 +253,20 @@ export default {
 
           const propName = getPropName(path.node.property)!
           const value = objectProperties.current!.find(
-            prop => getPropName(prop.key) === propName,
-          )?.value as t.FunctionExpression | t.StringLiteral | t.BooleanLiteral | t.NumericLiteral | undefined
+            (prop) => getPropName(prop.key) === propName,
+          )?.value as
+            | t.FunctionExpression
+            | t.StringLiteral
+            | t.BooleanLiteral
+            | t.NumericLiteral
+            | undefined
           if (!value) return
 
           if (t.isLiteral(value)) {
             path.replaceWith(value)
-          }
-          else if (path.parentPath.isCallExpression()) {
+          } else if (path.parentPath.isCallExpression()) {
             inlineFunctionCall(value, path.parentPath)
-          }
-          else {
+          } else {
             path.replaceWith(value)
           }
           this.changes++

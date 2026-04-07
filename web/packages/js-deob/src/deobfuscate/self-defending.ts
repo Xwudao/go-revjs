@@ -28,12 +28,11 @@ export default {
         if (!binding) return
 
         binding.referencePaths
-          .filter(ref => ref.parent.type === 'CallExpression')
+          .filter((ref) => ref.parent.type === 'CallExpression')
           .forEach((ref) => {
             if (ref.parentPath?.parent.type === 'CallExpression') {
               ref.parentPath.parentPath?.remove()
-            }
-            else {
+            } else {
               removeSelfDefendingRefs(ref as NodePath<t.Identifier>)
             }
 
@@ -48,31 +47,46 @@ export default {
   },
 } satisfies Transform
 
-function isApplyLikeCall(node: t.Node | null | undefined, fnName: string, contextName: string) {
+function isApplyLikeCall(
+  node: t.Node | null | undefined,
+  fnName: string,
+  contextName: string,
+) {
   if (!t.isCallExpression(node)) return false
   if (!t.isMemberExpression(node.callee)) return false
   if (!t.isIdentifier(node.callee.object, { name: fnName })) return false
   if (node.arguments.length !== 2) return false
 
   const [contextArg, argumentsArg] = node.arguments
-  return t.isIdentifier(contextArg, { name: contextName })
-    && t.isIdentifier(argumentsArg, { name: 'arguments' })
+  return (
+    t.isIdentifier(contextArg, { name: contextName }) &&
+    t.isIdentifier(argumentsArg, { name: 'arguments' })
+  )
 }
 
 function isTrueLike(node: t.Node | null | undefined) {
-  return t.isBooleanLiteral(node, { value: true })
-    || (t.isUnaryExpression(node, { operator: '!' }) && t.isNumericLiteral(node.argument, { value: 0 }))
+  return (
+    t.isBooleanLiteral(node, { value: true }) ||
+    (t.isUnaryExpression(node, { operator: '!' }) &&
+      t.isNumericLiteral(node.argument, { value: 0 }))
+  )
 }
 
 function isFalseLike(node: t.Node | null | undefined) {
-  return t.isBooleanLiteral(node, { value: false })
-    || (t.isUnaryExpression(node, { operator: '!' }) && t.isArrayExpression(node.argument) && node.argument.elements.length === 0)
+  return (
+    t.isBooleanLiteral(node, { value: false }) ||
+    (t.isUnaryExpression(node, { operator: '!' }) &&
+      t.isArrayExpression(node.argument) &&
+      node.argument.elements.length === 0)
+  )
 }
 
 function isEmptyFunction(node: t.Node | null | undefined) {
-  return t.isFunctionExpression(node)
-    && node.params.length === 0
-    && node.body.body.length === 0
+  return (
+    t.isFunctionExpression(node) &&
+    node.params.length === 0 &&
+    node.body.body.length === 0
+  )
 }
 
 function hasApplySequence(
@@ -83,15 +97,33 @@ function hasApplySequence(
   if (statements.length !== 3) return false
 
   const [resultDeclaration, nullAssignment, returnResult] = statements
-  if (!t.isVariableDeclaration(resultDeclaration) || resultDeclaration.declarations.length !== 1) return false
+  if (
+    !t.isVariableDeclaration(resultDeclaration) ||
+    resultDeclaration.declarations.length !== 1
+  )
+    return false
   const [resultDeclarator] = resultDeclaration.declarations
-  if (!t.isIdentifier(resultDeclarator.id) || !isApplyLikeCall(resultDeclarator.init, fnName, contextName)) return false
+  if (
+    !t.isIdentifier(resultDeclarator.id) ||
+    !isApplyLikeCall(resultDeclarator.init, fnName, contextName)
+  )
+    return false
 
-  if (!t.isExpressionStatement(nullAssignment) || !t.isAssignmentExpression(nullAssignment.expression, { operator: '=' })) return false
-  if (!t.isIdentifier(nullAssignment.expression.left, { name: fnName }) || !t.isNullLiteral(nullAssignment.expression.right)) return false
+  if (
+    !t.isExpressionStatement(nullAssignment) ||
+    !t.isAssignmentExpression(nullAssignment.expression, { operator: '=' })
+  )
+    return false
+  if (
+    !t.isIdentifier(nullAssignment.expression.left, { name: fnName }) ||
+    !t.isNullLiteral(nullAssignment.expression.right)
+  )
+    return false
 
-  return t.isReturnStatement(returnResult)
-    && t.isIdentifier(returnResult.argument, { name: resultDeclarator.id.name })
+  return (
+    t.isReturnStatement(returnResult) &&
+    t.isIdentifier(returnResult.argument, { name: resultDeclarator.id.name })
+  )
 }
 
 function findGuardedApplySequence(
@@ -100,7 +132,10 @@ function findGuardedApplySequence(
   contextName: string,
 ) {
   for (const statement of statements) {
-    if (!t.isIfStatement(statement) || !t.isIdentifier(statement.test, { name: fnName })) {
+    if (
+      !t.isIfStatement(statement) ||
+      !t.isIdentifier(statement.test, { name: fnName })
+    ) {
       continue
     }
 
@@ -115,13 +150,17 @@ function findGuardedApplySequence(
     for (const nestedStatement of statement.consequent.body) {
       if (!t.isIfStatement(nestedStatement)) continue
 
-      if (t.isBlockStatement(nestedStatement.consequent)
-        && hasApplySequence(nestedStatement.consequent.body, fnName, contextName)) {
+      if (
+        t.isBlockStatement(nestedStatement.consequent) &&
+        hasApplySequence(nestedStatement.consequent.body, fnName, contextName)
+      ) {
         return true
       }
 
-      if (t.isBlockStatement(nestedStatement.alternate)
-        && hasApplySequence(nestedStatement.alternate.body, fnName, contextName)) {
+      if (
+        t.isBlockStatement(nestedStatement.alternate) &&
+        hasApplySequence(nestedStatement.alternate.body, fnName, contextName)
+      ) {
         return true
       }
     }
@@ -141,12 +180,18 @@ function matchSelfDefendingController(node: t.VariableDeclarator) {
   if (!t.isBlockStatement(callee.body) || callee.body.body.length < 2) return null
 
   const returnControllerStatement = callee.body.body.at(-1)
-  if (!t.isReturnStatement(returnControllerStatement) || !t.isFunctionExpression(returnControllerStatement.argument)) return null
+  if (
+    !t.isReturnStatement(returnControllerStatement) ||
+    !t.isFunctionExpression(returnControllerStatement.argument)
+  )
+    return null
 
   const firstCallDeclarator = callee.body.body
     .slice(0, -1)
-    .flatMap(statement => t.isVariableDeclaration(statement) ? statement.declarations : [])
-    .find(declarator => t.isIdentifier(declarator.id) && isTrueLike(declarator.init))
+    .flatMap((statement) =>
+      t.isVariableDeclaration(statement) ? statement.declarations : [],
+    )
+    .find((declarator) => t.isIdentifier(declarator.id) && isTrueLike(declarator.init))
   if (!firstCallDeclarator || !t.isIdentifier(firstCallDeclarator.id)) return null
   const firstCallName = firstCallDeclarator.id.name
 
@@ -157,31 +202,45 @@ function matchSelfDefendingController(node: t.VariableDeclarator) {
   if (controller.body.body.length < 3) return null
 
   const returnWrapped = controller.body.body.at(-1)
-  if (!t.isReturnStatement(returnWrapped) || !t.isIdentifier(returnWrapped.argument)) return null
+  if (!t.isReturnStatement(returnWrapped) || !t.isIdentifier(returnWrapped.argument))
+    return null
   const wrappedName = returnWrapped.argument.name
 
   const flipFirstCall = controller.body.body
     .slice(0, -1)
-    .findLast(statement =>
-      t.isExpressionStatement(statement)
-      && t.isAssignmentExpression(statement.expression, { operator: '=' })
-      && t.isIdentifier(statement.expression.left, { name: firstCallName })
-      && isFalseLike(statement.expression.right),
+    .findLast(
+      (statement) =>
+        t.isExpressionStatement(statement) &&
+        t.isAssignmentExpression(statement.expression, { operator: '=' }) &&
+        t.isIdentifier(statement.expression.left, { name: firstCallName }) &&
+        isFalseLike(statement.expression.right),
     )
   if (!flipFirstCall || !t.isExpressionStatement(flipFirstCall)) return null
 
   const wrappedDeclarator = controller.body.body
     .slice(0, controller.body.body.indexOf(flipFirstCall))
-    .flatMap(statement => t.isVariableDeclaration(statement) ? statement.declarations : [])
-    .find(declarator =>
-      t.isIdentifier(declarator.id, { name: wrappedName })
-      && t.isConditionalExpression(declarator.init),
+    .flatMap((statement) =>
+      t.isVariableDeclaration(statement) ? statement.declarations : [],
     )
-  if (!wrappedDeclarator || !t.isIdentifier(wrappedDeclarator.id) || !t.isConditionalExpression(wrappedDeclarator.init)) return null
+    .find(
+      (declarator) =>
+        t.isIdentifier(declarator.id, { name: wrappedName }) &&
+        t.isConditionalExpression(declarator.init),
+    )
+  if (
+    !wrappedDeclarator ||
+    !t.isIdentifier(wrappedDeclarator.id) ||
+    !t.isConditionalExpression(wrappedDeclarator.init)
+  )
+    return null
 
   const wrappedConditional = wrappedDeclarator.init
   if (!t.isIdentifier(wrappedConditional.test, { name: firstCallName })) return null
-  if (!t.isFunctionExpression(wrappedConditional.consequent) || !isEmptyFunction(wrappedConditional.alternate)) return null
+  if (
+    !t.isFunctionExpression(wrappedConditional.consequent) ||
+    !isEmptyFunction(wrappedConditional.alternate)
+  )
+    return null
 
   const wrappedBody = wrappedConditional.consequent.body.body
   if (!findGuardedApplySequence(wrappedBody, fnParam.name, contextParam.name)) return null

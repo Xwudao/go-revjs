@@ -35,11 +35,7 @@ export default {
     // Example: var _tmp; x[_tmp = y()] || (x[_tmp] = z);
     const computedMemberMatcher = m.logicalExpression(
       operator,
-      m.memberExpression(
-        object,
-        m.assignmentExpression('=', tmpVar, property),
-        true,
-      ),
+      m.memberExpression(object, m.assignmentExpression('=', tmpVar, property), true),
       m.assignmentExpression(
         '=',
         m.memberExpression(m.fromCapture(object), m.fromCapture(tmpVar), true),
@@ -75,8 +71,7 @@ export default {
               ),
             )
             this.changes++
-          }
-          else if (memberMatcher.match(path.node)) {
+          } else if (memberMatcher.match(path.node)) {
             const binding = path.scope.getBinding(tmpVar.current!.name)
             if (!isTemporaryVariable(binding, 1)) return
 
@@ -90,8 +85,7 @@ export default {
               ),
             )
             this.changes++
-          }
-          else if (computedMemberMatcher.match(path.node)) {
+          } else if (computedMemberMatcher.match(path.node)) {
             const binding = path.scope.getBinding(tmpVar.current!.name)
             if (!isTemporaryVariable(binding, 1)) return
 
@@ -104,14 +98,10 @@ export default {
               ),
             )
             this.changes++
-          }
-          else if (multiComputedMemberMatcher.match(path.node)) {
+          } else if (multiComputedMemberMatcher.match(path.node)) {
             const binding = path.scope.getBinding(tmpVar.current!.name)
             const binding2 = path.scope.getBinding(tmpVar2.current!.name)
-            if (
-              !isTemporaryVariable(binding, 1)
-              || !isTemporaryVariable(binding2, 1)
-            ) {
+            if (!isTemporaryVariable(binding, 1) || !isTemporaryVariable(binding2, 1)) {
               return
             }
 

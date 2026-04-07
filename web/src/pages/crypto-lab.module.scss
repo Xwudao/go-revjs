@@ -16,8 +16,16 @@
   gap: var(--space-4);
   padding: var(--space-4) var(--space-5);
   background:
-    radial-gradient(circle at top right, color-mix(in srgb, var(--color-accent) 9%, transparent), transparent 32%),
-    radial-gradient(circle at left, color-mix(in srgb, var(--color-info) 6%, transparent), transparent 28%),
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--color-accent) 9%, transparent),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at left,
+      color-mix(in srgb, var(--color-info) 6%, transparent),
+      transparent 28%
+    ),
     color-mix(in srgb, var(--color-surface) 95%, transparent);
 }
 

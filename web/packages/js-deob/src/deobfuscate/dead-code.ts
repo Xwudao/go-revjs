@@ -14,27 +14,20 @@ export default {
       m.stringLiteral(),
       m.stringLiteral(),
     )
-    const testMatcher = m.or(
-      stringComparison,
-      m.unaryExpression('!', stringComparison),
-    )
+    const testMatcher = m.or(stringComparison, m.unaryExpression('!', stringComparison))
 
     return {
       'IfStatement|ConditionalExpression': {
         exit(_path) {
-          const path = _path as NodePath<
-            t.IfStatement | t.ConditionalExpression
-          >
+          const path = _path as NodePath<t.IfStatement | t.ConditionalExpression>
 
           if (!testMatcher.match(path.node.test)) return
 
           if (path.get('test').evaluateTruthy()) {
             replace(path, path.get('consequent'))
-          }
-          else if (path.node.alternate) {
+          } else if (path.node.alternate) {
             replace(path, path.get('alternate') as NodePath)
-          }
-          else {
+          } else {
             path.remove()
           }
 
@@ -60,8 +53,7 @@ function replace(path: NodePath<t.Conditional>, replacement: NodePath) {
       path.scope.bindings[binding.identifier.name] = binding
     }
     path.replaceWithMultiple(replacement.node.body)
-  }
-  else {
+  } else {
     path.replaceWith(replacement)
   }
 }

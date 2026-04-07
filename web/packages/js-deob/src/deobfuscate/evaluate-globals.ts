@@ -18,9 +18,7 @@ export default {
       m.or(...(Object.keys(FUNCTIONS) as (keyof typeof FUNCTIONS)[])),
     )
     const arg = m.capture(m.anyString())
-    const matcher = m.callExpression(m.identifier(name), [
-      m.stringLiteral(arg),
-    ])
+    const matcher = m.callExpression(m.identifier(name), [m.stringLiteral(arg)])
 
     return {
       CallExpression: {
@@ -30,14 +28,10 @@ export default {
 
           try {
             // Causes a "TypeError: Illegal invocation" without the globalThis receiver
-            const value = FUNCTIONS[name.current!].call(
-              globalThis,
-              arg.current!,
-            )
+            const value = FUNCTIONS[name.current!].call(globalThis, arg.current!)
             path.replaceWith(t.stringLiteral(value))
             this.changes++
-          }
-          catch {
+          } catch {
             // ignore
           }
         },

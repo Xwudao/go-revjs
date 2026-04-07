@@ -6,8 +6,7 @@ function normalizeGeneratedCode(code: string) {
   if (code.length >= 2 && code.startsWith('"') && code.endsWith('"')) {
     try {
       return JSON.parse(code) as string
-    }
-    catch {
+    } catch {
       return code.slice(1, -1)
     }
   }
@@ -29,14 +28,17 @@ function normalizeSnapshotText(snapshot: string) {
   }
 
   const indent = lines
-    .filter(line => line.trim().length > 0)
-    .reduce((min, line) => Math.min(min, line.match(/^\s*/)?.[0].length ?? 0), Number.POSITIVE_INFINITY)
+    .filter((line) => line.trim().length > 0)
+    .reduce(
+      (min, line) => Math.min(min, line.match(/^\s*/)?.[0].length ?? 0),
+      Number.POSITIVE_INFINITY,
+    )
 
   if (!Number.isFinite(indent)) {
     return lines.join('\n')
   }
 
-  return lines.map(line => line.slice(indent)).join('\n')
+  return lines.map((line) => line.slice(indent)).join('\n')
 }
 
 export function testTransform<TOptions>(

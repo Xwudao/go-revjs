@@ -55,17 +55,17 @@ export default {
           while (siblingIndex < container.length) {
             const sibling = path.getSibling(siblingIndex)
             if (
-              !assignmentMatcher.match(sibling.node)
-              || hasCircularReference(value.current!, binding)
+              !assignmentMatcher.match(sibling.node) ||
+              hasCircularReference(value.current!, binding)
             ) {
               return
             }
 
             // { [1]: value, "foo bar": value } can be simplified to { 1: value, "foo bar": value }
-            const isComputed
-              = computed.current!
-                && key.current!.type !== 'NumericLiteral'
-                && key.current!.type !== 'StringLiteral'
+            const isComputed =
+              computed.current! &&
+              key.current!.type !== 'NumericLiteral' &&
+              key.current!.type !== 'StringLiteral'
 
             // Example: const obj = { x: 1 }; obj.foo = 'bar'; -> const obj = { x: 1, foo: 'bar' };
             object.current!.properties.push(
@@ -78,9 +78,9 @@ export default {
 
             // Example: const obj = { foo: 'bar' }; return obj; -> return { foo: 'bar' };
             if (
-              binding.references === 1
-              && inlineableObject.match(object.current)
-              && !isRepeatedCallReference(binding, binding.referencePaths[0])
+              binding.references === 1 &&
+              inlineableObject.match(object.current) &&
+              !isRepeatedCallReference(binding, binding.referencePaths[0])
             ) {
               binding.referencePaths[0].replaceWith(object.current)
               path.remove()
@@ -99,9 +99,9 @@ export default {
 function hasCircularReference(node: t.Node, binding: Binding) {
   return (
     // obj.foo = obj;
-    binding.referencePaths.some(path => path.find(p => p.node === node))
+    binding.referencePaths.some((path) => path.find((p) => p.node === node)) ||
     // obj.foo = fn(); where fn could reference the binding or not, for simplicity we assume it does.
-    || m.containerOf(m.callExpression()).match(node)
+    m.containerOf(m.callExpression()).match(node)
   )
 }
 
@@ -131,7 +131,7 @@ function isRepeatedCallReference(binding: Binding, reference: NodePath) {
  * Only literals, arrays and objects are allowed because variable values
  * might be different in the place the object will be inlined.
  */
-const inlineableObject: m.Matcher<t.Expression> = m.matcher(node =>
+const inlineableObject: m.Matcher<t.Expression> = m.matcher((node) =>
   m
     .or(
       safeLiteral,

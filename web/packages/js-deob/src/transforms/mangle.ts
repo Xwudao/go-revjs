@@ -20,10 +20,7 @@ export default {
 
           const binding = path.scope.getBinding(path.node.name)
           if (!binding) return
-          if (
-            binding.referencePaths.some(ref => ref.isExportNamedDeclaration())
-          )
-            return
+          if (binding.referencePaths.some((ref) => ref.isExportNamedDeclaration())) return
 
           renameFast(binding, inferName(path))
         },
@@ -40,76 +37,54 @@ const requireMatcher = m.variableDeclarator(
 function inferName(path: NodePath<t.Identifier>): string {
   if (path.parentPath.isClass({ id: path.node })) {
     return generateUid(path.scope, 'C')
-  }
-  else if (path.parentPath.isFunction({ id: path.node })) {
+  } else if (path.parentPath.isFunction({ id: path.node })) {
     return generateUid(path.scope, 'f')
-  }
-  else if (
-    path.listKey === 'params'
-    || (path.parentPath.isAssignmentPattern({ left: path.node })
-      && path.parentPath.listKey === 'params')
+  } else if (
+    path.listKey === 'params' ||
+    (path.parentPath.isAssignmentPattern({ left: path.node }) &&
+      path.parentPath.listKey === 'params')
   ) {
     return generateUid(path.scope, 'p')
-  }
-  else if (requireMatcher.match(path.parent)) {
+  } else if (requireMatcher.match(path.parent)) {
     return generateUid(
       path.scope,
-      (path.parentPath.get('init.arguments.0') as NodePath<t.StringLiteral>)
-        .node.value,
+      (path.parentPath.get('init.arguments.0') as NodePath<t.StringLiteral>).node.value,
     )
-  }
-  else if (path.parentPath.isVariableDeclarator({ id: path.node })) {
+  } else if (path.parentPath.isVariableDeclarator({ id: path.node })) {
     const init = path.parentPath.get('init')
     const suffix = (init.isExpression() && generateExpressionName(init)) || ''
     return generateUid(path.scope, `v${titleCase(suffix)}`)
-  }
-  else if (path.parentPath.isCatchClause()) {
+  } else if (path.parentPath.isCatchClause()) {
     return generateUid(path.scope, 'e')
-  }
-  else if (path.parentPath.isArrayPattern()) {
+  } else if (path.parentPath.isArrayPattern()) {
     return generateUid(path.scope, 'v')
-  }
-  else {
+  } else {
     return path.node.name
   }
 }
 
-function generateExpressionName(
-  expression: NodePath<t.Expression>,
-): string | undefined {
+function generateExpressionName(expression: NodePath<t.Expression>): string | undefined {
   if (expression.isIdentifier()) {
     return expression.node.name
-  }
-  else if (expression.isFunctionExpression()) {
+  } else if (expression.isFunctionExpression()) {
     return expression.node.id?.name ?? 'f'
-  }
-  else if (expression.isArrowFunctionExpression()) {
+  } else if (expression.isArrowFunctionExpression()) {
     return 'f'
-  }
-  else if (expression.isClassExpression()) {
+  } else if (expression.isClassExpression()) {
     return expression.node.id?.name ?? 'C'
-  }
-  else if (expression.isCallExpression()) {
-    return generateExpressionName(
-      expression.get('callee') as NodePath<t.Expression>,
-    )
-  }
-  else if (expression.isThisExpression()) {
+  } else if (expression.isCallExpression()) {
+    return generateExpressionName(expression.get('callee') as NodePath<t.Expression>)
+  } else if (expression.isThisExpression()) {
     return 'this'
-  }
-  else if (expression.isNumericLiteral()) {
+  } else if (expression.isNumericLiteral()) {
     return `LN${expression.node.value.toString()}`
-  }
-  else if (expression.isStringLiteral()) {
+  } else if (expression.isStringLiteral()) {
     return `LS${titleCase(expression.node.value).slice(0, 20)}`
-  }
-  else if (expression.isObjectExpression()) {
+  } else if (expression.isObjectExpression()) {
     return 'O'
-  }
-  else if (expression.isArrayExpression()) {
+  } else if (expression.isArrayExpression()) {
     return 'A'
-  }
-  else {
+  } else {
     return undefined
   }
 }

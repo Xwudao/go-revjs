@@ -26,10 +26,7 @@ export default {
     const pureValue = m.or(
       m.stringLiteral(),
       m.numericLiteral(),
-      m.unaryExpression(
-        '-',
-        m.or(m.numericLiteral(), m.identifier('Infinity')),
-      ),
+      m.unaryExpression('-', m.or(m.numericLiteral(), m.identifier('Infinity'))),
       m.booleanLiteral(),
       m.nullLiteral(),
       m.identifier('undefined'),
@@ -39,7 +36,7 @@ export default {
     const matcher = m.binaryExpression(
       m.or(...Object.values(FLIPPED_OPERATORS)),
       pureValue,
-      m.matcher(node => !pureValue.match(node)),
+      m.matcher((node) => !pureValue.match(node)),
     )
 
     return {
@@ -48,9 +45,7 @@ export default {
           if (matcher.match(path.node)) {
             path.replaceWith(
               t.binaryExpression(
-                FLIPPED_OPERATORS[
-                  path.node.operator as keyof typeof FLIPPED_OPERATORS
-                ],
+                FLIPPED_OPERATORS[path.node.operator as keyof typeof FLIPPED_OPERATORS],
                 path.node.right,
                 path.node.left as t.Expression,
               ),

@@ -15,6 +15,7 @@ interface CodeEditorProps {
   height?: string
   minHeight?: string
   compact?: boolean
+  language?: 'javascript' | 'plain'
 }
 
 export function CodeEditor({
@@ -24,11 +25,18 @@ export function CodeEditor({
   height,
   minHeight = '33rem',
   compact = false,
+  language = 'javascript',
 }: CodeEditorProps) {
   const { theme } = useAppConfig()
   const editorHeight = height ?? minHeight
 
-  const extensions = useMemo(() => [javascript(), EditorView.lineWrapping], [])
+  const extensions = useMemo(
+    () =>
+      language === 'javascript'
+        ? [javascript(), EditorView.lineWrapping]
+        : [EditorView.lineWrapping],
+    [language],
+  )
 
   return (
     <div

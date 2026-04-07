@@ -11,43 +11,25 @@ export default {
     const defaultExpression = m.capture(m.anyExpression())
     const index = m.capture(m.numericLiteral())
     const varName = m.capture(m.identifier())
-    const varId = m.capture(
-      m.or(m.identifier(), m.arrayPattern(), m.objectPattern()),
-    )
+    const varId = m.capture(m.or(m.identifier(), m.arrayPattern(), m.objectPattern()))
 
     // Example: arguments.length > 0 && arguments[0] !== undefined
     const argumentCheckAnd = m.logicalExpression(
       '&&',
-      m.binaryExpression(
-        '>',
-        constMemberExpression('arguments', 'length'),
-        index,
-      ),
+      m.binaryExpression('>', constMemberExpression('arguments', 'length'), index),
       m.binaryExpression(
         '!==',
-        m.memberExpression(
-          m.identifier('arguments'),
-          m.fromCapture(index),
-          true,
-        ),
+        m.memberExpression(m.identifier('arguments'), m.fromCapture(index), true),
         m.identifier('undefined'),
       ),
     )
     // Example: arguments.length > 0 && arguments[0] !== undefined
     const argumentCheckOr = m.logicalExpression(
       '||',
-      m.binaryExpression(
-        '<=',
-        constMemberExpression('arguments', 'length'),
-        index,
-      ),
+      m.binaryExpression('<=', constMemberExpression('arguments', 'length'), index),
       m.binaryExpression(
         '===',
-        m.memberExpression(
-          m.identifier('arguments'),
-          m.fromCapture(index),
-          true,
-        ),
+        m.memberExpression(m.identifier('arguments'), m.fromCapture(index), true),
         m.identifier('undefined'),
       ),
     )
@@ -57,11 +39,7 @@ export default {
         varId,
         m.conditionalExpression(
           argumentCheckAnd,
-          m.memberExpression(
-            m.identifier('arguments'),
-            m.fromCapture(index),
-            true,
-          ),
+          m.memberExpression(m.identifier('arguments'), m.fromCapture(index), true),
           defaultExpression,
         ),
       ),
@@ -73,11 +51,7 @@ export default {
         m.logicalExpression(
           '&&',
           argumentCheckAnd,
-          m.memberExpression(
-            m.identifier('arguments'),
-            m.fromCapture(index),
-            true,
-          ),
+          m.memberExpression(m.identifier('arguments'), m.fromCapture(index), true),
         ),
       ),
     ])
@@ -88,11 +62,7 @@ export default {
         m.logicalExpression(
           '||',
           argumentCheckOr,
-          m.memberExpression(
-            m.identifier('arguments'),
-            m.fromCapture(index),
-            true,
-          ),
+          m.memberExpression(m.identifier('arguments'), m.fromCapture(index), true),
         ),
       ),
     ])
@@ -102,11 +72,7 @@ export default {
       m.binaryExpression('===', varName, m.identifier('undefined')),
       m.blockStatement([
         m.expressionStatement(
-          m.assignmentExpression(
-            '=',
-            m.fromCapture(varName),
-            defaultExpression,
-          ),
+          m.assignmentExpression('=', m.fromCapture(varName), defaultExpression),
         ),
       ]),
     )
@@ -115,16 +81,8 @@ export default {
       m.variableDeclarator(
         varId,
         m.conditionalExpression(
-          m.binaryExpression(
-            '>',
-            constMemberExpression('arguments', 'length'),
-            index,
-          ),
-          m.memberExpression(
-            m.identifier('arguments'),
-            m.fromCapture(index),
-            true,
-          ),
+          m.binaryExpression('>', constMemberExpression('arguments', 'length'), index),
+          m.memberExpression(m.identifier('arguments'), m.fromCapture(index), true),
           m.identifier('undefined'),
         ),
       ),
@@ -163,8 +121,8 @@ export default {
 
           const binding = path.scope.getOwnBinding(varName.current!.name)
           if (!binding) return
-          const isFunctionParam
-            = binding.path.listKey === 'params' && binding.path.parent === fn
+          const isFunctionParam =
+            binding.path.listKey === 'params' && binding.path.parent === fn
           if (!isFunctionParam) return
 
           binding.path.replaceWith(

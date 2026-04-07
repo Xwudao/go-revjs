@@ -37,20 +37,19 @@ export default {
           const { argument } = path.node
 
           if (binaryMatcher.match(path.node)) {
-            binaryExpression.current!.operator
-              = INVERTED_BINARY_OPERATORS[
+            binaryExpression.current!.operator =
+              INVERTED_BINARY_OPERATORS[
                 binaryExpression.current!
                   .operator as keyof typeof INVERTED_BINARY_OPERATORS
               ]
 
             path.replaceWith(binaryExpression.current!)
             this.changes++
-          }
-          else if (logicalMatcher.match(path.node)) {
+          } else if (logicalMatcher.match(path.node)) {
             let current = argument
             while (logicalExpression.match(current)) {
-              current.operator
-                = INVERTED_LOGICAL_OPERATORS[
+              current.operator =
+                INVERTED_LOGICAL_OPERATORS[
                   current.operator as keyof typeof INVERTED_LOGICAL_OPERATORS
                 ]
 

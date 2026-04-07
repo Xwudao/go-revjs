@@ -6,9 +6,8 @@ import * as m from '@codemod/matchers'
  * Matches any literal except for template literals with expressions (that could have side effects)
  */
 export const safeLiteral: m.Matcher<t.Literal> = m.matcher(
-  node =>
-    t.isLiteral(node)
-    && (!t.isTemplateLiteral(node) || node.expressions.length === 0),
+  (node) =>
+    t.isLiteral(node) && (!t.isTemplateLiteral(node) || node.expressions.length === 0),
 )
 
 export function infiniteLoop(
@@ -39,11 +38,7 @@ export function constObjectProperty(
 export function anonymousFunction(
   params?:
     | m.Matcher<(t.Identifier | t.RestElement | t.Pattern)[]>
-    | (
-      | m.Matcher<t.Identifier>
-      | m.Matcher<t.Pattern>
-      | m.Matcher<t.RestElement>
-    )[],
+    | (m.Matcher<t.Identifier> | m.Matcher<t.Pattern> | m.Matcher<t.RestElement>)[],
   body?: m.Matcher<t.BlockStatement>,
 ): m.Matcher<t.FunctionExpression | t.ArrowFunctionExpression> {
   return m.or(
@@ -55,11 +50,7 @@ export function anonymousFunction(
 export function iife(
   params?:
     | m.Matcher<(t.Identifier | t.RestElement | t.Pattern)[]>
-    | (
-      | m.Matcher<t.Identifier>
-      | m.Matcher<t.Pattern>
-      | m.Matcher<t.RestElement>
-    )[],
+    | (m.Matcher<t.Identifier> | m.Matcher<t.Pattern> | m.Matcher<t.RestElement>)[],
   body?: m.Matcher<t.BlockStatement>,
 ): m.Matcher<t.CallExpression> {
   return m.callExpression(anonymousFunction(params, body))
@@ -107,9 +98,7 @@ export function findParent<T extends t.Node>(
   path: NodePath,
   matcher: m.Matcher<T>,
 ): NodePath<T> | null {
-  return path.findParent(path =>
-    matcher.match(path.node),
-  ) as NodePath<T> | null
+  return path.findParent((path) => matcher.match(path.node)) as NodePath<T> | null
 }
 
 /**
@@ -121,7 +110,7 @@ export function findPath<T extends t.Node>(
   path: NodePath,
   matcher: m.Matcher<T>,
 ): NodePath<T> | null {
-  return path.find(path => matcher.match(path.node)) as NodePath<T> | null
+  return path.find((path) => matcher.match(path.node)) as NodePath<T> | null
 }
 
 /**
@@ -134,15 +123,12 @@ export function createFunctionMatcher(
     ...captures: m.Matcher<t.Identifier>[]
   ) => m.Matcher<t.Statement[]> | m.Matcher<t.Statement>[],
 ): m.Matcher<t.FunctionExpression> {
-  const captures = Array.from({ length: params }, () =>
-    m.capture(m.anyString()))
+  const captures = Array.from({ length: params }, () => m.capture(m.anyString()))
 
   return m.functionExpression(
     undefined,
     captures.map(m.identifier),
-    m.blockStatement(
-      body(...captures.map(c => m.identifier(m.fromCapture(c)))),
-    ),
+    m.blockStatement(body(...captures.map((c) => m.identifier(m.fromCapture(c))))),
   )
 }
 
@@ -154,43 +140,42 @@ export function isReadonlyObject(
   memberAccess: m.Matcher<t.MemberExpression>,
 ): boolean {
   // Workaround because sometimes babel treats the VariableDeclarator/binding itself as a violation
-  if (!binding.constant && binding.constantViolations[0] !== binding.path)
-    return false
+  if (!binding.constant && binding.constantViolations[0] !== binding.path) return false
 
   function isPatternAssignment(member: NodePath<t.Node>) {
     const { parentPath } = member
     return (
       // [obj.property] = [1];
-      parentPath?.isArrayPattern()
+      parentPath?.isArrayPattern() ||
       // ({ property: obj.property } = {})
       // ({ ...obj.property } = {})
-      || (parentPath?.parentPath?.isObjectPattern()
-        && (parentPath.isObjectProperty({ value: member.node })
-          || parentPath.isRestElement()))
+      (parentPath?.parentPath?.isObjectPattern() &&
+        (parentPath.isObjectProperty({ value: member.node }) ||
+          parentPath.isRestElement())) ||
       // ([obj.property = 1] = [])
       // ({ property: obj.property = 1 } = {})
-        || parentPath?.isAssignmentPattern({ left: member.node })
+      parentPath?.isAssignmentPattern({ left: member.node })
     )
   }
 
   return binding.referencePaths.every(
-    path =>
+    (path) =>
       // obj.property
-      memberAccess.match(path.parent)
+      memberAccess.match(path.parent) &&
       // obj.property = 1
-      && !path.parentPath?.parentPath?.isAssignmentExpression({
+      !path.parentPath?.parentPath?.isAssignmentExpression({
         left: path.parent,
-      })
+      }) &&
       // obj.property++
-      && !path.parentPath?.parentPath?.isUpdateExpression({
+      !path.parentPath?.parentPath?.isUpdateExpression({
         argument: path.parent,
-      })
+      }) &&
       // delete obj.property
-      && !path.parentPath?.parentPath?.isUnaryExpression({
+      !path.parentPath?.parentPath?.isUnaryExpression({
         argument: path.parent,
         operator: 'delete',
-      })
-      && !isPatternAssignment(path.parentPath!),
+      }) &&
+      !isPatternAssignment(path.parentPath!),
   )
 }
 
@@ -209,10 +194,10 @@ export function isTemporaryVariable(
   kind: 'var' | 'param' = 'var',
 ): binding is Binding {
   return (
-    binding !== undefined
-    && binding.references === references
-    && binding.constantViolations.length === 1
-    && (kind === 'var'
+    binding !== undefined &&
+    binding.references === references &&
+    binding.constantViolations.length === 1 &&
+    (kind === 'var'
       ? binding.path.isVariableDeclarator() && binding.path.node.init === null
       : binding.path.listKey === 'params' && binding.path.isIdentifier())
   )
@@ -250,8 +235,6 @@ export class AnySubListMatcher<T> extends m.Matcher<T[]> {
 /**
  * Greedy matches elements in the specified order, allowing for any number of elements in between
  */
-export function anySubList<T>(
-  ...elements: Array<m.Matcher<T>>
-): m.Matcher<Array<T>> {
+export function anySubList<T>(...elements: Array<m.Matcher<T>>): m.Matcher<Array<T>> {
   return new AnySubListMatcher(elements)
 }

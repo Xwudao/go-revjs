@@ -26,20 +26,16 @@ export default {
       m.containerOf(
         m.or(
           m.debuggerStatement(),
-          m.callExpression(
-            constMemberExpression(m.anyExpression(), 'constructor'),
-            [m.stringLiteral('debugger')],
-          ),
+          m.callExpression(constMemberExpression(m.anyExpression(), 'constructor'), [
+            m.stringLiteral('debugger'),
+          ]),
         ),
       ),
     )
     // that.setInterval(debugProtectionFunctionName, 4000);
     const intervalCall = m.callExpression(
       constMemberExpression(m.anyExpression(), 'setInterval'),
-      [
-        m.identifier(m.fromCapture(debugProtectionFunctionName)),
-        m.numericLiteral(),
-      ],
+      [m.identifier(m.fromCapture(debugProtectionFunctionName)), m.numericLiteral()],
     )
 
     // function debugProtectionFunctionName(ret) {
@@ -67,9 +63,7 @@ export default {
             ifStatement(
               m.fromCapture(ret),
               // return debuggerProtection;
-              m.blockStatement([
-                m.returnStatement(m.fromCapture(debuggerProtection)),
-              ]),
+              m.blockStatement([m.returnStatement(m.fromCapture(debuggerProtection))]),
               // } else { debuggerProtection(0); }
               m.blockStatement([
                 m.expressionStatement(
@@ -88,9 +82,7 @@ export default {
       FunctionDeclaration(path) {
         if (!matcher.match(path.node)) return
 
-        const binding = path.scope.getBinding(
-          debugProtectionFunctionName.current!,
-        )
+        const binding = path.scope.getBinding(debugProtectionFunctionName.current!)
 
         binding?.referencePaths.forEach((ref) => {
           if (intervalCall.match(ref.parent)) {

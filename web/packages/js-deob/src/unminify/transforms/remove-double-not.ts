@@ -9,23 +9,12 @@ export default {
   tags: ['safe'],
   visitor() {
     const expression = m.capture(m.anyExpression())
-    const doubleNot = m.unaryExpression(
-      '!',
-      m.unaryExpression('!', expression),
-    )
+    const doubleNot = m.unaryExpression('!', m.unaryExpression('!', expression))
     const tripleNot = m.unaryExpression('!', doubleNot)
     const arrayCall = m.callExpression(
       constMemberExpression(
         m.arrayExpression(),
-        m.or(
-          'filter',
-          'find',
-          'findLast',
-          'findIndex',
-          'findLastIndex',
-          'some',
-          'every',
-        ),
+        m.or('filter', 'find', 'findLast', 'findIndex', 'findLastIndex', 'some', 'every'),
       ),
       [m.arrowFunctionExpression(m.anything(), doubleNot)],
     )
@@ -50,9 +39,7 @@ export default {
       CallExpression: {
         exit(path) {
           if (arrayCall.match(path.node)) {
-            (path.get('arguments.0.body') as NodePath).replaceWith(
-              expression.current!,
-            )
+            ;(path.get('arguments.0.body') as NodePath).replaceWith(expression.current!)
             this.changes++
           }
         },

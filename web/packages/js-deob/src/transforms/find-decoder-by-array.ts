@@ -46,9 +46,9 @@ function getStringArrayLength(node: t.Node | null | undefined): number | undefin
     let length = 0
     for (const element of node.elements) {
       if (
-        element === null
-        || t.isIdentifier(element, { name: 'undefined' })
-        || t.isIdentifier(element)
+        element === null ||
+        t.isIdentifier(element, { name: 'undefined' }) ||
+        t.isIdentifier(element)
       ) {
         length++
         continue
@@ -62,10 +62,10 @@ function getStringArrayLength(node: t.Node | null | undefined): number | undefin
   }
 
   if (
-    t.isCallExpression(node)
-    && t.isMemberExpression(node.callee)
-    && !node.callee.computed
-    && t.isIdentifier(node.callee.property, { name: 'concat' })
+    t.isCallExpression(node) &&
+    t.isMemberExpression(node.callee) &&
+    !node.callee.computed &&
+    t.isIdentifier(node.callee.property, { name: 'concat' })
   ) {
     const baseLength = getStringArrayLength(node.callee.object)
     if (baseLength === undefined) return
@@ -85,9 +85,9 @@ function getStringArrayLength(node: t.Node | null | undefined): number | undefin
   }
 
   if (
-    t.isCallExpression(node)
-    && (t.isFunctionExpression(node.callee) || t.isArrowFunctionExpression(node.callee))
-    && node.arguments.length === 0
+    t.isCallExpression(node) &&
+    (t.isFunctionExpression(node.callee) || t.isArrowFunctionExpression(node.callee)) &&
+    node.arguments.length === 0
   ) {
     if (t.isBlockStatement(node.callee.body)) {
       if (node.callee.body.body.length !== 1) return
@@ -105,7 +105,10 @@ function getWrappedStringArrayInfo(path: NodePath<t.FunctionDeclaration>) {
   if (!id || params.length !== 0 || body.body.length < 2) return
 
   const [firstStatement] = body.body
-  if (!t.isVariableDeclaration(firstStatement) || firstStatement.declarations.length !== 1) {
+  if (
+    !t.isVariableDeclaration(firstStatement) ||
+    firstStatement.declarations.length !== 1
+  ) {
     return
   }
 
@@ -124,26 +127,31 @@ function getWrappedStringArrayInfo(path: NodePath<t.FunctionDeclaration>) {
     if (t.isBlockStatement(fn.body)) {
       if (fn.body.body.length !== 1) return false
       const [statement] = fn.body.body
-      return t.isReturnStatement(statement)
-        && t.isIdentifier(statement.argument, { name: arrayIdentifier })
+      return (
+        t.isReturnStatement(statement) &&
+        t.isIdentifier(statement.argument, { name: arrayIdentifier })
+      )
     }
 
     return t.isIdentifier(fn.body, { name: arrayIdentifier })
   }
 
   const isSelfAssignment = (expression: t.AssignmentExpression) => {
-    return t.isIdentifier(expression.left, { name: id.name })
-      && (t.isFunctionExpression(expression.right) || t.isArrowFunctionExpression(expression.right))
-      && isArrayGetter(expression.right)
+    return (
+      t.isIdentifier(expression.left, { name: id.name }) &&
+      (t.isFunctionExpression(expression.right) ||
+        t.isArrowFunctionExpression(expression.right)) &&
+      isArrayGetter(expression.right)
+    )
   }
 
   if (tailStatements.length === 1) {
     const [statement] = tailStatements
     if (
-      t.isReturnStatement(statement)
-      && t.isCallExpression(statement.argument)
-      && t.isAssignmentExpression(statement.argument.callee)
-      && isSelfAssignment(statement.argument.callee)
+      t.isReturnStatement(statement) &&
+      t.isCallExpression(statement.argument) &&
+      t.isAssignmentExpression(statement.argument.callee) &&
+      isSelfAssignment(statement.argument.callee)
     ) {
       return { name: id.name, length }
     }
@@ -152,13 +160,13 @@ function getWrappedStringArrayInfo(path: NodePath<t.FunctionDeclaration>) {
   if (tailStatements.length === 2) {
     const [assignmentStatement, returnStatement] = tailStatements
     if (
-      t.isExpressionStatement(assignmentStatement)
-      && t.isAssignmentExpression(assignmentStatement.expression)
-      && isSelfAssignment(assignmentStatement.expression)
-      && t.isReturnStatement(returnStatement)
-      && t.isCallExpression(returnStatement.argument)
-      && t.isIdentifier(returnStatement.argument.callee, { name: id.name })
-      && returnStatement.argument.arguments.length === 0
+      t.isExpressionStatement(assignmentStatement) &&
+      t.isAssignmentExpression(assignmentStatement.expression) &&
+      isSelfAssignment(assignmentStatement.expression) &&
+      t.isReturnStatement(returnStatement) &&
+      t.isCallExpression(returnStatement.argument) &&
+      t.isIdentifier(returnStatement.argument.callee, { name: id.name }) &&
+      returnStatement.argument.arguments.length === 0
     ) {
       return { name: id.name, length }
     }
@@ -455,9 +463,14 @@ export function findDecoderByArray(ast: t.Node, expectedLength?: number) {
     },
   })
 
-  const setupCode = 'program' in ast
-    ? buildSetupCode(ast, [stringArray?.path, ...rotators, ...decoders.map((decoder) => decoder.path)])
-    : ''
+  const setupCode =
+    'program' in ast
+      ? buildSetupCode(ast, [
+          stringArray?.path,
+          ...rotators,
+          ...decoders.map((decoder) => decoder.path),
+        ])
+      : ''
 
   return {
     stringArray,

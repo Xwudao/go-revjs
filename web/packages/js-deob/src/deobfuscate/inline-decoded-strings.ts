@@ -13,9 +13,7 @@ export default {
   async run(_ast, state, options) {
     if (!options) return
 
-    const calls = options.vm.decoders.flatMap(decoder =>
-      decoder.collectCalls(),
-    )
+    const calls = options.vm.decoders.flatMap((decoder) => decoder.collectCalls())
     const decodedValues = await options.vm.decode(calls)
 
     for (let i = 0; i < calls.length; i++) {
@@ -23,8 +21,7 @@ export default {
       const value = decodedValues[i]
 
       call.replaceWith(t.valueToNode(value))
-      if (typeof value !== 'string')
-        call.addComment('leading', 'webcrack:decode_error')
+      if (typeof value !== 'string') call.addComment('leading', 'webcrack:decode_error')
     }
 
     state.changes += calls.length

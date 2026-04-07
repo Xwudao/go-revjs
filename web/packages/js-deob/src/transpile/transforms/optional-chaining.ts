@@ -15,11 +15,7 @@ export default {
       m.logicalExpression(
         '||',
         m.binaryExpression('===', object, m.nullLiteral()),
-        m.binaryExpression(
-          '===',
-          m.fromCapture(object),
-          m.identifier('undefined'),
-        ),
+        m.binaryExpression('===', m.fromCapture(object), m.identifier('undefined')),
       ),
       m.identifier('undefined'),
       member,
@@ -36,11 +32,7 @@ export default {
           m.assignmentExpression('=', tmpVar, object),
           m.nullLiteral(),
         ),
-        m.binaryExpression(
-          '===',
-          m.fromCapture(tmpVar),
-          m.identifier('undefined'),
-        ),
+        m.binaryExpression('===', m.fromCapture(tmpVar), m.identifier('undefined')),
       ),
       m.identifier('undefined'),
       tmpMember,
@@ -60,8 +52,7 @@ export default {
               ),
             )
             this.changes++
-          }
-          else if (tmpMatcher.match(path.node)) {
+          } else if (tmpMatcher.match(path.node)) {
             const binding = path.scope.getBinding(tmpVar.current!.name)
             if (!isTemporaryVariable(binding, 2)) return
 

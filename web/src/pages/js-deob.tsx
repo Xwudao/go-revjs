@@ -352,7 +352,8 @@ function JsDeobPage() {
 
       pushLog(`已格式化输入代码 | ${sourceCode.length} -> ${formatted.length} 字符`)
     } catch (error) {
-      const message = error instanceof Error ? error.message : '格式化失败，请检查输入代码。'
+      const message =
+        error instanceof Error ? error.message : '格式化失败，请检查输入代码。'
       setErrorMessage(message)
       pushLog(`格式化失败 | ${message}`)
     } finally {
@@ -380,7 +381,8 @@ function JsDeobPage() {
 
       pushLog(`已压缩处理结果 | ${outputCode.length} -> ${minified.length} 字符`)
     } catch (error) {
-      const message = error instanceof Error ? error.message : '压缩失败，请检查处理结果。'
+      const message =
+        error instanceof Error ? error.message : '压缩失败，请检查处理结果。'
       setErrorMessage(message)
       pushLog(`压缩失败 | ${message}`)
     } finally {
@@ -539,7 +541,6 @@ function JsDeobPage() {
               <span>输出与日志分区查看</span>
             </div>
           </div>
-
         </section>
 
         <section className={clsx(classes.jsDeobGrid)}>

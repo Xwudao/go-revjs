@@ -191,8 +191,7 @@ test('inline function call with rest arg', () => {
   traverse(ast, {
     CallExpression(path) {
       if (t.isIdentifier(path.node.callee, { name: 'fn' })) {
-        const fn = path.parentPath.getPrevSibling()
-          .node as t.FunctionDeclaration
+        const fn = path.parentPath.getPrevSibling().node as t.FunctionDeclaration
         inlineFunctionCall(fn, path)
       }
     },

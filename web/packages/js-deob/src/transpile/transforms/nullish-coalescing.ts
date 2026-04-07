@@ -20,11 +20,7 @@ export default {
           m.assignmentExpression('=', tmpVar, left),
           m.nullLiteral(),
         ),
-        m.binaryExpression(
-          '!==',
-          m.fromCapture(tmpVar),
-          m.identifier('undefined'),
-        ),
+        m.binaryExpression('!==', m.fromCapture(tmpVar), m.identifier('undefined')),
       ),
       m.fromCapture(tmpVar),
       right,
@@ -47,11 +43,7 @@ export default {
         m.logicalExpression(
           '&&',
           m.binaryExpression('!==', left, m.nullLiteral()),
-          m.binaryExpression(
-            '!==',
-            m.fromCapture(left),
-            m.identifier('undefined'),
-          ),
+          m.binaryExpression('!==', m.fromCapture(left), m.identifier('undefined')),
         ),
         m.binaryExpression('!=', left, m.nullLiteral()),
       ),
@@ -60,11 +52,7 @@ export default {
     )
 
     const iifeMatcher = m.callExpression(
-      m.arrowFunctionExpression(
-        [m.fromCapture(tmpVar)],
-        m.anyExpression(),
-        false,
-      ),
+      m.arrowFunctionExpression([m.fromCapture(tmpVar)], m.anyExpression(), false),
       [],
     )
 
@@ -75,36 +63,27 @@ export default {
             const binding = path.scope.getBinding(tmpVar.current!.name)
 
             if (
-              iifeMatcher.match(path.parentPath.parent)
-              && isTemporaryVariable(binding, 2, 'param')
+              iifeMatcher.match(path.parentPath.parent) &&
+              isTemporaryVariable(binding, 2, 'param')
             ) {
               path.parentPath.parentPath!.replaceWith(
                 t.logicalExpression('??', left.current!, right.current!),
               )
               this.changes++
-            }
-            else if (isTemporaryVariable(binding, 2, 'var')) {
+            } else if (isTemporaryVariable(binding, 2, 'var')) {
               binding.path.remove()
-              path.replaceWith(
-                t.logicalExpression('??', left.current!, right.current!),
-              )
+              path.replaceWith(t.logicalExpression('??', left.current!, right.current!))
               this.changes++
             }
-          }
-          else if (idLooseMatcher.match(path.node)) {
+          } else if (idLooseMatcher.match(path.node)) {
             const binding = path.scope.getBinding(tmpVar.current!.name)
             if (!isTemporaryVariable(binding, 1)) return
 
             binding.path.remove()
-            path.replaceWith(
-              t.logicalExpression('??', left.current!, right.current!),
-            )
+            path.replaceWith(t.logicalExpression('??', left.current!, right.current!))
             this.changes++
-          }
-          else if (simpleIdMatcher.match(path.node)) {
-            path.replaceWith(
-              t.logicalExpression('??', left.current!, right.current!),
-            )
+          } else if (simpleIdMatcher.match(path.node)) {
+            path.replaceWith(t.logicalExpression('??', left.current!, right.current!))
             this.changes++
           }
         },

@@ -19,10 +19,10 @@ export default {
 
           const value = literal.current!.value
 
-          const isShifter
-            = literal.current! === path.node.right
-              && (path.node.operator === '<<' || path.node.operator === '>>')
-          const truncation = isShifter ? 31 : 0xFFFFFFFF
+          const isShifter =
+            literal.current! === path.node.right &&
+            (path.node.operator === '<<' || path.node.operator === '>>')
+          const truncation = isShifter ? 31 : 0xffffffff
           const truncated = value & truncation
 
           if (truncated === value) return

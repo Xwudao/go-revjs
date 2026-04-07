@@ -3,12 +3,7 @@ import type * as t from '@babel/types'
 import type { StringArray } from './string-array'
 import { expression } from '@babel/template'
 import * as m from '@codemod/matchers'
-import {
-  anySubList,
-  findParent,
-  inlineVariable,
-  renameFast,
-} from '../ast-utils'
+import { anySubList, findParent, inlineVariable, renameFast } from '../ast-utils'
 
 /**
  * A function that is called with >= 1 numeric/string arguments
@@ -20,11 +15,7 @@ export class Decoder {
   name: string
   path: NodePath<t.FunctionDeclaration>
 
-  constructor(
-    originalName: string,
-    name: string,
-    path: NodePath<t.FunctionDeclaration>,
-  ) {
+  constructor(originalName: string, name: string, path: NodePath<t.FunctionDeclaration>) {
     this.originalName = originalName
     this.name = name
     this.path = path
@@ -36,12 +27,12 @@ export class Decoder {
     const literalArgument: m.Matcher<t.Expression> = m.or(
       m.binaryExpression(
         m.anything(),
-        m.matcher(node => literalArgument.match(node)),
-        m.matcher(node => literalArgument.match(node)),
+        m.matcher((node) => literalArgument.match(node)),
+        m.matcher((node) => literalArgument.match(node)),
       ),
       m.unaryExpression(
         '-',
-        m.matcher(node => literalArgument.match(node)),
+        m.matcher((node) => literalArgument.match(node)),
       ),
       m.numericLiteral(),
       m.stringLiteral(),
@@ -57,9 +48,7 @@ export class Decoder {
     )
 
     const conditional = m.capture(m.conditionalExpression())
-    const conditionalCall = m.callExpression(m.identifier(this.name), [
-      conditional,
-    ])
+    const conditionalCall = m.callExpression(m.identifier(this.name), [conditional])
 
     const buildExtractedConditional = expression`TEST ? CALLEE(CONSEQUENT) : CALLEE(ALTERNATE)`
 
@@ -77,11 +66,9 @@ export class Decoder {
         )
         // some of the scope information is somehow lost after replacing
         replacement.scope.crawl()
-      }
-      else if (literalCall.match(ref.parent)) {
+      } else if (literalCall.match(ref.parent)) {
         calls.push(ref.parentPath as NodePath<t.CallExpression>)
-      }
-      else if (expressionCall.match(ref.parent)) {
+      } else if (expressionCall.match(ref.parent)) {
         // var n = 1; decode(n); -> decode(1);
         ref.parentPath!.traverse({
           ReferencedIdentifier(path) {
@@ -93,8 +80,7 @@ export class Decoder {
         if (literalCall.match(ref.parent)) {
           calls.push(ref.parentPath as NodePath<t.CallExpression>)
         }
-      }
-      else if (ref.parentPath?.isExpressionStatement()) {
+      } else if (ref.parentPath?.isExpressionStatement()) {
         // `decode;` may appear on it's own in some forked obfuscators
         ref.parentPath.remove()
       }

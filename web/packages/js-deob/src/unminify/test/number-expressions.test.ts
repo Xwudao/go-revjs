@@ -5,9 +5,7 @@ import numberExpressions from '../transforms/number-expressions'
 const expectJS = testTransform(numberExpressions)
 
 test('simplify', () =>
-  expectJS(`-0x1021e + -0x7eac8 + 0x17 * 0xac9c`).toMatchInlineSnapshot(
-    '431390;',
-  ))
+  expectJS(`-0x1021e + -0x7eac8 + 0x17 * 0xac9c`).toMatchInlineSnapshot('431390;'))
 
 test('simplify coerced string', () =>
   expectJS(`-"0xa6" - -331; -"0xa6"`).toMatchInlineSnapshot(`

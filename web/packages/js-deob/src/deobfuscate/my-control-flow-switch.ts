@@ -30,17 +30,17 @@ function inferSequenceFromObjectBinding(
   if (targetPropName) {
     const exactMatch = init.properties.find((property) => {
       return (
-        t.isObjectProperty(property)
-        && getPropName(property.key) === targetPropName
-        && t.isStringLiteral(property.value)
-        && isSequenceString(property.value.value)
+        t.isObjectProperty(property) &&
+        getPropName(property.key) === targetPropName &&
+        t.isStringLiteral(property.value) &&
+        isSequenceString(property.value.value)
       )
     })
 
     if (
-      exactMatch
-      && t.isObjectProperty(exactMatch)
-      && t.isStringLiteral(exactMatch.value)
+      exactMatch &&
+      t.isObjectProperty(exactMatch) &&
+      t.isStringLiteral(exactMatch.value)
     ) {
       return exactMatch.value.value.split('|')
     }
@@ -109,16 +109,20 @@ export default {
     return {
       SwitchStatement(switchPath) {
         // 判断父节点是否为循环节点
-        const forOrWhileStatementPath = switchPath.findParent(p => p.isForStatement() || p.isWhileStatement())
+        const forOrWhileStatementPath = switchPath.findParent(
+          (p) => p.isForStatement() || p.isWhileStatement(),
+        )
 
         if (!forOrWhileStatementPath) return
 
         // 拿到函数的块语句
-        const fnBlockStatementPath = forOrWhileStatementPath.findParent(p => p.isBlockStatement()) as unknown as NodePath<t.BlockStatement>
+        const fnBlockStatementPath = forOrWhileStatementPath.findParent((p) =>
+          p.isBlockStatement(),
+        ) as unknown as NodePath<t.BlockStatement>
         if (!fnBlockStatementPath) return
 
         const expectedCaseCount = switchPath.node.cases.filter(
-          p => p.test?.type === 'StringLiteral',
+          (p) => p.test?.type === 'StringLiteral',
         ).length
 
         let shufferArr: string[] = []
@@ -129,33 +133,32 @@ export default {
             const { object, property } = path.node
             const propertyName = getPropName(property)
             if (
-              (t.isStringLiteral(property)
-                || t.isIdentifier(property))
-              && propertyName === 'split'
+              (t.isStringLiteral(property) || t.isIdentifier(property)) &&
+              propertyName === 'split'
             ) {
               if (t.isStringLiteral(object)) {
                 const shufferString = object.value // "1|3|2|0"
                 shufferArr = shufferString.split('|')
 
                 // 顺带移除 var _0x263cfa = "1|3|2|0"["split"]("|"),
-                const variableDeclarator = path.findParent(p => p.isVariableDeclarator())
+                const variableDeclarator = path.findParent((p) =>
+                  p.isVariableDeclarator(),
+                )
 
-                if (variableDeclarator)
-                  variableDeclarator.remove()
+                if (variableDeclarator) variableDeclarator.remove()
 
                 path.stop()
-              }
-              else if (t.isMemberExpression(object)) {
+              } else if (t.isMemberExpression(object)) {
                 shufferArr = inferSequenceFromObjectBinding(path, expectedCaseCount)
 
-                if (shufferArr.length === 0)
-                  return
+                if (shufferArr.length === 0) return
 
                 // 顺带移除 var _0x263cfa = "1|3|2|0"["split"]("|"),
-                const variableDeclarator = path.findParent(p => p.isVariableDeclarator())
+                const variableDeclarator = path.findParent((p) =>
+                  p.isVariableDeclarator(),
+                )
 
-                if (variableDeclarator)
-                  variableDeclarator.remove()
+                if (variableDeclarator) variableDeclarator.remove()
 
                 path.stop()
               }
@@ -163,8 +166,7 @@ export default {
           },
         })
 
-        if (shufferArr.length === 0)
-          return
+        if (shufferArr.length === 0) return
 
         // Build a map from case string → ordered statements (excluding trailing continue)
         const caseMap = new Map<string, t.Statement[]>()
@@ -172,12 +174,14 @@ export default {
           if (c.test?.type !== 'StringLiteral') continue
           const stmts = c.consequent
           // Drop the trailing ContinueStatement if present
-          const lastNonContinue = stmts.findLastIndex(s => !t.isContinueStatement(s))
-          caseMap.set((c.test as t.StringLiteral).value, lastNonContinue >= 0 ? stmts.slice(0, lastNonContinue + 1) : [])
+          const lastNonContinue = stmts.findLastIndex((s) => !t.isContinueStatement(s))
+          caseMap.set(
+            (c.test as t.StringLiteral).value,
+            lastNonContinue >= 0 ? stmts.slice(0, lastNonContinue + 1) : [],
+          )
         }
 
-        const sequences = shufferArr
-          .flatMap(s => caseMap.get(s) ?? []) // reorder and flatten all multi-statement cases
+        const sequences = shufferArr.flatMap((s) => caseMap.get(s) ?? []) // reorder and flatten all multi-statement cases
 
         fnBlockStatementPath.node.body.push(...sequences)
 

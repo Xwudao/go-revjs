@@ -7,10 +7,18 @@ interface HubFeature {
   description: string
   state: string
   iconClass: string
-  to?: '/crypto-lab' | '/js-deob'
+  to?: '/crypto-lab' | '/curl-to-code' | '/js-deob'
 }
 
 const hubFeatures: readonly HubFeature[] = [
+  {
+    title: 'cURL 2 Req',
+    description:
+      '粘贴 cURL 命令，一键转成 Python Requests、Go net/http、Fetch、Axios、OkHttp 等请求代码。',
+    state: '已上线',
+    iconClass: 'i-mdi-console-network-outline',
+    to: '/curl-to-code',
+  },
   {
     title: 'Crypto Lab',
     description:
@@ -21,7 +29,8 @@ const hubFeatures: readonly HubFeature[] = [
   },
   {
     title: 'JS 解混淆',
-    description: '直接贴入混淆后的 JavaScript，调整参数后在同一工作台查看整理结果和运行过程。',
+    description:
+      '直接贴入混淆后的 JavaScript，调整参数后在同一工作台查看整理结果和运行过程。',
     state: '已上线',
     iconClass: 'i-mdi-code-json',
     to: '/js-deob',
@@ -47,13 +56,14 @@ const hubFeatures: readonly HubFeature[] = [
 ]
 
 const commandEntries = [
+  { label: '打开 cURL 2 Req', value: '可用' },
   { label: '打开 Crypto Lab', value: '可用' },
   { label: '打开 JS Deob 工作台', value: '可用' },
   { label: '指纹分析', value: '即将推出' },
-  { label: '协议模拟', value: '即将推出' },
 ] as const
 
 const scopeEntries = [
+  '已上线 cURL 转请求代码工具，支持 Python、Go、Fetch、Axios、OkHttp 和原始 HTTP。',
   '已上线对称加解密实验台，适合快速验证 AES、DES、TripleDES 等参数组合。',
   '当前已上线 JS 解混淆工具，可直接粘贴混淆代码开始分析。',
   '更多分析模块正在开发中，敬请期待。',
@@ -61,8 +71,8 @@ const scopeEntries = [
 ] as const
 
 const runtimeStats = [
-  { label: '在线工具', value: '02' },
-  { label: '即将上线', value: '03' },
+  { label: '在线工具', value: '03' },
+  { label: '即将上线', value: '02' },
   { label: '本地运行', value: '100%' },
 ] as const
 
@@ -82,28 +92,26 @@ function IndexPage() {
             工程中心
           </h1>
           <p className={clsx(classes.frontPageCopy)}>
-            在线 JavaScript 逆向分析工具集。粘贴混淆代码，一键还原可读结构。更多分析模块持续更新中。
+            在线 JavaScript
+            逆向分析工具集。粘贴混淆代码，一键还原可读结构。更多分析模块持续更新中。
           </p>
 
           <div className={clsx(classes.frontPageActions)}>
             <Link
-              to="/crypto-lab"
+              to="/curl-to-code"
               className={clsx(classes.frontPageAction, classes.frontPageActionPrimary)}
             >
+              <span className="i-mdi-console-network-outline" aria-hidden="true" />
+              打开 cURL 2 Req
+            </Link>
+            <Link to="/crypto-lab" className={clsx(classes.frontPageAction)}>
               <span className="i-mdi-lock-open-variant-outline" aria-hidden="true" />
               打开 Crypto Lab
             </Link>
-            <Link
-              to="/js-deob"
-              className={clsx(classes.frontPageAction)}
-            >
+            <Link to="/js-deob" className={clsx(classes.frontPageAction)}>
               <span className="i-mdi-play-circle-outline" aria-hidden="true" />
               打开 JS Deob
             </Link>
-            <a href="#hub-stack" className={clsx(classes.frontPageAction)}>
-              <span className="i-mdi-chevron-down" aria-hidden="true" />
-              查看工作台
-            </a>
           </div>
 
           <div className={clsx(classes.frontPageTags)} aria-label="首页亮点">
@@ -113,7 +121,6 @@ function IndexPage() {
             <span>持续更新</span>
           </div>
         </div>
-
       </section>
 
       <section className={clsx(classes.frontPageGrid)}>
@@ -147,7 +154,11 @@ function IndexPage() {
 
           if (feature.to) {
             return (
-              <Link key={feature.title} to={feature.to} className={clsx(classes.frontPagePanelLink)}>
+              <Link
+                key={feature.title}
+                to={feature.to}
+                className={clsx(classes.frontPagePanelLink)}
+              >
                 {card}
               </Link>
             )

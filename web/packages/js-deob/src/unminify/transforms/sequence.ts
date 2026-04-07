@@ -53,9 +53,7 @@ export default {
         exit(path) {
           if (!t.isSequenceExpression(path.node.expression)) return
 
-          const statements = path.node.expression.expressions.map(
-            t.expressionStatement,
-          )
+          const statements = path.node.expression.expressions.map(t.expressionStatement)
           path.replaceWithMultiple(statements)
           this.changes++
         },
@@ -129,16 +127,14 @@ export default {
       ForStatement: {
         exit(path) {
           if (t.isSequenceExpression(path.node.init)) {
-            const statements = path.node.init.expressions.map(
-              t.expressionStatement,
-            )
+            const statements = path.node.init.expressions.map(t.expressionStatement)
             path.node.init = null
             path.insertBefore(statements)
             this.changes++
           }
           if (
-            t.isSequenceExpression(path.node.update)
-            && path.node.body.type === 'EmptyStatement'
+            t.isSequenceExpression(path.node.update) &&
+            path.node.body.type === 'EmptyStatement'
           ) {
             const { expressions } = path.node.update
             path.node.update = expressions.pop()!
@@ -166,7 +162,7 @@ export default {
       SequenceExpression: {
         exit(path) {
           const { expressions } = path.node
-          if (expressions.every(node => safeLiteral.match(node))) {
+          if (expressions.every((node) => safeLiteral.match(node))) {
             path.replaceWith(expressions.at(-1)!)
             this.changes++
           }

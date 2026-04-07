@@ -28,6 +28,7 @@
     "@uiw/react-codemirror": "^4.25.9",
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
+    "curlconverter": "^4.12.0",
     "debug": "^4.4.3",
     "prettier": "^3.8.1",
     "react": "^19.2.4",

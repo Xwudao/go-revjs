@@ -11,8 +11,8 @@ export default {
         if (!matcher.match(path.node)) return
         const evaluated = path.evaluate()
         if (
-          t.isBinaryExpression(path.node, { operator: '/' })
-          && !Number.isInteger(evaluated.value)
+          t.isBinaryExpression(path.node, { operator: '/' }) &&
+          !Number.isInteger(evaluated.value)
         ) {
           return
         }

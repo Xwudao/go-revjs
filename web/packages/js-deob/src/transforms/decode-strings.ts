@@ -24,7 +24,9 @@ export async function decodeStrings(sandbox: Sandbox, decoders: Decoder[]) {
         const callExpression = ref.parentPath
         try {
           // 如果调用解密函数中有变量参数则不替换
-          const hasIdentifier = callExpression.node.arguments.some(a => t.isIdentifier(a))
+          const hasIdentifier = callExpression.node.arguments.some((a) =>
+            t.isIdentifier(a),
+          )
           if (hasIdentifier) continue
 
           const call = callExpression.toString()
@@ -33,11 +35,14 @@ export async function decodeStrings(sandbox: Sandbox, decoders: Decoder[]) {
           map.set(call, value as string)
 
           callExpression.replaceWith(t.valueToNode(value))
-        }
-        catch (error) {
+        } catch (error) {
           failures++
           // 解密失败 则添加注释
-          callExpression.addComment('leading', `decode_error: ${(error as any).message}`, true)
+          callExpression.addComment(
+            'leading',
+            `decode_error: ${(error as any).message}`,
+            true,
+          )
         }
       }
     }

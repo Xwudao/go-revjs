@@ -28,15 +28,13 @@ function push(template: t.TemplateLiteral, value: t.Expression) {
   if (value.type === 'StringLiteral') {
     const lastQuasi = template.quasis.at(-1)!
     lastQuasi.value.raw += escape(value.value)
-  }
-  else if (value.type === 'TemplateLiteral') {
+  } else if (value.type === 'TemplateLiteral') {
     const lastQuasi = template.quasis.at(-1)!
     const firstQuasi = value.quasis[0]
     lastQuasi.value.raw += firstQuasi.value.raw
     template.expressions.push(...value.expressions)
     template.quasis.push(...value.quasis.slice(1))
-  }
-  else {
+  } else {
     template.expressions.push(value)
     template.quasis.push(t.templateElement({ raw: '' }))
   }
@@ -46,8 +44,7 @@ function unshift(template: t.TemplateLiteral, value: t.Expression) {
   if (value.type === 'StringLiteral') {
     const firstQuasi = template.quasis[0]
     firstQuasi.value.raw = escape(value.value) + firstQuasi.value.raw
-  }
-  else {
+  } else {
     template.expressions.unshift(value)
     template.quasis.unshift(t.templateElement({ raw: '' }))
   }
@@ -72,10 +69,9 @@ export default {
             push(path.node.left, path.node.right)
             path.replaceWith(path.node.left)
             this.changes++
-          }
-          else if (
-            t.isTemplateLiteral(path.node.right)
-            && t.isExpression(path.node.left)
+          } else if (
+            t.isTemplateLiteral(path.node.right) &&
+            t.isExpression(path.node.left)
           ) {
             unshift(path.node.right, path.node.left)
             path.replaceWith(path.node.right)
@@ -86,10 +82,7 @@ export default {
       CallExpression: {
         exit(path) {
           if (concatMatcher.match(path.node)) {
-            const template = t.templateLiteral(
-              [t.templateElement({ raw: '' })],
-              [],
-            )
+            const template = t.templateLiteral([t.templateElement({ raw: '' })], [])
             push(template, string.current!)
 
             for (const arg of path.node.arguments) {

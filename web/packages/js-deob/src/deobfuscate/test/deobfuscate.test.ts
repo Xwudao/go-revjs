@@ -1,11 +1,7 @@
 import { parse } from '@babel/parser'
 import traverse from '@babel/traverse'
 import { describe, expect, test } from 'vitest'
-import {
-  generate,
-  inlineFunctionAliases,
-  inlineVariableAliases,
-} from '../../ast-utils'
+import { generate, inlineFunctionAliases, inlineVariableAliases } from '../../ast-utils'
 
 describe('inline decoder', () => {
   test('inline variable', () => {

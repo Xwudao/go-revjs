@@ -1,11 +1,7 @@
 import type { AsyncTransform } from '../ast-utils'
 import type { Sandbox } from './vm'
 import debug from 'debug'
-import {
-  applyTransform,
-  applyTransformAsync,
-  applyTransforms,
-} from '../ast-utils'
+import { applyTransform, applyTransformAsync, applyTransforms } from '../ast-utils'
 import mergeStrings from '../unminify/transforms/merge-strings'
 import { findArrayRotator } from './array-rotator'
 import controlFlowObject from './control-flow-object'
@@ -41,20 +37,12 @@ export default {
     logger(`String Array Rotate: ${rotator ? 'yes' : 'no'}`)
 
     const decoders = findDecoders(stringArray)
-    logger(
-      `String Array Decoders: ${decoders
-        .map(d => d.originalName)
-        .join(', ')}`,
-    )
+    logger(`String Array Decoders: ${decoders.map((d) => d.originalName).join(', ')}`)
 
     state.changes += applyTransform(ast, inlineObjectProps).changes
 
     for (const decoder of decoders) {
-      state.changes += applyTransform(
-        ast,
-        inlineDecoderWrappers,
-        decoder.path,
-      ).changes
+      state.changes += applyTransform(ast, inlineDecoderWrappers, decoder.path).changes
     }
 
     const vm = new VMDecoder(sandbox, stringArray, decoders, rotator)
@@ -65,13 +53,15 @@ export default {
     if (decoders.length > 0) {
       stringArray.path.remove()
       rotator?.remove()
-      decoders.forEach(decoder => decoder.path.remove())
+      decoders.forEach((decoder) => decoder.path.remove())
       state.changes += 2 + decoders.length
     }
 
-    state.changes += applyTransforms(
-      ast,
-      [mergeStrings, deadCode, controlFlowObject, controlFlowSwitch],
-    ).changes
+    state.changes += applyTransforms(ast, [
+      mergeStrings,
+      deadCode,
+      controlFlowObject,
+      controlFlowSwitch,
+    ]).changes
   },
 } satisfies AsyncTransform<Sandbox>

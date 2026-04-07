@@ -33,9 +33,7 @@ export default {
   scope: true,
   visitor() {
     const varId = m.capture(m.identifier())
-    const propertyName = m.capture(
-      m.matcher<string>(name => /^\w+$/.test(name)),
-    )
+    const propertyName = m.capture(m.matcher<string>((name) => /^\w+$/.test(name)))
     const propertyKey = constKey(propertyName)
     // E.g. "_0x51b74a": 0x80
     const objectProperties = m.capture(
@@ -47,14 +45,8 @@ export default {
       ),
     )
     // E.g. obj._0x51b74a
-    const memberAccess = constMemberExpression(
-      m.fromCapture(varId),
-      propertyName,
-    )
-    const varMatcher = m.variableDeclarator(
-      varId,
-      m.objectExpression(objectProperties),
-    )
+    const memberAccess = constMemberExpression(m.fromCapture(varId), propertyName)
+    const varMatcher = m.variableDeclarator(varId, m.objectExpression(objectProperties))
     // E.g. { e: 0x80 }.e
     const literalMemberAccess = constMemberExpression(
       m.objectExpression(objectProperties),
@@ -65,7 +57,7 @@ export default {
       MemberExpression(path) {
         if (!literalMemberAccess.match(path.node)) return
         const property = objectProperties.current!.find(
-          p => getPropName(p.key) === propertyName.current,
+          (p) => getPropName(p.key) === propertyName.current,
         )
         if (!property) return
         path.replaceWith(property.value)

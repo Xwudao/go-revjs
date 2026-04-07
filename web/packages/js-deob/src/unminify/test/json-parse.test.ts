@@ -4,8 +4,7 @@ import jsonParse from '../transforms/json-parse'
 
 const expectJS = testTransform(jsonParse)
 
-test('array', () =>
-  expectJS('JSON.parse("[1,2,3]")').toMatchInlineSnapshot('[1, 2, 3];'))
+test('array', () => expectJS('JSON.parse("[1,2,3]")').toMatchInlineSnapshot('[1, 2, 3];'))
 
 test('large literal', () =>
   expectJS('JSON.parse("1000000000000000000000")').toMatchInlineSnapshot(

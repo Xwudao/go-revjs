@@ -5,8 +5,7 @@ function normalizeGeneratedCode(code: string) {
   if (code.length >= 2 && code.startsWith('"') && code.endsWith('"')) {
     try {
       return JSON.parse(code) as string
-    }
-    catch {
+    } catch {
       return code.slice(1, -1)
     }
   }
@@ -16,10 +15,10 @@ function normalizeGeneratedCode(code: string) {
 
 function isBabelNode(value: unknown): value is t.Node {
   return Boolean(
-    value
-    && typeof value === 'object'
-    && 'type' in value
-    && typeof (value as { type?: unknown }).type === 'string',
+    value &&
+    typeof value === 'object' &&
+    'type' in value &&
+    typeof (value as { type?: unknown }).type === 'string',
   )
 }
 

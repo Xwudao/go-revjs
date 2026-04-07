@@ -11,9 +11,7 @@ export default {
   visitor() {
     const name = m.capture(m.identifier())
     const fn = m.capture(m.functionExpression(null))
-    const matcher = m.variableDeclaration('var', [
-      m.variableDeclarator(name, fn),
-    ])
+    const matcher = m.variableDeclaration('var', [m.variableDeclarator(name, fn)])
 
     return {
       VariableDeclaration: {

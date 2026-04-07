@@ -16,7 +16,8 @@ export default {
 
         const binding = path.scope.getBinding(id.name)
         if (!binding) return
-        if (binding.referencePaths.length > 0 || binding.constantViolations.length > 0) return
+        if (binding.referencePaths.length > 0 || binding.constantViolations.length > 0)
+          return
 
         if (!path.parentPath?.isVariableDeclaration()) return
 

@@ -22,8 +22,7 @@ export default {
               }),
             )
             this.changes++
-          }
-          else if (expression.operator === '||') {
+          } else if (expression.operator === '||') {
             path.replaceWith(
               buildIfNot({
                 TEST: expression.left,

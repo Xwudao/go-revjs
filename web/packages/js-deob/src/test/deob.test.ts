@@ -64,7 +64,9 @@ test('pipeline decodes wrapped concat string arrays', async () => {
   `)
 
   expect(code).toContain('.update = "2023年01月17日05:34:29更新";')
-  expect(code).toContain('.info = "本站历时1年半研发的新版本V7初版，具有多态性加密，破解难度更高。";')
+  expect(code).toContain(
+    '.info = "本站历时1年半研发的新版本V7初版，具有多态性加密，破解难度更高。";',
+  )
   expect(code).not.toContain('decoder(')
   expect(code).not.toContain('jsjiami.com.v7')
 })
@@ -101,10 +103,12 @@ test('pipeline supports module syntax when evaluating decoder setup code', async
     });
   `)
 
-  expect(code).toMatch(/import\s+\{\s*jsx\s+as\s+_jsx\s*\}\s+from\s+['"]\.\/jsx-runtime\.js['"];/)
+  expect(code).toMatch(
+    /import\s+\{\s*jsx\s+as\s+_jsx\s*\}\s+from\s+['"]\.\/jsx-runtime\.js['"];/,
+  )
   expect(code).toMatch(/_jsx\(['"]span['"], \{\s*hidden: true/s)
   expect(code).toMatch(/export const node = _jsx\(['"]div['"], \{/)
-  expect(code).toMatch(/title: ['"]decoded value['"]/) 
+  expect(code).toMatch(/title: ['"]decoded value['"]/)
   expect(code).not.toContain('decoder(1)')
 })
 
