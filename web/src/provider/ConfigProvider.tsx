@@ -107,6 +107,8 @@ export function ConfigProvider({ children }: PropsWithChildren) {
     root.style.setProperty('--accent', tokens.accent)
     root.style.setProperty('--accent-bg', tokens.soft)
     root.style.setProperty('--accent-border', tokens.border)
+    root.style.setProperty('--color-signal', tokens.accent)
+    root.style.setProperty('--color-signal-soft', tokens.soft)
   }, [accent, theme])
 
   return (
@@ -118,7 +120,7 @@ export function ConfigProvider({ children }: PropsWithChildren) {
     >
       {children}
       <Toaster
-        position="bottom-right"
+        position="top-right"
         toastOptions={{
           duration: 3000,
           style: {

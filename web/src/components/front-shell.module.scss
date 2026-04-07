@@ -20,14 +20,10 @@
 }
 
 .route-pending-viewport {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
   display: grid;
   place-items: center;
+  min-height: 16rem;
   padding: var(--space-4);
-  background: color-mix(in srgb, var(--color-canvas) 72%, transparent);
-  backdrop-filter: blur(10px);
 }
 
 .route-pending-card {
