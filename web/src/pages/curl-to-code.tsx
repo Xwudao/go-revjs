@@ -5,7 +5,7 @@ import toast from 'react-hot-toast'
 import { AppSelect, type AppSelectOption } from '@/components/ui/app-select'
 import { CodeEditor, type CodeEditorLanguage } from '@/components/ui/code-editor'
 import classes from './curl-to-code.module.scss'
-import exampleCurl from '@/assets/raw/curl.txt'
+import exampleCurl from '@/assets/raw/curl.txt?raw'
 
 type CurlConverterModule = typeof import('curlconverter')
 type ConversionTarget =
