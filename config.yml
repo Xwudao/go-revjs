@@ -2,7 +2,7 @@ app:
   mode: debug
   port: 8080
   pprof: false
-  host: true
+  host: false
 cors:
   allowCredentials: true
   domains:

@@ -22,5 +22,5 @@ logs
 .idea
 mock.json
 build
-
+app-linux
 .playwright-mcp

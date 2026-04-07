@@ -34,10 +34,17 @@ const (
 
 var (
 	AllowHeaders = []string{
-		"Origin", "Content-Type", "Authorization",
+		"Origin", "Content-Type", "Accept", "Authorization",
+		"X-Time", "X-Path", "X-Sign", "X-Key", "X-Body-Sign",
+		"X-Request-ID", "X-Data", "Is-Automated",
 	}
+	ExposeHeaders = []string{"Content-Type", "Authorization", "X-Login"}
 
 	ShowInFrontendConfig = []ConfigKey{
 		ConfigKeySiteInfo,
 	}
+)
+
+var (
+	IndexRobotsWhite = []string{"YisouSpider"}
 )

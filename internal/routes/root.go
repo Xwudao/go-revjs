@@ -11,7 +11,6 @@ import (
 
 	"github.com/knadh/koanf/v2"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
@@ -55,6 +54,8 @@ func NewEngine(
 
 	r := gin.New()
 	_ = r.SetTrustedProxies(nil)
+
+	r.Use(mdw.CorsMdw(conf))
 
 	r.Use(mdw.CacheMdw(), mdw.ExtractUserInfoMiddleware(log, jwt, ur))
 
@@ -154,8 +155,4 @@ func (r *HttpEngine) Register() {
 
 func (r *HttpEngine) Use(middleware ...gin.HandlerFunc) gin.IRoutes {
 	return r.router.Use(middleware...)
-}
-
-func (r *HttpEngine) ConfigCors(c cors.Config) {
-	r.router.Use(cors.New(c))
 }
