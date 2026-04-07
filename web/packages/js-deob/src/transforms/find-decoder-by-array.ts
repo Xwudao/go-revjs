@@ -53,10 +53,18 @@ function getStringArrayLength(node: t.Node | null | undefined): number | undefin
         length++
         continue
       }
-      if (!t.isStringLiteral(element)) {
-        return
+      if (t.isStringLiteral(element)) {
+        length++
+        continue
       }
-      length++
+      // Handle spread elements: [...subArray] or ...(IIFE)()
+      if (t.isSpreadElement(element)) {
+        const spreadLength = getStringArrayLength(element.argument)
+        if (spreadLength === undefined) return
+        length += spreadLength
+        continue
+      }
+      return
     }
     return length
   }

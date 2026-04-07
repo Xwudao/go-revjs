@@ -18,6 +18,10 @@ export async function decodeStrings(sandbox: Sandbox, decoders: Decoder[]) {
   let failures = 0
 
   for (const decoder of decoders) {
+    // Re-crawl the program scope so that any alias refs inlined by
+    // inlineDecoderWrappers (e.g. var alias = decoder → decoder) are
+    // visible in binding.referencePaths before we try to evaluate them.
+    decoder.path.scope.getProgramParent().crawl()
     const refs = decoder?.path.scope.getBinding(decoder.name)?.referencePaths ?? []
     for (const ref of refs) {
       if (ref?.parentKey === 'callee' && ref.parentPath?.isCallExpression()) {

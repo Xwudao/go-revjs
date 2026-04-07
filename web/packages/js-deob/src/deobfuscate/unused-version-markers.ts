@@ -1,7 +1,7 @@
 import type { Transform } from '../ast-utils'
 import * as t from '@babel/types'
 
-const versionMarkerPattern = /^jsjiami\.com\.v\d+$/i
+const versionMarkerPattern = /^jsjiami\.(com|cn)\.v\d+$/i
 
 export default {
   name: 'unused-version-markers',

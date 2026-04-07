@@ -307,11 +307,25 @@ export function inlineVariableAliases(
       }
       state.changes++
     } else {
-      // Only rename when the reference is in the same scope as the binding.
-      // Direct alias of root (binding.name === targetName): use rootTargetName so alias(2) -> decoder(2).
-      // Deeper alias (e.g. alias2): use targetName so alias2(4) -> alias(4).
-      // Refs in nested scopes are left as-is so alias(4) stays.
-      if (ref.scope === binding.scope) {
+      // Rename references in the same function scope as the binding (including
+      // nested block scopes such as while/switch bodies — `var` hoists to the
+      // enclosing function scope so these refs belong to the same binding).
+      // Stop at any function/arrow-function boundary so that closure-captured
+      // refs in nested functions are left as-is (they are alias-of-alias and
+      // handled by the matcher branch above).
+      let isInSameFnScope = ref.scope === binding.scope
+      if (!isInSameFnScope) {
+        let s = ref.scope.parent
+        while (s) {
+          if (s === binding.scope) {
+            isInSameFnScope = true
+            break
+          }
+          if ((s.path as NodePath).isFunction()) break
+          s = s.parent
+        }
+      }
+      if (isInSameFnScope) {
         const nameToUse =
           binding.identifier.name === targetName ? rootTargetName : targetName
         ref.replaceWith(t.identifier(nameToUse))

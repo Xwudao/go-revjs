@@ -120,6 +120,61 @@ Add `position: sticky; top: 3.75rem; z-index: calc(var(--z-header) - 1)` to the 
 - Tips / usage sidebars ("使用建议" panels)
 - Sticky action bars inside the editor workbench area
 
+## Mobile responsiveness
+
+Always verify that tool pages do not overflow horizontally at 375px (iPhone viewport). Test with the Playwright MCP browser resized to 390×844 and check `document.documentElement.scrollWidth === document.documentElement.clientWidth`.
+
+### Toolbar wrapping rules
+
+The standard toolbar pattern splits into `.toolbar-left` (brand + badge) and `.toolbar-actions` (all buttons). Both MUST wrap correctly on mobile:
+
+- **Always** add `flex-wrap: wrap` to the **outer toolbar** element (e.g. `.foo-toolbar`).
+- **Always** add `flex-wrap: wrap` to the **actions wrapper** (`.*-toolbar-actions`).
+- **Never** use `flex-shrink: 0` on the actions wrapper — this prevents proper wrapping and causes horizontal overflow.
+
+The correct CSS pattern (matching js-deob's working toolbar):
+```scss
+.foo-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;           /* ← required */
+  justify-content: space-between;
+  gap: var(--space-3);
+  ...
+}
+
+.foo-toolbar-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;           /* ← required */
+  gap: var(--space-1-5);
+  /* do NOT add flex-shrink: 0 */
+}
+```
+
+### CSS Grid min-width safety
+
+The `front-shell` uses `display: grid; grid-template-rows: auto 1fr auto`. Grid items default to `min-width: auto`, which means their computed width can exceed the grid track width if any child's min-content size is wide. This causes cascade overflow: toolbar overflow → body widens → header stretches to match.
+
+Always set `min-width: 0` on the `front-shell-body` grid item in `front-shell.module.scss` to prevent this cascade.
+
+### Overflow root-cause diagnosis
+
+When a tool page overflows on mobile, diagnose with:
+```js
+// 1. Check total overflow
+document.documentElement.scrollWidth + ' vs ' + document.documentElement.clientWidth
+
+// 2. Find the offending element
+const all = document.querySelectorAll('*');
+for (const el of all) {
+  if (el.scrollWidth > el.clientWidth + 2) {
+    console.log(el.className, el.scrollWidth, window.getComputedStyle(el).flexWrap);
+  }
+}
+```
+Look for elements with `flex-wrap: nowrap` (default) + `flex-shrink: 0` in the overflow chain — these are the common culprits.
+
 ## Avoid
 
 - Large hero banners with broad decorative gradients as the main UI structure

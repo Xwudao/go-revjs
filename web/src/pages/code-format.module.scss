@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-4);
+  // padding: var(--space-4);
   min-height: 100%;
   box-sizing: border-box;
 }
@@ -23,6 +23,7 @@
 .fmt-toolbar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-3);
@@ -42,6 +43,7 @@
 .fmt-brand {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-1-5);
   font-size: var(--font-size-sm);
   font-weight: 600;
@@ -74,8 +76,8 @@
 .fmt-toolbar-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-1-5);
-  flex-shrink: 0;
 }
 
 .fmt-divider {
