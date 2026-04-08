@@ -1,4 +1,5 @@
 import type { Options } from '@revjs/js-deob'
+import { deflateSync, inflateSync, strFromU8, strToU8 } from 'fflate'
 import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
 import clsx from 'clsx'
 import toast from 'react-hot-toast'
@@ -81,10 +82,37 @@ const mangleModeOptions: AppSelectOption<EditableOptions['mangleMode']>[] = [
   },
 ]
 
+const STORAGE_COMPRESS_PREFIX = 'z:'
+
+function compressToStorage(str: string): string {
+  try {
+    const compressed = deflateSync(strToU8(str))
+    let binary = ''
+    for (let i = 0; i < compressed.length; i++) {
+      binary += String.fromCharCode(compressed[i])
+    }
+    return STORAGE_COMPRESS_PREFIX + btoa(binary)
+  } catch {
+    return str
+  }
+}
+
+function decompressFromStorage(data: string): string {
+  if (!data.startsWith(STORAGE_COMPRESS_PREFIX)) return data
+  try {
+    const binary = atob(data.slice(STORAGE_COMPRESS_PREFIX.length))
+    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0))
+    return strFromU8(inflateSync(bytes))
+  } catch {
+    return data
+  }
+}
+
 function readStoredCode() {
   if (typeof window === 'undefined') return ''
 
-  return window.localStorage.getItem(storageKeys.code) ?? ''
+  const raw = window.localStorage.getItem(storageKeys.code) ?? ''
+  return decompressFromStorage(raw)
 }
 
 function readStoredOptions(): EditableOptions {
@@ -289,7 +317,7 @@ function JsDeobPage() {
   }, [])
 
   useEffect(() => {
-    window.localStorage.setItem(storageKeys.code, sourceCode)
+    window.localStorage.setItem(storageKeys.code, compressToStorage(sourceCode))
   }, [sourceCode])
 
   useEffect(() => {

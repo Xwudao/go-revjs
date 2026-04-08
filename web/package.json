@@ -39,6 +39,7 @@
     "crypto-js": "^4.2.0",
     "curlconverter": "^4.12.0",
     "debug": "^4.4.3",
+    "fflate": "^0.8.2",
     "prettier": "^3.8.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
