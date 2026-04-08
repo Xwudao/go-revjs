@@ -8,7 +8,8 @@ import IconsResolver from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import { defineConfig } from 'vite'
 import checker from 'vite-plugin-checker'
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import nodePolyfills from "@rolldown/plugin-node-polyfills";
+
 import UnoCSS from 'unocss/vite'
 import { compression, defineAlgorithm } from 'vite-plugin-compression2'
 
@@ -43,7 +44,7 @@ export default defineConfig({
       include: /\.(html|xml|css|json|js|mjs|svg|yaml|yml|toml|wasm)$/,
       algorithms: [defineAlgorithm('gzip', { level: 9 })],
     }),
-    nodePolyfills({ exclude: ['fs'] }),
+    nodePolyfills(),
     react(),
     babel({ presets: [reactCompilerPreset()] }),
     checker({

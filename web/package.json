@@ -52,6 +52,7 @@
     "@eslint/js": "^9.39.4",
     "@iconify/json": "^2.2.437",
     "@rolldown/plugin-babel": "^0.2.2",
+    "@rolldown/plugin-node-polyfills": "^1.0.3",
     "@svgr/core": "^8.1.0",
     "@svgr/plugin-jsx": "^8.1.0",
     "@tanstack/router-plugin": "^1.167.12",
@@ -77,9 +78,8 @@
     "unocss": "^66.5.5",
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
-    "vite": "^8.0.4",
+    "vite": "^8.0.5",
     "vite-plugin-checker": "^0.11.0",
-    "vite-plugin-compression2": "^2.5.3",
-    "vite-plugin-node-polyfills": "^0.25.0"
+    "vite-plugin-compression2": "^2.5.3"
   }
 }
