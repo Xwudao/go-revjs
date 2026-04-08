@@ -5,9 +5,8 @@ import toast from 'react-hot-toast'
 import { AppCheckbox } from '@/components/ui/app-checkbox'
 import { AppSelect, type AppSelectOption } from '@/components/ui/app-select'
 import { CodeEditor } from '@/components/ui/code-editor'
+import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button'
 import JsDeobWorker from './js-deob.worker?worker'
-import JsFormatWorker from './js-format.worker?worker'
-import JsMinifyWorker from './js-minify.worker?worker'
 import classes from './js-deob.module.scss'
 
 type EditableOptions = Required<Omit<Options, 'sandbox'>>
@@ -133,13 +132,13 @@ function formatLogTime(timestamp: number) {
   return `${hours}:${minutes}:${seconds}.${milliseconds}`
 }
 
-// Persistent singleton workers — pre-spawned on page load so modules are already
-// loaded by the time the user first triggers a format / minify operation.
+// Singleton workers — created on first use (lazy).
 let formatWorkerSingleton: Worker | null = null
 let minifyWorkerSingleton: Worker | null = null
 
-function getFormatWorker(): Worker {
+async function getFormatWorker(): Promise<Worker> {
   if (!formatWorkerSingleton) {
+    const { default: JsFormatWorker } = await import('./js-format.worker?worker')
     formatWorkerSingleton = new JsFormatWorker()
     formatWorkerSingleton.onerror = () => {
       formatWorkerSingleton = null
@@ -148,8 +147,9 @@ function getFormatWorker(): Worker {
   return formatWorkerSingleton
 }
 
-function getMinifyWorker(): Worker {
+async function getMinifyWorker(): Promise<Worker> {
   if (!minifyWorkerSingleton) {
+    const { default: JsMinifyWorker } = await import('./js-minify.worker?worker')
     minifyWorkerSingleton = new JsMinifyWorker()
     minifyWorkerSingleton.onerror = () => {
       minifyWorkerSingleton = null
@@ -158,10 +158,10 @@ function getMinifyWorker(): Worker {
   return minifyWorkerSingleton
 }
 
-function formatSourceWithWorker(code: string) {
-  return new Promise<string>((resolve, reject) => {
-    const worker = getFormatWorker()
+async function formatSourceWithWorker(code: string) {
+  const worker = await getFormatWorker()
 
+  return new Promise<string>((resolve, reject) => {
     worker.onmessage = (event: MessageEvent<FormatWorkerResponse>) => {
       if (event.data.type === 'formatted') {
         resolve(event.data.code)
@@ -181,10 +181,10 @@ function formatSourceWithWorker(code: string) {
   })
 }
 
-function minifyOutputWithWorker(code: string) {
-  return new Promise<string>((resolve, reject) => {
-    const worker = getMinifyWorker()
+async function minifyOutputWithWorker(code: string) {
+  const worker = await getMinifyWorker()
 
+  return new Promise<string>((resolve, reject) => {
     worker.onmessage = (event: MessageEvent<MinifyWorkerResponse>) => {
       if (event.data.type === 'minified') {
         resolve(event.data.code)
@@ -281,11 +281,6 @@ function JsDeobPage() {
 
   useEffect(() => {
     spawnWorkerRef.current()
-    // Pre-spawn format / minify workers so their modules are already loaded
-    // when the user first triggers those operations.
-    getFormatWorker()
-    getMinifyWorker()
-    toast.success('工具已就绪', { id: 'deob-workers-ready', duration: 2500 })
 
     return () => {
       workerRef.current?.terminate()
@@ -358,11 +353,18 @@ function JsDeobPage() {
       return
     }
 
+    const isFirstLoad = formatWorkerSingleton === null
+    if (isFirstLoad) {
+      toast('正在加载格式化模块，初次稍候片刻…', { id: 'format-init', duration: 8000 })
+    }
+
     setIsFormatting(true)
     setErrorMessage('')
 
     try {
       const formatted = await formatSourceWithWorker(sourceCode)
+
+      if (isFirstLoad) toast.dismiss('format-init')
 
       startTransition(() => {
         setSourceCode(formatted)
@@ -370,6 +372,7 @@ function JsDeobPage() {
 
       pushLog(`已格式化输入代码 | ${sourceCode.length} -> ${formatted.length} 字符`)
     } catch (error) {
+      if (isFirstLoad) toast.dismiss('format-init')
       const message =
         error instanceof Error ? error.message : '格式化失败，请检查输入代码。'
       setErrorMessage(message)
@@ -387,11 +390,18 @@ function JsDeobPage() {
       return
     }
 
+    const isFirstLoad = minifyWorkerSingleton === null
+    if (isFirstLoad) {
+      toast('正在加载压缩模块，初次稍候片刻…', { id: 'minify-init', duration: 8000 })
+    }
+
     setIsMinifying(true)
     setErrorMessage('')
 
     try {
       const minified = await minifyOutputWithWorker(outputCode)
+
+      if (isFirstLoad) toast.dismiss('minify-init')
 
       startTransition(() => {
         setOutputCode(minified)
@@ -399,6 +409,7 @@ function JsDeobPage() {
 
       pushLog(`已压缩处理结果 | ${outputCode.length} -> ${minified.length} 字符`)
     } catch (error) {
+      if (isFirstLoad) toast.dismiss('minify-init')
       const message =
         error instanceof Error ? error.message : '压缩失败，请检查处理结果。'
       setErrorMessage(message)
@@ -542,9 +553,8 @@ function JsDeobPage() {
 
         <div className={clsx(classes.jsDeobToolbarActions)}>
           {/* Primary: run / stop */}
-          <button
-            type="button"
-            className={clsx(classes.jsDeobButton, classes.jsDeobButtonPrimary)}
+          <ToolbarButton
+            variant="primary"
             onClick={runDeobfuscation}
             disabled={isRunning || isFormatting || isMinifying}
           >
@@ -555,23 +565,16 @@ function JsDeobPage() {
               aria-hidden="true"
             />
             {isRunning ? '处理中...' : '开始处理'}
-          </button>
-          <button
-            type="button"
-            className={clsx(classes.jsDeobButton)}
-            onClick={cancelDeobfuscation}
-            disabled={!isRunning}
-          >
+          </ToolbarButton>
+          <ToolbarButton onClick={cancelDeobfuscation} disabled={!isRunning}>
             <span className="i-mdi-stop-circle-outline" aria-hidden="true" />
             停止
-          </button>
+          </ToolbarButton>
 
-          <div className={clsx(classes.jsDeobDivider)} aria-hidden="true" />
+          <ToolbarDivider />
 
           {/* Source actions */}
-          <button
-            type="button"
-            className={clsx(classes.jsDeobButton)}
+          <ToolbarButton
             onClick={formatSourceCode}
             disabled={isRunning || isFormatting || !sourceCode.trim()}
           >
@@ -582,30 +585,20 @@ function JsDeobPage() {
               aria-hidden="true"
             />
             {isFormatting ? '格式化中...' : '格式化'}
-          </button>
-          <button
-            type="button"
-            className={clsx(classes.jsDeobButton)}
-            onClick={() => sourceFileInputRef.current?.click()}
-          >
+          </ToolbarButton>
+          <ToolbarButton onClick={() => sourceFileInputRef.current?.click()}>
             <span className="i-mdi-file-upload-outline" aria-hidden="true" />
             导入
-          </button>
-          <button
-            type="button"
-            className={clsx(classes.jsDeobButton)}
-            onClick={pasteFromClipboard}
-          >
+          </ToolbarButton>
+          <ToolbarButton onClick={pasteFromClipboard}>
             <span className="i-mdi-clipboard-arrow-down-outline" aria-hidden="true" />
             粘贴
-          </button>
+          </ToolbarButton>
 
-          <div className={clsx(classes.jsDeobDivider)} aria-hidden="true" />
+          <ToolbarDivider />
 
           {/* Output actions */}
-          <button
-            type="button"
-            className={clsx(classes.jsDeobButton)}
+          <ToolbarButton
             onClick={minifyOutputCode}
             disabled={!outputCode || isMinifying || isRunning}
           >
@@ -618,45 +611,26 @@ function JsDeobPage() {
               aria-hidden="true"
             />
             {isMinifying ? '压缩中...' : '压缩输出'}
-          </button>
-          <button
-            type="button"
-            className={clsx(classes.jsDeobButton)}
-            onClick={applyOutputToInput}
-            disabled={!outputCode}
-          >
+          </ToolbarButton>
+          <ToolbarButton onClick={applyOutputToInput} disabled={!outputCode}>
             <span className="i-mdi-swap-horizontal" aria-hidden="true" />
             回填输入
-          </button>
-          <button
-            type="button"
-            className={clsx(classes.jsDeobButton)}
-            onClick={copyOutput}
-            disabled={!outputCode}
-          >
+          </ToolbarButton>
+          <ToolbarButton onClick={copyOutput} disabled={!outputCode}>
             <span className="i-mdi-content-copy" aria-hidden="true" />
             {copyState === 'done' ? '已复制' : copyState === 'failed' ? '失败' : '复制输出'}
-          </button>
-          <button
-            type="button"
-            className={clsx(classes.jsDeobButton)}
-            onClick={downloadOutput}
-            disabled={!outputCode}
-          >
+          </ToolbarButton>
+          <ToolbarButton onClick={downloadOutput} disabled={!outputCode}>
             <span className="i-mdi-download" aria-hidden="true" />
             下载
-          </button>
+          </ToolbarButton>
 
-          <div className={clsx(classes.jsDeobDivider)} aria-hidden="true" />
+          <ToolbarDivider />
 
-          <button
-            type="button"
-            className={clsx(classes.jsDeobButton)}
-            onClick={resetAll}
-          >
+          <ToolbarButton onClick={resetAll}>
             <span className="i-mdi-refresh" aria-hidden="true" />
             重置
-          </button>
+          </ToolbarButton>
         </div>
       </div>
 
@@ -867,15 +841,10 @@ function JsDeobPage() {
         >
           <div className={clsx(classes.jsDeobEditorHead)}>
             <h2 className={clsx(classes.jsDeobSectionTitle)}>运行日志</h2>
-            <button
-              type="button"
-              className={clsx(classes.jsDeobButton)}
-              onClick={clearLogs}
-              disabled={!logs.length}
-            >
+            <ToolbarButton onClick={clearLogs} disabled={!logs.length}>
               <span className="i-mdi-delete-outline" aria-hidden="true" />
               清空
-            </button>
+            </ToolbarButton>
           </div>
 
           <div className={clsx(classes.jsDeobConsole)} ref={consoleBodyRef}>

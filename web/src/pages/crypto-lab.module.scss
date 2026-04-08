@@ -77,62 +77,6 @@
   gap: var(--space-1-5);
 }
 
-.crypto-lab-divider {
-  width: 1px;
-  height: 1.25rem;
-  background: var(--color-border-soft);
-  flex-shrink: 0;
-}
-
-/* ── Buttons ── */
-.crypto-lab-button {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1-5);
-  padding: var(--space-1) var(--space-2-5);
-  border: 1px solid var(--color-border-soft);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  transition:
-    background var(--duration-fast) var(--ease-standard),
-    border-color var(--duration-fast) var(--ease-standard),
-    color var(--duration-fast) var(--ease-standard);
-
-  &:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--color-surface-muted) 80%, transparent);
-    border-color: var(--color-border-strong);
-    color: var(--color-text-strong);
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  [class^='i-'] {
-    font-size: 0.875rem;
-    flex-shrink: 0;
-  }
-}
-
-.crypto-lab-button-primary {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: var(--color-accent-contrast);
-  font-weight: 600;
-
-  &:hover:not(:disabled) {
-    background: var(--color-accent-hover);
-    border-color: var(--color-accent-hover);
-    color: var(--color-accent-contrast);
-  }
-}
-
 /* ── Editors grid ── */
 .crypto-lab-editors-grid {
   display: grid;

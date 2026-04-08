@@ -20,10 +20,10 @@ The goal is a clean separation: **logic lives in the hook, TSX only renders**.
 | File | Purpose |
 |---|---|
 | `some-page.tsx` | JSX rendering only — imports from the hook |
-| `some-page.hook.ts` | All state, derived values, handlers, side effects, constants, and types |
+| `hooks/some-page.hook.ts` | All state, derived values, handlers, side effects, constants, and types |
 | `some-page.module.scss` | Scoped styles (unchanged) |
 
-Keep the hook file next to the page file in the same directory.
+Place the hook file under a `hooks/` subdirectory inside the same `pages/` folder (e.g. `web/src/pages/hooks/some-page.hook.ts`). This keeps hook files separated from TSX and SCSS files without moving them out of the pages tree.
 
 ## What belongs in the hook file
 
@@ -96,7 +96,7 @@ useEffect(() => {
 
 ```tsx
 import clsx from 'clsx'
-import { tabs, opsByTab, useMyPage } from './my-page.hook'
+import { tabs, opsByTab, useMyPage } from './hooks/my-page.hook'
 import classes from './my-page.module.scss'
 
 export default function MyPage() {
@@ -116,7 +116,7 @@ export default function MyPage() {
 
 ## Real example in this repo
 
-- Hook: `web/src/pages/string-tools.hook.ts`
+- Hook: `web/src/pages/hooks/string-tools.hook.ts`
 - Page: `web/src/pages/string-tools.tsx`
 - Hook: `web/src/pages/crypto-lab.hook.ts`
 - Page: `web/src/pages/crypto-lab.tsx`

@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { tabs, opsByTab, useStringTools } from './string-tools.hook'
+import { tabs, opsByTab, useStringTools } from './hooks/string-tools.hook'
 import classes from './string-tools.module.scss'
 
 // ── Component ────────────────────────────────────────────────────────────────

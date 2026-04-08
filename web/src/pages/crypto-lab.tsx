@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { AppCheckbox } from '@/components/ui/app-checkbox'
 import { AppSelect } from '@/components/ui/app-select'
 import { CodeEditor } from '@/components/ui/code-editor'
+import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button'
 import {
   algorithmOptions,
   blockModeOptions,
@@ -11,7 +12,7 @@ import {
   inputEncodingOptions,
   paddingOptions,
   useCryptoLab,
-} from './crypto-lab.hook'
+} from './hooks/crypto-lab.hook'
 import classes from './crypto-lab.module.scss'
 
 
@@ -52,46 +53,28 @@ function CryptoLabPage() {
         </div>
 
         <div className={clsx(classes.cryptoLabToolbarActions)}>
-          <button
-            type="button"
-            className={clsx(
-              classes.cryptoLabButton,
-              classes.cryptoLabButtonPrimary,
-            )}
+          <ToolbarButton
+            variant="primary"
             onClick={executeCrypto}
           >
             <span className="i-mdi-play-circle-outline" aria-hidden="true" />
             {form.direction === 'encrypt' ? '立即加密' : '立即解密'}
-          </button>
-          <button
-            type="button"
-            className={clsx(classes.cryptoLabButton)}
-            onClick={swapInputOutput}
-            disabled={!result}
-          >
+          </ToolbarButton>
+          <ToolbarButton onClick={swapInputOutput} disabled={!result}>
             <span className="i-mdi-swap-horizontal" aria-hidden="true" />
             结果回填
-          </button>
-          <button
-            type="button"
-            className={clsx(classes.cryptoLabButton)}
-            onClick={copyResult}
-            disabled={!result}
-          >
+          </ToolbarButton>
+          <ToolbarButton onClick={copyResult} disabled={!result}>
             <span className="i-mdi-content-copy" aria-hidden="true" />
             {copyState === 'done' ? '已复制' : copyState === 'failed' ? '失败' : '复制结果'}
-          </button>
+          </ToolbarButton>
 
-          <div className={clsx(classes.cryptoLabDivider)} aria-hidden="true" />
+          <ToolbarDivider />
 
-          <button
-            type="button"
-            className={clsx(classes.cryptoLabButton)}
-            onClick={clearAll}
-          >
+          <ToolbarButton onClick={clearAll}>
             <span className="i-mdi-refresh" aria-hidden="true" />
             重置
-          </button>
+          </ToolbarButton>
         </div>
       </div>
 

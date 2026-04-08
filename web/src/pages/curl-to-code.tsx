@@ -4,6 +4,7 @@ import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import { AppSelect, type AppSelectOption } from '@/components/ui/app-select'
 import { CodeEditor, type CodeEditorLanguage } from '@/components/ui/code-editor'
+import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button'
 import classes from './curl-to-code.module.scss'
 import exampleCurl from '@/assets/raw/curl.txt?raw'
 
@@ -419,12 +420,7 @@ function CurlToCodePage() {
         </div>
 
         <div className={clsx(classes.curlToolbarActions)}>
-          <button
-            type="button"
-            className={clsx(classes.curlButton, classes.curlButtonPrimary)}
-            onClick={runConversion}
-            disabled={isConverting}
-          >
+          <ToolbarButton variant="primary" onClick={runConversion} disabled={isConverting}>
             <span
               className={clsx(
                 isConverting ? 'i-mdi-loading animate-spin' : 'i-mdi-play-circle-outline',
@@ -432,58 +428,40 @@ function CurlToCodePage() {
               aria-hidden="true"
             />
             {isConverting ? '转换中' : '立即转换'}
-          </button>
+          </ToolbarButton>
 
-          <div className={clsx(classes.curlDivider)} aria-hidden="true" />
+          <ToolbarDivider />
 
-          <button
-            type="button"
-            className={clsx(classes.curlButton)}
-            onClick={pasteFromClipboard}
-          >
+          <ToolbarButton onClick={pasteFromClipboard}>
             <span className="i-mdi-clipboard-text-outline" aria-hidden="true" />
             从剪贴板粘贴
-          </button>
-          <button
-            type="button"
-            className={clsx(classes.curlButton)}
-            onClick={() => sourceFileInputRef.current?.click()}
-          >
+          </ToolbarButton>
+          <ToolbarButton onClick={() => sourceFileInputRef.current?.click()}>
             <span className="i-mdi-file-import-outline" aria-hidden="true" />
             导入文件
-          </button>
-          <button type="button" className={clsx(classes.curlButton)} onClick={fillExample}>
+          </ToolbarButton>
+          <ToolbarButton onClick={fillExample}>
             <span className="i-mdi-flask-outline" aria-hidden="true" />
             示例命令
-          </button>
+          </ToolbarButton>
 
-          <div className={clsx(classes.curlDivider)} aria-hidden="true" />
+          <ToolbarDivider />
 
-          <button
-            type="button"
-            className={clsx(classes.curlButton)}
-            onClick={copyOutput}
-            disabled={!outputCode}
-          >
+          <ToolbarButton onClick={copyOutput} disabled={!outputCode}>
             <span className="i-mdi-content-copy" aria-hidden="true" />
             {copyState === 'done' ? '已复制' : copyState === 'failed' ? '失败' : '复制结果'}
-          </button>
-          <button
-            type="button"
-            className={clsx(classes.curlButton)}
-            onClick={downloadOutput}
-            disabled={!outputCode}
-          >
+          </ToolbarButton>
+          <ToolbarButton onClick={downloadOutput} disabled={!outputCode}>
             <span className="i-mdi-download" aria-hidden="true" />
             下载结果
-          </button>
+          </ToolbarButton>
 
-          <div className={clsx(classes.curlDivider)} aria-hidden="true" />
+          <ToolbarDivider />
 
-          <button type="button" className={clsx(classes.curlButton)} onClick={clearAll}>
+          <ToolbarButton onClick={clearAll}>
             <span className="i-mdi-refresh" aria-hidden="true" />
             重置
-          </button>
+          </ToolbarButton>
         </div>
       </div>
 

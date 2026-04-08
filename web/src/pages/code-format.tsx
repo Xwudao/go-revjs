@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import { AppSelect, type AppSelectOption } from '@/components/ui/app-select'
 import { CodeEditor, type CodeEditorLanguage } from '@/components/ui/code-editor'
+import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button'
 import type { FormatLanguage, FormatOptions } from './code-format.worker'
 import CodeFormatWorker from './code-format.worker?worker'
 import classes from './code-format.module.scss'
@@ -334,12 +335,7 @@ function CodeFormatPage() {
         </div>
 
         <div className={clsx(classes.fmtToolbarActions)}>
-          <button
-            type="button"
-            className={clsx(classes.fmtButton, classes.fmtButtonPrimary)}
-            onClick={runFormat}
-            disabled={isFormatting}
-          >
+          <ToolbarButton variant="primary" onClick={runFormat} disabled={isFormatting}>
             <span
               className={clsx(
                 isFormatting ? 'i-mdi-loading animate-spin' : 'i-mdi-auto-fix',
@@ -347,58 +343,40 @@ function CodeFormatPage() {
               aria-hidden="true"
             />
             {isFormatting ? '格式化中' : '立即格式化'}
-          </button>
+          </ToolbarButton>
 
-          <div className={clsx(classes.fmtDivider)} aria-hidden="true" />
+          <ToolbarDivider />
 
-          <button
-            type="button"
-            className={clsx(classes.fmtButton)}
-            onClick={pasteFromClipboard}
-          >
+          <ToolbarButton onClick={pasteFromClipboard}>
             <span className="i-mdi-clipboard-text-outline" aria-hidden="true" />
             从剪贴板粘贴
-          </button>
-          <button
-            type="button"
-            className={clsx(classes.fmtButton)}
-            onClick={() => sourceFileInputRef.current?.click()}
-          >
+          </ToolbarButton>
+          <ToolbarButton onClick={() => sourceFileInputRef.current?.click()}>
             <span className="i-mdi-file-import-outline" aria-hidden="true" />
             导入文件
-          </button>
+          </ToolbarButton>
 
-          <div className={clsx(classes.fmtDivider)} aria-hidden="true" />
+          <ToolbarDivider />
 
-          <button
-            type="button"
-            className={clsx(classes.fmtButton)}
-            onClick={copyOutput}
-            disabled={!outputCode}
-          >
+          <ToolbarButton onClick={copyOutput} disabled={!outputCode}>
             <span className="i-mdi-content-copy" aria-hidden="true" />
             {copyState === 'done'
               ? '已复制'
               : copyState === 'failed'
                 ? '复制失败'
                 : '复制结果'}
-          </button>
-          <button
-            type="button"
-            className={clsx(classes.fmtButton)}
-            onClick={downloadOutput}
-            disabled={!outputCode}
-          >
+          </ToolbarButton>
+          <ToolbarButton onClick={downloadOutput} disabled={!outputCode}>
             <span className="i-mdi-download" aria-hidden="true" />
             下载结果
-          </button>
+          </ToolbarButton>
 
-          <div className={clsx(classes.fmtDivider)} aria-hidden="true" />
+          <ToolbarDivider />
 
-          <button type="button" className={clsx(classes.fmtButton)} onClick={clearAll}>
+          <ToolbarButton onClick={clearAll}>
             <span className="i-mdi-refresh" aria-hidden="true" />
             重置
-          </button>
+          </ToolbarButton>
         </div>
       </div>
 
