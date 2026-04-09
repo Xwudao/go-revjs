@@ -1,8 +1,8 @@
-import type { Binding, NodePath } from '@babel/traverse'
-import type { FunctionExpression } from '@babel/types'
-import type { Transform } from '../ast-utils'
-import * as t from '@babel/types'
-import * as m from '@codemod/matchers'
+import type { Binding, NodePath } from '@babel/traverse';
+import type { FunctionExpression } from '@babel/types';
+import type { Transform } from '../ast-utils';
+import * as t from '@babel/types';
+import * as m from '@codemod/matchers';
 import {
   applyTransform,
   constKey,
@@ -12,8 +12,8 @@ import {
   getPropName,
   inlineFunctionCall,
   isReadonlyObject,
-} from '../ast-utils'
-import mergeStrings from '../unminify/transforms/merge-strings'
+} from '../ast-utils';
+import mergeStrings from '../unminify/transforms/merge-strings';
 
 /**
  * Explanation: https://excalidraw.com/#json=0vehUdrfSS635CNPEQBXl,hDOd-UO9ETfSDWT9MxVX-A
@@ -24,14 +24,14 @@ export default {
   tags: ['safe'],
   scope: true,
   visitor() {
-    const varId = m.capture(m.identifier())
-    const propertyName = m.matcher<string>((name) => /^[$_a-z][$_\w]*$/i.test(name))
-    const propertyKey = constKey(propertyName)
+    const varId = m.capture(m.identifier());
+    const propertyName = m.matcher<string>((name) => /^[$_a-z][$_\w]*$/i.test(name));
+    const propertyKey = constKey(propertyName);
     const literalPropertyValue = m.or(
       m.stringLiteral(),
       m.booleanLiteral(),
       m.numericLiteral(),
-    )
+    );
     const propertyValue = m.or(
       // E.g. "6|0|4|3|1|5|2"
       literalPropertyValue,
@@ -53,12 +53,12 @@ export default {
           createFunctionMatcher(node.params.length, (...params) => [
             m.returnStatement(m.callExpression(params[0], params.slice(1))),
           ]).match(node)
-        )
+        );
       }),
       // E.g. function (a, ...b) { return a(...b) }
       (() => {
-        const fnName = m.capture(m.identifier())
-        const restName = m.capture(m.identifier())
+        const fnName = m.capture(m.identifier());
+        const restName = m.capture(m.identifier());
 
         return m.functionExpression(
           undefined,
@@ -70,21 +70,21 @@ export default {
               ]),
             ),
           ]),
-        )
+        );
       })(),
-    )
+    );
     // E.g. "rLxJs": "6|0|4|3|1|5|2"
     const objectProperties = m.capture(
       m.arrayOf(m.objectProperty(propertyKey, propertyValue)),
-    )
-    const aliasId = m.capture(m.identifier())
+    );
+    const aliasId = m.capture(m.identifier());
     const aliasVar = m.variableDeclaration(m.anything(), [
       m.variableDeclarator(aliasId, m.fromCapture(varId)),
-    ])
+    ]);
     // E.g. "rLxJs"
-    const assignedKey = m.capture(propertyName)
+    const assignedKey = m.capture(propertyName);
     // E.g. "6|0|4|3|1|5|2"
-    const assignedValue = m.capture(propertyValue)
+    const assignedValue = m.capture(propertyValue);
     // E.g. obj.rLxJs = "6|0|4|3|1|5|2"
     const assignment = m.expressionStatement(
       m.assignmentExpression(
@@ -92,49 +92,49 @@ export default {
         constMemberExpression(m.fromCapture(varId), assignedKey),
         assignedValue,
       ),
-    )
+    );
     const looseAssignment = m.expressionStatement(
       m.assignmentExpression(
         '=',
         constMemberExpression(m.fromCapture(varId), assignedKey),
       ),
-    )
+    );
     // E.g. obj.rLxJs
     const memberAccess = constMemberExpression(
       m.or(m.fromCapture(varId), m.fromCapture(aliasId)),
       propertyName,
-    )
+    );
     // E.g. obj[decoder(N)] — computed access with a call-expression key (string decoder pattern)
     const computedCallAccess = m.memberExpression(
       m.or(m.fromCapture(varId), m.fromCapture(aliasId)),
       m.anything(),
       true,
-    )
+    );
     // Relaxed matcher: accepts literal-key OR computed-call-key member accesses
-    const relaxedMemberAccess = m.or(memberAccess, computedCallAccess)
-    const varMatcher = m.variableDeclarator(varId, m.objectExpression(objectProperties))
+    const relaxedMemberAccess = m.or(memberAccess, computedCallAccess);
+    const varMatcher = m.variableDeclarator(varId, m.objectExpression(objectProperties));
     // Example: { YhxvC: "default" }.YhxvC
     const inlineMatcher = constMemberExpression(
       m.objectExpression(objectProperties),
       propertyName,
-    )
+    );
 
     function isConstantBinding(binding: Binding) {
       // Workaround because sometimes babel treats the VariableDeclarator/binding itself as a violation
-      return binding.constant || binding.constantViolations[0] === binding.path
+      return binding.constant || binding.constantViolations[0] === binding.path;
     }
 
     function transform(path: NodePath<t.VariableDeclarator>) {
-      let changes = 0
+      let changes = 0;
       if (varMatcher.match(path.node)) {
         // Verify all references to make sure they match how the obfuscator
         // would have generated the code (no reassignments, etc.)
-        const binding = path.scope.getBinding(varId.current!.name)
-        if (!binding) return changes
-        if (!isConstantBinding(binding)) return changes
-        if (!transformObjectKeys(binding)) return changes
+        const binding = path.scope.getBinding(varId.current!.name);
+        if (!binding) return changes;
+        if (!isConstantBinding(binding)) return changes;
+        if (!transformObjectKeys(binding)) return changes;
         // Use relaxed check: also allow computed accesses with call-expression keys (obj[decoder(N)])
-        if (!isReadonlyObject(binding, relaxedMemberAccess)) return changes
+        if (!isReadonlyObject(binding, relaxedMemberAccess)) return changes;
 
         const props = new Map(
           objectProperties.current!.map((p) => [
@@ -145,50 +145,53 @@ export default {
               | t.BooleanLiteral
               | t.NumericLiteral,
           ]),
-        )
-        if (!props.size) return changes
+        );
+        if (!props.size) return changes;
 
-        const oldRefs = [...binding.referencePaths]
-        let hasUnresolvedComputedRefs = false
+        const oldRefs = [...binding.referencePaths];
+        let hasUnresolvedComputedRefs = false;
 
         // Have to loop backwards because we might replace a node that
         // contains another reference to the binding (https://github.com/babel/babel/issues/12943)
-        ;[...binding.referencePaths].reverse().forEach((ref) => {
-          const memberPath = ref.parentPath as NodePath<t.MemberExpression>
-          const propName = getPropName(memberPath.node.property)
+        [...binding.referencePaths].reverse().forEach((ref) => {
+          const memberPath = ref.parentPath as NodePath<t.MemberExpression>;
+          const propName = getPropName(memberPath.node.property);
           if (propName === undefined) {
             // Computed access with a call-expression key (e.g. obj[decoder(N)])
             // Cannot inline without resolving the decoder — skip silently
-            hasUnresolvedComputedRefs = true
-            return
+            hasUnresolvedComputedRefs = true;
+            return;
           }
-          const value = props.get(propName)
+          const value = props.get(propName);
           if (!value) {
-            ref.addComment('leading', 'webcrack:control_flow_missing_prop')
-            return
+            ref.addComment('leading', 'webcrack:control_flow_missing_prop');
+            return;
           }
 
           if (t.isLiteral(value)) {
-            memberPath.replaceWith(value)
+            memberPath.replaceWith(value);
           } else {
-            inlineFunctionCall(value, memberPath.parentPath as NodePath<t.CallExpression>)
+            inlineFunctionCall(
+              value,
+              memberPath.parentPath as NodePath<t.CallExpression>,
+            );
           }
-          changes++
-        })
+          changes++;
+        });
 
         oldRefs.forEach((ref) => {
-          const varDeclarator = findParent(ref, m.variableDeclarator())
-          if (varDeclarator) changes += transform(varDeclarator)
-        })
+          const varDeclarator = findParent(ref, m.variableDeclarator());
+          if (varDeclarator) changes += transform(varDeclarator);
+        });
 
         // Only remove the declaration if every reference was inlined.
         // Keep it alive when there are still unresolved obj[decoder(N)] accesses.
         if (!hasUnresolvedComputedRefs) {
-          path.remove()
-          changes++
+          path.remove();
+          changes++;
         }
       }
-      return changes
+      return changes;
     }
 
     /**
@@ -200,58 +203,58 @@ export default {
      * and others are assigned later.
      */
     function transformObjectKeys(objBinding: Binding): boolean {
-      const container = objBinding.path.parentPath!.container as t.Statement[]
-      const startIndex = (objBinding.path.parentPath!.key as number) + 1
-      const properties: t.ObjectProperty[] = []
+      const container = objBinding.path.parentPath!.container as t.Statement[];
+      const startIndex = (objBinding.path.parentPath!.key as number) + 1;
+      const properties: t.ObjectProperty[] = [];
 
       for (let i = startIndex; i < container.length; i++) {
-        const statement = container[i]
+        const statement = container[i];
 
         // Example: _0x29d709["kHAOU"] = "5|1|2" + "|4|3|" + "0|6";
         // For performance reasons, only traverse if it is a potential match (value doesn't matter)
         if (looseAssignment.match(statement)) {
-          applyTransform(statement, mergeStrings)
+          applyTransform(statement, mergeStrings);
         }
 
         if (assignment.match(statement)) {
           properties.push(
             t.objectProperty(t.identifier(assignedKey.current!), assignedValue.current!),
-          )
+          );
         } else {
-          break
+          break;
         }
       }
 
       // If all properties are in the object then there typically won't be an alias variable
-      const aliasAssignment = container[startIndex + properties.length]
-      if (!aliasVar.match(aliasAssignment)) return true
+      const aliasAssignment = container[startIndex + properties.length];
+      if (!aliasVar.match(aliasAssignment)) return true;
 
       // Avoid false positives
-      if (objBinding.references !== properties.length + 1) return false
+      if (objBinding.references !== properties.length + 1) return false;
 
-      const aliasBinding = objBinding.scope.getBinding(aliasId.current!.name)!
-      if (!isReadonlyObject(aliasBinding, relaxedMemberAccess)) return false
+      const aliasBinding = objBinding.scope.getBinding(aliasId.current!.name)!;
+      if (!isReadonlyObject(aliasBinding, relaxedMemberAccess)) return false;
 
-      objectProperties.current!.push(...properties)
-      container.splice(startIndex, properties.length)
-      objBinding.referencePaths = aliasBinding.referencePaths
-      objBinding.references = aliasBinding.references
-      objBinding.identifier.name = aliasBinding.identifier.name
-      aliasBinding.path.remove()
-      return true
+      objectProperties.current!.push(...properties);
+      container.splice(startIndex, properties.length);
+      objBinding.referencePaths = aliasBinding.referencePaths;
+      objBinding.references = aliasBinding.references;
+      objBinding.identifier.name = aliasBinding.identifier.name;
+      aliasBinding.path.remove();
+      return true;
     }
 
     return {
       VariableDeclarator: {
         exit(path) {
-          this.changes += transform(path)
+          this.changes += transform(path);
         },
       },
       MemberExpression: {
         exit(path) {
-          if (!inlineMatcher.match(path.node)) return
+          if (!inlineMatcher.match(path.node)) return;
 
-          const propName = getPropName(path.node.property)!
+          const propName = getPropName(path.node.property)!;
           const value = objectProperties.current!.find(
             (prop) => getPropName(prop.key) === propName,
           )?.value as
@@ -259,19 +262,19 @@ export default {
             | t.StringLiteral
             | t.BooleanLiteral
             | t.NumericLiteral
-            | undefined
-          if (!value) return
+            | undefined;
+          if (!value) return;
 
           if (t.isLiteral(value)) {
-            path.replaceWith(value)
+            path.replaceWith(value);
           } else if (path.parentPath.isCallExpression()) {
-            inlineFunctionCall(value, path.parentPath)
+            inlineFunctionCall(value, path.parentPath);
           } else {
-            path.replaceWith(value)
+            path.replaceWith(value);
           }
-          this.changes++
+          this.changes++;
         },
       },
-    }
+    };
   },
-} satisfies Transform
+} satisfies Transform;

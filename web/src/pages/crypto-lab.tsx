@@ -1,8 +1,8 @@
-import clsx from 'clsx'
-import { AppCheckbox } from '@/components/ui/app-checkbox'
-import { AppSelect } from '@/components/ui/app-select'
-import { CodeEditor } from '@/components/ui/code-editor'
-import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button'
+import clsx from 'clsx';
+import { AppCheckbox } from '@/components/ui/app-checkbox';
+import { AppSelect } from '@/components/ui/app-select';
+import { CodeEditor } from '@/components/ui/code-editor';
+import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
 import {
   algorithmOptions,
   blockModeOptions,
@@ -12,8 +12,8 @@ import {
   inputEncodingOptions,
   paddingOptions,
   useCryptoLab,
-} from './hooks/crypto-lab.hook'
-import classes from './crypto-lab.module.scss'
+} from './hooks/crypto-lab.hook';
+import classes from './crypto-lab.module.scss';
 
 function CryptoLabPage() {
   const {
@@ -32,9 +32,9 @@ function CryptoLabPage() {
     clearAll,
     copyResult,
     executeCrypto,
-  } = useCryptoLab()
+  } = useCryptoLab();
 
-  const generatedCode = generateCode(form)
+  const generatedCode = generateCode(form);
 
   return (
     <main className={clsx(classes.cryptoLabPage)}>
@@ -326,7 +326,7 @@ function CryptoLabPage() {
         </div>
       </div>
     </main>
-  )
+  );
 }
 
-export default CryptoLabPage
+export default CryptoLabPage;

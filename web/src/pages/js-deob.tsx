@@ -1,42 +1,42 @@
-import type { Options } from '@revjs/js-deob'
-import { deflateSync, inflateSync, strFromU8, strToU8 } from 'fflate'
-import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
-import clsx from 'clsx'
-import toast from 'react-hot-toast'
-import { AppCheckbox } from '@/components/ui/app-checkbox'
-import { AppSelect, type AppSelectOption } from '@/components/ui/app-select'
-import { CodeEditor } from '@/components/ui/code-editor'
-import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button'
-import JsDeobWorker from './js-deob.worker?worker'
-import classes from './js-deob.module.scss'
+import type { Options } from '@revjs/js-deob';
+import { deflateSync, inflateSync, strFromU8, strToU8 } from 'fflate';
+import { startTransition, useEffect, useMemo, useRef, useState } from 'react';
+import clsx from 'clsx';
+import toast from 'react-hot-toast';
+import { AppCheckbox } from '@/components/ui/app-checkbox';
+import { AppSelect, type AppSelectOption } from '@/components/ui/app-select';
+import { CodeEditor } from '@/components/ui/code-editor';
+import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
+import JsDeobWorker from './js-deob.worker?worker';
+import classes from './js-deob.module.scss';
 
-type EditableOptions = Required<Omit<Options, 'sandbox'>>
+type EditableOptions = Required<Omit<Options, 'sandbox'>>;
 
 interface ConsoleEntry {
-  id: number
-  message: string
-  timestamp: number
+  id: number;
+  message: string;
+  timestamp: number;
 }
 
 type WorkerMessage =
   | { type: 'log'; message: string; timestamp: number }
   | { type: 'result'; code: string; parseTime: number }
-  | { type: 'error'; message: string; timestamp?: number }
+  | { type: 'error'; message: string; timestamp?: number };
 
 type FormatWorkerResponse =
   | { type: 'formatted'; code: string }
-  | { type: 'error'; message: string }
+  | { type: 'error'; message: string };
 
 type MinifyWorkerResponse =
   | { type: 'minified'; code: string }
-  | { type: 'error'; message: string }
+  | { type: 'error'; message: string };
 
-const maxLogs = 200
+const maxLogs = 200;
 
 const storageKeys = {
   code: 'revjs:js-deob:code',
   options: 'revjs:js-deob:options',
-} as const
+} as const;
 
 const defaultOptions: EditableOptions = {
   decoderLocationMethod: 'stringArray',
@@ -49,7 +49,7 @@ const defaultOptions: EditableOptions = {
   mangleMode: 'off',
   manglePattern: '',
   mangleFlags: '',
-}
+};
 
 const decoderMethodOptions: AppSelectOption<EditableOptions['decoderLocationMethod']>[] =
   [
@@ -68,7 +68,7 @@ const decoderMethodOptions: AppSelectOption<EditableOptions['decoderLocationMeth
       label: '注入自定义代码',
       description: '需要手动补环境或补函数时使用。',
     },
-  ]
+  ];
 
 const mangleModeOptions: AppSelectOption<EditableOptions['mangleMode']>[] = [
   { value: 'off', label: '关闭', description: '保留原始变量名。' },
@@ -80,66 +80,66 @@ const mangleModeOptions: AppSelectOption<EditableOptions['mangleMode']>[] = [
     label: '自定义正则',
     description: '按自定义正则匹配需要优化的变量。',
   },
-]
+];
 
-const STORAGE_COMPRESS_PREFIX = 'z:'
+const STORAGE_COMPRESS_PREFIX = 'z:';
 
 function compressToStorage(str: string): string {
   try {
-    const compressed = deflateSync(strToU8(str))
-    let binary = ''
+    const compressed = deflateSync(strToU8(str));
+    let binary = '';
     for (let i = 0; i < compressed.length; i++) {
-      binary += String.fromCharCode(compressed[i])
+      binary += String.fromCharCode(compressed[i]);
     }
-    return STORAGE_COMPRESS_PREFIX + btoa(binary)
+    return STORAGE_COMPRESS_PREFIX + btoa(binary);
   } catch {
-    return str
+    return str;
   }
 }
 
 function decompressFromStorage(data: string): string {
-  if (!data.startsWith(STORAGE_COMPRESS_PREFIX)) return data
+  if (!data.startsWith(STORAGE_COMPRESS_PREFIX)) return data;
   try {
-    const binary = atob(data.slice(STORAGE_COMPRESS_PREFIX.length))
-    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0))
-    return strFromU8(inflateSync(bytes))
+    const binary = atob(data.slice(STORAGE_COMPRESS_PREFIX.length));
+    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+    return strFromU8(inflateSync(bytes));
   } catch {
-    return data
+    return data;
   }
 }
 
 function readStoredCode() {
-  if (typeof window === 'undefined') return ''
+  if (typeof window === 'undefined') return '';
 
-  const raw = window.localStorage.getItem(storageKeys.code) ?? ''
-  return decompressFromStorage(raw)
+  const raw = window.localStorage.getItem(storageKeys.code) ?? '';
+  return decompressFromStorage(raw);
 }
 
 function readStoredOptions(): EditableOptions {
-  if (typeof window === 'undefined') return defaultOptions
+  if (typeof window === 'undefined') return defaultOptions;
 
-  const raw = window.localStorage.getItem(storageKeys.options)
+  const raw = window.localStorage.getItem(storageKeys.options);
 
-  if (!raw) return defaultOptions
+  if (!raw) return defaultOptions;
 
   try {
-    const parsed = JSON.parse(raw) as Partial<EditableOptions> & { mangle?: boolean }
+    const parsed = JSON.parse(raw) as Partial<EditableOptions> & { mangle?: boolean };
     const merged = {
       ...defaultOptions,
       ...parsed,
-    }
+    };
 
     if (!merged.mangleMode && typeof parsed.mangle === 'boolean') {
-      merged.mangleMode = parsed.mangle ? 'all' : 'off'
+      merged.mangleMode = parsed.mangle ? 'all' : 'off';
     }
 
     merged.keywords = Array.isArray(merged.keywords)
       ? merged.keywords.filter(Boolean)
-      : defaultOptions.keywords
+      : defaultOptions.keywords;
 
-    return merged
+    return merged;
   } catch {
-    return defaultOptions
+    return defaultOptions;
   }
 }
 
@@ -147,113 +147,113 @@ function formatKeywords(value: string) {
   return value
     .split(',')
     .map((item) => item.trim())
-    .filter(Boolean)
+    .filter(Boolean);
 }
 
 function formatLogTime(timestamp: number) {
-  const date = new Date(timestamp)
-  const hours = date.getHours().toString().padStart(2, '0')
-  const minutes = date.getMinutes().toString().padStart(2, '0')
-  const seconds = date.getSeconds().toString().padStart(2, '0')
-  const milliseconds = date.getMilliseconds().toString().padStart(3, '0')
+  const date = new Date(timestamp);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+  const milliseconds = date.getMilliseconds().toString().padStart(3, '0');
 
-  return `${hours}:${minutes}:${seconds}.${milliseconds}`
+  return `${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
 // Singleton workers — created on first use (lazy).
-let formatWorkerSingleton: Worker | null = null
-let minifyWorkerSingleton: Worker | null = null
+let formatWorkerSingleton: Worker | null = null;
+let minifyWorkerSingleton: Worker | null = null;
 
 async function getFormatWorker(): Promise<Worker> {
   if (!formatWorkerSingleton) {
-    const { default: JsFormatWorker } = await import('./js-format.worker?worker')
-    formatWorkerSingleton = new JsFormatWorker()
+    const { default: JsFormatWorker } = await import('./js-format.worker?worker');
+    formatWorkerSingleton = new JsFormatWorker();
     formatWorkerSingleton.onerror = () => {
-      formatWorkerSingleton = null
-    }
+      formatWorkerSingleton = null;
+    };
   }
-  return formatWorkerSingleton
+  return formatWorkerSingleton;
 }
 
 async function getMinifyWorker(): Promise<Worker> {
   if (!minifyWorkerSingleton) {
-    const { default: JsMinifyWorker } = await import('./js-minify.worker?worker')
-    minifyWorkerSingleton = new JsMinifyWorker()
+    const { default: JsMinifyWorker } = await import('./js-minify.worker?worker');
+    minifyWorkerSingleton = new JsMinifyWorker();
     minifyWorkerSingleton.onerror = () => {
-      minifyWorkerSingleton = null
-    }
+      minifyWorkerSingleton = null;
+    };
   }
-  return minifyWorkerSingleton
+  return minifyWorkerSingleton;
 }
 
 async function formatSourceWithWorker(code: string) {
-  const worker = await getFormatWorker()
+  const worker = await getFormatWorker();
 
   return new Promise<string>((resolve, reject) => {
     worker.onmessage = (event: MessageEvent<FormatWorkerResponse>) => {
       if (event.data.type === 'formatted') {
-        resolve(event.data.code)
-        return
+        resolve(event.data.code);
+        return;
       }
 
-      formatWorkerSingleton = null
-      reject(new Error(event.data.message))
-    }
+      formatWorkerSingleton = null;
+      reject(new Error(event.data.message));
+    };
 
     worker.onerror = () => {
-      formatWorkerSingleton = null
-      reject(new Error('格式化失败，请检查输入代码是否完整。'))
-    }
+      formatWorkerSingleton = null;
+      reject(new Error('格式化失败，请检查输入代码是否完整。'));
+    };
 
-    worker.postMessage({ code })
-  })
+    worker.postMessage({ code });
+  });
 }
 
 async function minifyOutputWithWorker(code: string) {
-  const worker = await getMinifyWorker()
+  const worker = await getMinifyWorker();
 
   return new Promise<string>((resolve, reject) => {
     worker.onmessage = (event: MessageEvent<MinifyWorkerResponse>) => {
       if (event.data.type === 'minified') {
-        resolve(event.data.code)
-        return
+        resolve(event.data.code);
+        return;
       }
 
-      minifyWorkerSingleton = null
-      reject(new Error(event.data.message))
-    }
+      minifyWorkerSingleton = null;
+      reject(new Error(event.data.message));
+    };
 
     worker.onerror = () => {
-      minifyWorkerSingleton = null
-      reject(new Error('压缩失败，请稍后重试。'))
-    }
+      minifyWorkerSingleton = null;
+      reject(new Error('压缩失败，请稍后重试。'));
+    };
 
-    worker.postMessage({ code })
-  })
+    worker.postMessage({ code });
+  });
 }
 
 function JsDeobPage() {
-  const workerRef = useRef<Worker | null>(null)
-  const spawnWorkerRef = useRef<() => void>(() => {})
-  const consoleBodyRef = useRef<HTMLDivElement | null>(null)
-  const sourceFileInputRef = useRef<HTMLInputElement | null>(null)
-  const [sourceCode, setSourceCode] = useState(readStoredCode)
-  const [outputCode, setOutputCode] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
-  const [parseTime, setParseTime] = useState<number | null>(null)
-  const [isRunning, setIsRunning] = useState(false)
-  const [isFormatting, setIsFormatting] = useState(false)
-  const [isMinifying, setIsMinifying] = useState(false)
-  const [copyState, setCopyState] = useState<'idle' | 'done' | 'failed'>('idle')
-  const [logs, setLogs] = useState<ConsoleEntry[]>([])
-  const [options, setOptions] = useState<EditableOptions>(readStoredOptions)
-  const optionsRef = useRef(options)
+  const workerRef = useRef<Worker | null>(null);
+  const spawnWorkerRef = useRef<() => void>(() => {});
+  const consoleBodyRef = useRef<HTMLDivElement | null>(null);
+  const sourceFileInputRef = useRef<HTMLInputElement | null>(null);
+  const [sourceCode, setSourceCode] = useState(readStoredCode);
+  const [outputCode, setOutputCode] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [parseTime, setParseTime] = useState<number | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
+  const [isFormatting, setIsFormatting] = useState(false);
+  const [isMinifying, setIsMinifying] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'done' | 'failed'>('idle');
+  const [logs, setLogs] = useState<ConsoleEntry[]>([]);
+  const [options, setOptions] = useState<EditableOptions>(readStoredOptions);
+  const optionsRef = useRef(options);
 
-  const keywordsValue = useMemo(() => options.keywords.join(', '), [options.keywords])
+  const keywordsValue = useMemo(() => options.keywords.join(', '), [options.keywords]);
 
   useEffect(() => {
-    optionsRef.current = options
-  }, [options])
+    optionsRef.current = options;
+  }, [options]);
 
   function pushLog(message: string, timestamp = Date.now()) {
     setLogs((current) => [
@@ -263,293 +263,293 @@ function JsDeobPage() {
         message,
         timestamp,
       },
-    ])
+    ]);
   }
 
   function handleWorkerError(message: string, timestamp = Date.now()) {
-    pushLog(message, timestamp)
-    setErrorMessage(message)
-    setIsRunning(false)
+    pushLog(message, timestamp);
+    setErrorMessage(message);
+    setIsRunning(false);
   }
 
   spawnWorkerRef.current = () => {
-    workerRef.current?.terminate()
+    workerRef.current?.terminate();
 
-    const worker = new JsDeobWorker()
-    workerRef.current = worker
+    const worker = new JsDeobWorker();
+    workerRef.current = worker;
 
     worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
-      const message = event.data
+      const message = event.data;
 
       if (message.type === 'log') {
-        pushLog(message.message, message.timestamp)
-        return
+        pushLog(message.message, message.timestamp);
+        return;
       }
 
       if (message.type === 'result') {
         pushLog(
           `处理完成，用时 ${message.parseTime} ms | 方式: ${optionsRef.current.decoderLocationMethod}`,
-        )
+        );
         startTransition(() => {
-          setOutputCode(message.code)
-          setParseTime(message.parseTime)
-          setErrorMessage('')
-          setIsRunning(false)
-        })
-        return
+          setOutputCode(message.code);
+          setParseTime(message.parseTime);
+          setErrorMessage('');
+          setIsRunning(false);
+        });
+        return;
       }
 
-      handleWorkerError(message.message, message.timestamp)
-    }
+      handleWorkerError(message.message, message.timestamp);
+    };
 
     worker.onerror = () => {
-      handleWorkerError('执行失败，请稍后重试或检查输入代码。')
-    }
-  }
+      handleWorkerError('执行失败，请稍后重试或检查输入代码。');
+    };
+  };
 
   useEffect(() => {
-    spawnWorkerRef.current()
+    spawnWorkerRef.current();
 
     return () => {
-      workerRef.current?.terminate()
-      workerRef.current = null
-    }
-  }, [])
+      workerRef.current?.terminate();
+      workerRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(storageKeys.code, compressToStorage(sourceCode))
-  }, [sourceCode])
+    window.localStorage.setItem(storageKeys.code, compressToStorage(sourceCode));
+  }, [sourceCode]);
 
   useEffect(() => {
-    window.localStorage.setItem(storageKeys.options, JSON.stringify(options))
-  }, [options])
+    window.localStorage.setItem(storageKeys.options, JSON.stringify(options));
+  }, [options]);
 
   useEffect(() => {
-    if (copyState === 'idle') return
+    if (copyState === 'idle') return;
 
-    const timer = window.setTimeout(() => setCopyState('idle'), 1800)
-    return () => window.clearTimeout(timer)
-  }, [copyState])
+    const timer = window.setTimeout(() => setCopyState('idle'), 1800);
+    return () => window.clearTimeout(timer);
+  }, [copyState]);
 
   useEffect(() => {
-    const container = consoleBodyRef.current
+    const container = consoleBodyRef.current;
 
-    if (!container) return
+    if (!container) return;
 
-    container.scrollTo({ top: container.scrollHeight })
-  }, [logs])
+    container.scrollTo({ top: container.scrollHeight });
+  }, [logs]);
 
   function updateOptions(patch: Partial<EditableOptions>) {
     setOptions((current) => ({
       ...current,
       ...patch,
-    }))
+    }));
   }
 
   function runDeobfuscation() {
-    const trimmedCode = sourceCode.trim()
+    const trimmedCode = sourceCode.trim();
 
     if (!trimmedCode) {
-      setErrorMessage('请先输入要处理的 JS 代码。')
-      setOutputCode('')
-      setParseTime(null)
-      return
+      setErrorMessage('请先输入要处理的 JS 代码。');
+      setOutputCode('');
+      setParseTime(null);
+      return;
     }
 
-    setIsRunning(true)
-    setErrorMessage('')
-    setParseTime(null)
-    setLogs([])
+    setIsRunning(true);
+    setErrorMessage('');
+    setParseTime(null);
+    setLogs([]);
 
-    pushLog(`开始处理 | 方式: ${options.decoderLocationMethod}`)
+    pushLog(`开始处理 | 方式: ${options.decoderLocationMethod}`);
 
     if (!workerRef.current) {
-      spawnWorkerRef.current()
+      spawnWorkerRef.current();
     }
 
     workerRef.current?.postMessage({
       code: trimmedCode,
       options: JSON.parse(JSON.stringify(options)) as EditableOptions,
-    })
+    });
   }
 
   async function formatSourceCode() {
-    const trimmedCode = sourceCode.trim()
+    const trimmedCode = sourceCode.trim();
 
     if (!trimmedCode) {
-      setErrorMessage('请先输入要格式化的 JS 代码。')
-      return
+      setErrorMessage('请先输入要格式化的 JS 代码。');
+      return;
     }
 
-    const isFirstLoad = formatWorkerSingleton === null
+    const isFirstLoad = formatWorkerSingleton === null;
     if (isFirstLoad) {
-      toast('正在加载格式化模块，初次稍候片刻…', { id: 'format-init', duration: 8000 })
+      toast('正在加载格式化模块，初次稍候片刻…', { id: 'format-init', duration: 8000 });
     }
 
-    setIsFormatting(true)
-    setErrorMessage('')
+    setIsFormatting(true);
+    setErrorMessage('');
 
     try {
-      const formatted = await formatSourceWithWorker(sourceCode)
+      const formatted = await formatSourceWithWorker(sourceCode);
 
-      if (isFirstLoad) toast.dismiss('format-init')
+      if (isFirstLoad) toast.dismiss('format-init');
 
       startTransition(() => {
-        setSourceCode(formatted)
-      })
+        setSourceCode(formatted);
+      });
 
-      pushLog(`已格式化输入代码 | ${sourceCode.length} -> ${formatted.length} 字符`)
+      pushLog(`已格式化输入代码 | ${sourceCode.length} -> ${formatted.length} 字符`);
     } catch (error) {
-      if (isFirstLoad) toast.dismiss('format-init')
+      if (isFirstLoad) toast.dismiss('format-init');
       const message =
-        error instanceof Error ? error.message : '格式化失败，请检查输入代码。'
-      setErrorMessage(message)
-      pushLog(`格式化失败 | ${message}`)
+        error instanceof Error ? error.message : '格式化失败，请检查输入代码。';
+      setErrorMessage(message);
+      pushLog(`格式化失败 | ${message}`);
     } finally {
-      setIsFormatting(false)
+      setIsFormatting(false);
     }
   }
 
   async function minifyOutputCode() {
-    const trimmedCode = outputCode.trim()
+    const trimmedCode = outputCode.trim();
 
     if (!trimmedCode) {
-      setErrorMessage('当前没有可压缩的处理结果。')
-      return
+      setErrorMessage('当前没有可压缩的处理结果。');
+      return;
     }
 
-    const isFirstLoad = minifyWorkerSingleton === null
+    const isFirstLoad = minifyWorkerSingleton === null;
     if (isFirstLoad) {
-      toast('正在加载压缩模块，初次稍候片刻…', { id: 'minify-init', duration: 8000 })
+      toast('正在加载压缩模块，初次稍候片刻…', { id: 'minify-init', duration: 8000 });
     }
 
-    setIsMinifying(true)
-    setErrorMessage('')
+    setIsMinifying(true);
+    setErrorMessage('');
 
     try {
-      const minified = await minifyOutputWithWorker(outputCode)
+      const minified = await minifyOutputWithWorker(outputCode);
 
-      if (isFirstLoad) toast.dismiss('minify-init')
+      if (isFirstLoad) toast.dismiss('minify-init');
 
       startTransition(() => {
-        setOutputCode(minified)
-      })
+        setOutputCode(minified);
+      });
 
-      pushLog(`已压缩处理结果 | ${outputCode.length} -> ${minified.length} 字符`)
+      pushLog(`已压缩处理结果 | ${outputCode.length} -> ${minified.length} 字符`);
     } catch (error) {
-      if (isFirstLoad) toast.dismiss('minify-init')
+      if (isFirstLoad) toast.dismiss('minify-init');
       const message =
-        error instanceof Error ? error.message : '压缩失败，请检查处理结果。'
-      setErrorMessage(message)
-      pushLog(`压缩失败 | ${message}`)
+        error instanceof Error ? error.message : '压缩失败，请检查处理结果。';
+      setErrorMessage(message);
+      pushLog(`压缩失败 | ${message}`);
     } finally {
-      setIsMinifying(false)
+      setIsMinifying(false);
     }
   }
 
   function cancelDeobfuscation() {
-    if (!isRunning) return
+    if (!isRunning) return;
 
-    spawnWorkerRef.current()
-    setIsRunning(false)
-    setErrorMessage('已停止当前任务。')
-    pushLog('已停止当前任务。')
+    spawnWorkerRef.current();
+    setIsRunning(false);
+    setErrorMessage('已停止当前任务。');
+    pushLog('已停止当前任务。');
   }
 
   async function copyOutput() {
-    if (!outputCode) return
+    if (!outputCode) return;
 
     try {
-      await navigator.clipboard.writeText(outputCode)
-      setCopyState('done')
-      toast.success('已复制到剪贴板')
+      await navigator.clipboard.writeText(outputCode);
+      setCopyState('done');
+      toast.success('已复制到剪贴板');
     } catch {
-      setCopyState('failed')
-      toast.error('复制失败，请检查浏览器权限')
+      setCopyState('failed');
+      toast.error('复制失败，请检查浏览器权限');
     }
   }
 
   function resetAll() {
-    setSourceCode('')
-    setOutputCode('')
-    setErrorMessage('')
-    setParseTime(null)
-    setLogs([])
-    setOptions(defaultOptions)
-    window.localStorage.removeItem(storageKeys.code)
-    window.localStorage.removeItem(storageKeys.options)
+    setSourceCode('');
+    setOutputCode('');
+    setErrorMessage('');
+    setParseTime(null);
+    setLogs([]);
+    setOptions(defaultOptions);
+    window.localStorage.removeItem(storageKeys.code);
+    window.localStorage.removeItem(storageKeys.options);
   }
 
   function clearLogs() {
-    setLogs([])
+    setLogs([]);
   }
 
   async function importSourceFile(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
 
-    if (!file) return
+    if (!file) return;
 
     try {
-      const text = await file.text()
-      setSourceCode(text)
-      setErrorMessage('')
-      pushLog(`已导入文件: ${file.name} (${text.length} 字符)`)
+      const text = await file.text();
+      setSourceCode(text);
+      setErrorMessage('');
+      pushLog(`已导入文件: ${file.name} (${text.length} 字符)`);
     } catch {
-      setErrorMessage('导入文件失败，请重新选择后再试。')
+      setErrorMessage('导入文件失败，请重新选择后再试。');
     } finally {
-      event.target.value = ''
+      event.target.value = '';
     }
   }
 
   async function pasteFromClipboard() {
     try {
-      const text = await navigator.clipboard.readText()
+      const text = await navigator.clipboard.readText();
 
       if (!text.trim()) {
-        toast.error('剪贴板里没有可用内容')
-        return
+        toast.error('剪贴板里没有可用内容');
+        return;
       }
 
-      setSourceCode(text)
-      setErrorMessage('')
-      pushLog(`已从剪贴板载入 ${text.length} 字符`)
-      toast.success(`已从剪贴板载入 ${text.length} 字符`)
+      setSourceCode(text);
+      setErrorMessage('');
+      pushLog(`已从剪贴板载入 ${text.length} 字符`);
+      toast.success(`已从剪贴板载入 ${text.length} 字符`);
     } catch {
-      toast.error('读取剪贴板失败，请检查浏览器权限')
+      toast.error('读取剪贴板失败，请检查浏览器权限');
     }
   }
 
   function applyOutputToInput() {
-    if (!outputCode) return
+    if (!outputCode) return;
 
-    setSourceCode(outputCode)
-    setErrorMessage('')
-    pushLog('已将处理结果回填到输入区。')
+    setSourceCode(outputCode);
+    setErrorMessage('');
+    pushLog('已将处理结果回填到输入区。');
   }
 
   function downloadOutput() {
-    if (!outputCode) return
+    if (!outputCode) return;
 
-    const blob = new Blob([outputCode], { type: 'text/javascript;charset=utf-8' })
-    const url = window.URL.createObjectURL(blob)
-    const anchor = document.createElement('a')
+    const blob = new Blob([outputCode], { type: 'text/javascript;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
 
-    anchor.href = url
-    anchor.download = 'revjs-output.js'
-    anchor.click()
+    anchor.href = url;
+    anchor.download = 'revjs-output.js';
+    anchor.click();
 
-    window.URL.revokeObjectURL(url)
-    pushLog('已下载处理结果。')
+    window.URL.revokeObjectURL(url);
+    pushLog('已下载处理结果。');
   }
 
   const sourceLineCount = useMemo(
     () => (sourceCode ? sourceCode.split(/\r?\n/).length : 0),
     [sourceCode],
-  )
+  );
   const outputLineCount = useMemo(
     () => (outputCode ? outputCode.split(/\r?\n/).length : 0),
     [outputCode],
-  )
+  );
 
   return (
     <main className={clsx(classes.jsDeobPage)}>
@@ -898,7 +898,7 @@ function JsDeobPage() {
         </div>
       </div>
     </main>
-  )
+  );
 }
 
-export default JsDeobPage
+export default JsDeobPage;

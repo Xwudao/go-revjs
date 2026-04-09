@@ -1,25 +1,25 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import clsx from 'clsx'
-import toast from 'react-hot-toast'
-import { SortableList } from '@/components/ui/sortable-list'
-import type { PipelineFnId, PipelineResponse } from './text-pipeline.worker'
-import TextPipelineWorker from './text-pipeline.worker?worker'
-import classes from './text-pipeline.module.scss'
+import { useCallback, useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
+import toast from 'react-hot-toast';
+import { SortableList } from '@/components/ui/sortable-list';
+import type { PipelineFnId, PipelineResponse } from './text-pipeline.worker';
+import TextPipelineWorker from './text-pipeline.worker?worker';
+import classes from './text-pipeline.module.scss';
 
 // ── Function metadata ────────────────────────────────────────────────────────
 
 interface FnDef {
-  id: PipelineFnId
-  name: string
-  icon: string
-  category: CategoryKey
+  id: PipelineFnId;
+  name: string;
+  icon: string;
+  category: CategoryKey;
 }
 
-type CategoryKey = 'lines' | 'case' | 'extract' | 'encode' | 'clean' | 'hash'
+type CategoryKey = 'lines' | 'case' | 'extract' | 'encode' | 'clean' | 'hash';
 
 interface CategoryDef {
-  key: CategoryKey
-  label: string
+  key: CategoryKey;
+  label: string;
 }
 
 const categories: CategoryDef[] = [
@@ -29,7 +29,7 @@ const categories: CategoryDef[] = [
   { key: 'encode', label: '编码 / 解码' },
   { key: 'clean', label: '清理 / 替换' },
   { key: 'hash', label: 'Hash（终态）' },
-]
+];
 
 const fnDefs: FnDef[] = [
   // Lines
@@ -261,139 +261,139 @@ const fnDefs: FnDef[] = [
   { id: 'sha1', name: 'SHA1', icon: 'i-mdi-pound', category: 'hash' },
   { id: 'sha256', name: 'SHA256', icon: 'i-mdi-pound', category: 'hash' },
   { id: 'sha512', name: 'SHA512', icon: 'i-mdi-pound', category: 'hash' },
-]
+];
 
-const fnDefMap = new Map<PipelineFnId, FnDef>(fnDefs.map((f) => [f.id, f]))
+const fnDefMap = new Map<PipelineFnId, FnDef>(fnDefs.map((f) => [f.id, f]));
 
 // ── Pipeline step (with stable uid for React key) ────────────────────────────
 
 interface PipelineStep {
-  uid: string
-  fnId: PipelineFnId
+  uid: string;
+  fnId: PipelineFnId;
 }
 
-let uidCounter = 0
+let uidCounter = 0;
 function nextUid() {
-  return `step-${++uidCounter}`
+  return `step-${++uidCounter}`;
 }
 
 // ── Worker singleton ─────────────────────────────────────────────────────────
 
-let workerSingleton: Worker | null = null
+let workerSingleton: Worker | null = null;
 
 function getPipelineWorker(): Worker {
   if (!workerSingleton) {
-    workerSingleton = new TextPipelineWorker()
+    workerSingleton = new TextPipelineWorker();
     workerSingleton.onerror = () => {
-      workerSingleton = null
-    }
+      workerSingleton = null;
+    };
   }
-  return workerSingleton
+  return workerSingleton;
 }
 
 function runPipelineInWorker(text: string, pipeline: PipelineFnId[]): Promise<string> {
   return new Promise((resolve, reject) => {
-    const worker = getPipelineWorker()
+    const worker = getPipelineWorker();
 
     worker.onmessage = (event: MessageEvent<PipelineResponse>) => {
       if (event.data.type === 'done') {
-        resolve(event.data.result)
-        return
+        resolve(event.data.result);
+        return;
       }
-      workerSingleton = null
-      reject(new Error(`[${event.data.failedStep}] ${event.data.message}`))
-    }
+      workerSingleton = null;
+      reject(new Error(`[${event.data.failedStep}] ${event.data.message}`));
+    };
 
     worker.onerror = () => {
-      workerSingleton = null
-      reject(new Error('Worker 崩溃，请刷新后重试'))
-    }
+      workerSingleton = null;
+      reject(new Error('Worker 崩溃，请刷新后重试'));
+    };
 
-    worker.postMessage({ text, pipeline })
-  })
+    worker.postMessage({ text, pipeline });
+  });
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function TextPipelinePage() {
-  const [input, setInput] = useState('')
-  const [output, setOutput] = useState('')
-  const [pipeline, setPipeline] = useState<PipelineStep[]>([])
-  const [isRunning, setIsRunning] = useState(false)
-  const [errorMsg, setErrorMsg] = useState('')
-  const runCountRef = useRef(0)
+  const [input, setInput] = useState('');
+  const [output, setOutput] = useState('');
+  const [pipeline, setPipeline] = useState<PipelineStep[]>([]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const runCountRef = useRef(0);
 
   // Clear error when pipeline or input changes
   useEffect(() => {
-    setErrorMsg('')
-  }, [pipeline, input])
+    setErrorMsg('');
+  }, [pipeline, input]);
 
   function addStep(fnId: PipelineFnId) {
-    setPipeline((prev) => [...prev, { uid: nextUid(), fnId }])
+    setPipeline((prev) => [...prev, { uid: nextUid(), fnId }]);
   }
 
   function removeStep(uid: string) {
-    setPipeline((prev) => prev.filter((s) => s.uid !== uid))
+    setPipeline((prev) => prev.filter((s) => s.uid !== uid));
   }
 
   const handleRun = useCallback(async () => {
     if (pipeline.length === 0) {
-      toast('请先从左侧选择至少一个处理步骤', { icon: '💬' })
-      return
+      toast('请先从左侧选择至少一个处理步骤', { icon: '💬' });
+      return;
     }
     if (!input) {
-      toast('请先输入内容', { icon: '💬' })
-      return
+      toast('请先输入内容', { icon: '💬' });
+      return;
     }
 
-    const runId = ++runCountRef.current
-    setIsRunning(true)
-    setErrorMsg('')
+    const runId = ++runCountRef.current;
+    setIsRunning(true);
+    setErrorMsg('');
 
     try {
       const result = await runPipelineInWorker(
         input,
         pipeline.map((s) => s.fnId),
-      )
-      if (runId !== runCountRef.current) return
-      setOutput(result)
+      );
+      if (runId !== runCountRef.current) return;
+      setOutput(result);
     } catch (e) {
-      if (runId !== runCountRef.current) return
-      const msg = e instanceof Error ? e.message : String(e)
-      setErrorMsg(msg)
-      setOutput('')
+      if (runId !== runCountRef.current) return;
+      const msg = e instanceof Error ? e.message : String(e);
+      setErrorMsg(msg);
+      setOutput('');
     } finally {
-      if (runId === runCountRef.current) setIsRunning(false)
+      if (runId === runCountRef.current) setIsRunning(false);
     }
-  }, [input, pipeline])
+  }, [input, pipeline]);
 
   function handleCopyOutput() {
     if (!output) {
-      toast('输出为空', { icon: '💬' })
-      return
+      toast('输出为空', { icon: '💬' });
+      return;
     }
     navigator.clipboard.writeText(output).then(
       () => toast.success('已复制'),
       () => toast.error('复制失败'),
-    )
+    );
   }
 
   function handleUseOutputAsInput() {
-    if (!output) return
-    setInput(output)
-    setOutput('')
-    setPipeline([])
+    if (!output) return;
+    setInput(output);
+    setOutput('');
+    setPipeline([]);
   }
 
   function handleClearPipeline() {
-    setPipeline([])
-    setErrorMsg('')
+    setPipeline([]);
+    setErrorMsg('');
   }
 
   const byCategory = categories.map((cat) => ({
     ...cat,
     fns: fnDefs.filter((f) => f.category === cat.key),
-  }))
+  }));
 
   return (
     <div className={classes.page}>
@@ -470,7 +470,7 @@ export default function TextPipelinePage() {
                 items={pipeline}
                 onReorder={setPipeline}
                 renderItem={(step, idx) => {
-                  const def = fnDefMap.get(step.fnId)
+                  const def = fnDefMap.get(step.fnId);
                   return (
                     <div className={classes.pipelineStep}>
                       <span className={classes.stepNum}>{idx + 1}</span>
@@ -492,7 +492,7 @@ export default function TextPipelinePage() {
                         </button>
                       </span>
                     </div>
-                  )
+                  );
                 }}
               />
             )}
@@ -607,5 +607,5 @@ export default function TextPipelinePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

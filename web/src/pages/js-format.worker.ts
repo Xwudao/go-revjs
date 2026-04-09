@@ -1,14 +1,14 @@
-import { format } from 'prettier'
-import babel from 'prettier/plugins/babel'
-import estree from 'prettier/plugins/estree'
+import { format } from 'prettier';
+import babel from 'prettier/plugins/babel';
+import estree from 'prettier/plugins/estree';
 
 interface FormatRequest {
-  code: string
+  code: string;
 }
 
 type FormatResponse =
   | { type: 'formatted'; code: string }
-  | { type: 'error'; message: string }
+  | { type: 'error'; message: string };
 
 self.onmessage = async (event: MessageEvent<FormatRequest>) => {
   try {
@@ -24,20 +24,20 @@ self.onmessage = async (event: MessageEvent<FormatRequest>) => {
       trailingComma: 'es5',
       bracketSpacing: true,
       arrowParens: 'avoid',
-    })
+    });
 
     const response: FormatResponse = {
       type: 'formatted',
       code: formatted,
-    }
+    };
 
-    self.postMessage(response)
+    self.postMessage(response);
   } catch (error) {
     const response: FormatResponse = {
       type: 'error',
       message: error instanceof Error ? error.message : '格式化失败',
-    }
+    };
 
-    self.postMessage(response)
+    self.postMessage(response);
   }
-}
+};

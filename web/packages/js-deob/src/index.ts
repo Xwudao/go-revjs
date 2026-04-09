@@ -1,10 +1,10 @@
-import type { ParseResult } from '@babel/parser'
-import type * as t from '@babel/types'
-import type { ArrayRotator } from './deobfuscate/array-rotator'
-import type { Decoder } from './deobfuscate/decoder'
-import type { StringArray } from './deobfuscate/string-array'
-import type { Options } from './options'
-import { parse } from '@babel/parser'
+import type { ParseResult } from '@babel/parser';
+import type * as t from '@babel/types';
+import type { ArrayRotator } from './deobfuscate/array-rotator';
+import type { Decoder } from './deobfuscate/decoder';
+import type { StringArray } from './deobfuscate/string-array';
+import type { Options } from './options';
+import { parse } from '@babel/parser';
 import {
   applyTransform,
   applyTransforms,
@@ -12,45 +12,45 @@ import {
   enableLogger,
   generate,
   deobLogger as logger,
-} from './ast-utils'
-import controlFlowObject from './deobfuscate/control-flow-object'
-import controlFlowSwitch from './deobfuscate/control-flow-switch'
-import myControlFlowSwitch from './deobfuscate/my-control-flow-switch'
-import deadCode from './deobfuscate/dead-code'
-import debugProtection from './deobfuscate/debug-protection'
-import evaluateGlobals from './deobfuscate/evaluate-globals'
-import inlineDecoderWrappers from './deobfuscate/inline-decoder-wrappers'
-import inlineObjectProps from './deobfuscate/inline-object-props'
-import mergeObjectAssignments from './deobfuscate/merge-object-assignments'
-import unusedVersionMarkers from './deobfuscate/unused-version-markers'
+} from './ast-utils';
+import controlFlowObject from './deobfuscate/control-flow-object';
+import controlFlowSwitch from './deobfuscate/control-flow-switch';
+import myControlFlowSwitch from './deobfuscate/my-control-flow-switch';
+import deadCode from './deobfuscate/dead-code';
+import debugProtection from './deobfuscate/debug-protection';
+import evaluateGlobals from './deobfuscate/evaluate-globals';
+import inlineDecoderWrappers from './deobfuscate/inline-decoder-wrappers';
+import inlineObjectProps from './deobfuscate/inline-object-props';
+import mergeObjectAssignments from './deobfuscate/merge-object-assignments';
+import unusedVersionMarkers from './deobfuscate/unused-version-markers';
 
-import selfDefending from './deobfuscate/self-defending'
-import varFunctions from './deobfuscate/var-functions'
+import selfDefending from './deobfuscate/self-defending';
+import varFunctions from './deobfuscate/var-functions';
 
-import { evalCode } from './deobfuscate/vm'
-import { defaultOptions, mergeOptions } from './options'
-import { collectDecoders } from './transforms/collect-decoders'
-import { decodeStrings } from './transforms/decode-strings'
-import { findDecoderByArray } from './transforms/find-decoder-by-array'
-import { buildPreRotatedSetupCode, findBestRotation } from './transforms/find-rotation'
-import { findDecoderByCallCount } from './transforms/find-decoder-by-call-count'
-import mangle from './transforms/mangle'
-import { markKeyword } from './transforms/mark-keyword'
-import transpile from './transpile'
-import unminify from './unminify'
+import { evalCode } from './deobfuscate/vm';
+import { defaultOptions, mergeOptions } from './options';
+import { collectDecoders } from './transforms/collect-decoders';
+import { decodeStrings } from './transforms/decode-strings';
+import { findDecoderByArray } from './transforms/find-decoder-by-array';
+import { buildPreRotatedSetupCode, findBestRotation } from './transforms/find-rotation';
+import { findDecoderByCallCount } from './transforms/find-decoder-by-call-count';
+import mangle from './transforms/mangle';
+import { markKeyword } from './transforms/mark-keyword';
+import transpile from './transpile';
+import unminify from './unminify';
 import {
   blockStatements,
   mergeStrings,
   rawLiterals,
   sequence,
   splitVariableDeclarations,
-} from './unminify/transforms'
+} from './unminify/transforms';
 
-export { codePrettier, defaultOptions, evalCode, type Options }
+export { codePrettier, defaultOptions, evalCode, type Options };
 
 export interface DeobResult {
-  code: string
-  save: (path: string) => Promise<void>
+  code: string;
+  save: (path: string) => Promise<void>;
 }
 
 export function parseCode(code: string): ParseResult<t.File> {
@@ -59,40 +59,40 @@ export function parseCode(code: string): ParseResult<t.File> {
     allowReturnOutsideFunction: true,
     errorRecovery: true,
     plugins: ['jsx'],
-  })
+  });
 }
 
 function buildDecryptionSummaryLog(map: Map<string, string>) {
   const shorten = (value: string, max = 120) => {
-    const clean = value.replace(/\s+/g, ' ').trim()
-    return clean.length <= max ? clean : `${clean.slice(0, max)}...`
-  }
+    const clean = value.replace(/\s+/g, ' ').trim();
+    return clean.length <= max ? clean : `${clean.slice(0, max)}...`;
+  };
 
-  const preview = Array.from(map.entries()).slice(0, 5)
+  const preview = Array.from(map.entries()).slice(0, 5);
   return [
     '=== 解密结果预览 ===',
     `- 解密条目: ${map.size} 个`,
     ...preview.map(([k, v]) => `  • ${k} -> ${shorten(String(v))}`),
     '====================',
-  ].join('\n')
+  ].join('\n');
 }
 
 export async function deob(rawCode: string, options: Options = {}): Promise<DeobResult> {
-  mergeOptions(options)
-  const opts = options
+  mergeOptions(options);
+  const opts = options;
 
-  enableLogger('Deob')
+  enableLogger('Deob');
 
-  if (!rawCode) throw new Error('请载入js代码')
+  if (!rawCode) throw new Error('请载入js代码');
 
   const ast: ParseResult<t.File> = parse(rawCode, {
     sourceType: 'unambiguous',
     allowReturnOutsideFunction: true,
     errorRecovery: true,
     plugins: ['jsx'],
-  })
+  });
 
-  let outputCode = ''
+  let outputCode = '';
 
   const stages = [
     // 格式预处理
@@ -101,18 +101,18 @@ export async function deob(rawCode: string, options: Options = {}): Promise<Deob
         ast,
         [blockStatements, sequence, splitVariableDeclarations, varFunctions, rawLiterals],
         { name: 'prepare' },
-      )
+      );
     },
     // 定位解密器
     async () => {
-      let stringArray: StringArray | undefined
-      let decoders: Decoder[] = []
-      let rotators: ArrayRotator[] = []
-      let setupCode: string = ''
+      let stringArray: StringArray | undefined;
+      let decoders: Decoder[] = [];
+      let rotators: ArrayRotator[] = [];
+      let setupCode: string = '';
 
       if (opts.decoderLocationMethod === 'stringArray') {
         if (opts.decoderStringArrayLength > 0) {
-          logger(`按字符串数组长度过滤: ${opts.decoderStringArrayLength}`)
+          logger(`按字符串数组长度过滤: ${opts.decoderStringArrayLength}`);
         }
 
         const {
@@ -120,43 +120,43 @@ export async function deob(rawCode: string, options: Options = {}): Promise<Deob
           rotators: r,
           stringArray: s,
           setupCode: scode,
-        } = findDecoderByArray(ast, opts.decoderStringArrayLength)
+        } = findDecoderByArray(ast, opts.decoderStringArrayLength);
 
-        stringArray = s as any
-        rotators = r
+        stringArray = s as any;
+        rotators = r;
         decoders = collectDecoders(
           ast,
           ds.map((d) => d.name),
-        )
-        setupCode = scode
+        );
+        setupCode = scode;
       } else if (opts.decoderLocationMethod === 'callCount') {
         const { decoders: ds, setupCode: scode } = findDecoderByCallCount(
           ast,
           opts.decoderCallCount,
-        )
+        );
         decoders = collectDecoders(
           ast,
           ds.map((d) => d.name),
-        )
-        setupCode = scode
+        );
+        setupCode = scode;
       } else if (opts.decoderLocationMethod === 'evalCode') {
-        await evalCode(opts.sandbox!, opts.setupCode!)
-        decoders = collectDecoders(ast, opts.decoderNames!)
+        await evalCode(opts.sandbox!, opts.setupCode!);
+        decoders = collectDecoders(ast, opts.decoderNames!);
       }
 
       logger(
         `${stringArray ? `字符串数组: ${stringArray?.name} (共 ${stringArray?.length} 项) 被引用 ${stringArray?.references.length} 处` : '没找到字符串数组'} | ${decoders.length ? `解密器函数: ${decoders.map((d) => d.name)}` : '没找到解密器函数'}`,
-      )
+      );
 
       // Try normal evalCode first; if the rotator times-out (e.g. jsjiami.cn.v7),
       // fall back to brute-forcing the correct rotation count.
-      let setupCodeToEval = setupCode
+      let setupCodeToEval = setupCode;
       if (stringArray && decoders.length > 0) {
         try {
-          await evalCode(opts.sandbox!, setupCode)
+          await evalCode(opts.sandbox!, setupCode);
         } catch {
-          logger('evalCode failed, trying brute-force rotation fallback...')
-          const primaryDecoder = decoders[0]
+          logger('evalCode failed, trying brute-force rotation fallback...');
+          const primaryDecoder = decoders[0];
           const rotation = findBestRotation(
             ast,
             stringArray.path as any,
@@ -164,43 +164,43 @@ export async function deob(rawCode: string, options: Options = {}): Promise<Deob
             primaryDecoder.name,
             stringArray.name,
             stringArray.length,
-          )
+          );
           setupCodeToEval = buildPreRotatedSetupCode(
             ast,
             stringArray.path as any,
             decoders.map((d) => d.path as any),
             stringArray.name,
             rotation,
-          )
-          await evalCode(opts.sandbox!, setupCodeToEval)
+          );
+          await evalCode(opts.sandbox!, setupCodeToEval);
         }
       } else {
-        await evalCode(opts.sandbox!, setupCode)
+        await evalCode(opts.sandbox!, setupCode);
       }
 
       for (const decoder of decoders) {
-        applyTransform(ast, inlineDecoderWrappers, decoder.path)
+        applyTransform(ast, inlineDecoderWrappers, decoder.path);
       }
 
       // 对象引用替换
-      applyTransform(ast, inlineObjectProps)
+      applyTransform(ast, inlineObjectProps);
 
       // 执行解密器
-      const map = await decodeStrings(opts.sandbox!, decoders as Decoder[])
+      const map = await decodeStrings(opts.sandbox!, decoders as Decoder[]);
 
       if (map.size > 0) {
-        logger(buildDecryptionSummaryLog(map))
+        logger(buildDecryptionSummaryLog(map));
       }
 
       if (decoders.length > 0) {
         if (stringArray?.path) {
-          stringArray.path.remove()
+          stringArray.path.remove();
         }
-        rotators.forEach((rotator) => rotator.remove())
-        decoders.forEach((decoder) => decoder.path.remove())
+        rotators.forEach((rotator) => rotator.remove());
+        decoders.forEach((decoder) => decoder.path.remove());
       }
 
-      return { changes: (map as any)?.size ?? decoders.length }
+      return { changes: (map as any)?.size ?? decoders.length };
     },
     // 控制流平坦化
     () =>
@@ -229,53 +229,53 @@ export async function deob(rawCode: string, options: Options = {}): Promise<Deob
 
     opts.isMarkEnable &&
       (() => {
-        logger(`关键字列表: [${opts.keywords.join(', ')}]`)
-        markKeyword(ast, opts.keywords)
-        return { changes: opts.keywords.length }
+        logger(`关键字列表: [${opts.keywords.join(', ')}]`);
+        markKeyword(ast, opts.keywords);
+        return { changes: opts.keywords.length };
       }),
 
     () => (outputCode = generate(ast)),
-  ].filter(Boolean) as (() => unknown)[]
+  ].filter(Boolean) as (() => unknown)[];
 
   for (let i = 0; i < stages.length; i++) {
-    await stages[i]()
+    await stages[i]();
   }
 
   return {
     code: outputCode,
     async save(path) {
-      const { join, normalize } = await import('node:path')
-      const { mkdir, writeFile } = await import('node:fs/promises')
-      path = normalize(path)
-      await mkdir(path, { recursive: true })
-      await writeFile(join(path, 'output.js'), outputCode, 'utf8')
+      const { join, normalize } = await import('node:path');
+      const { mkdir, writeFile } = await import('node:fs/promises');
+      path = normalize(path);
+      await mkdir(path, { recursive: true });
+      await writeFile(join(path, 'output.js'), outputCode, 'utf8');
     },
-  }
+  };
 }
 
 function getMangleMatcher(options: Options): ((id: string) => boolean) | undefined {
-  const legacyBoolean = (options as any).mangle
+  const legacyBoolean = (options as any).mangle;
   const mode =
     options.mangleMode ??
-    (typeof legacyBoolean === 'boolean' ? (legacyBoolean ? 'all' : 'off') : 'off')
+    (typeof legacyBoolean === 'boolean' ? (legacyBoolean ? 'all' : 'off') : 'off');
 
   switch (mode) {
     case 'off':
-      return
+      return;
     case 'all':
-      return () => true
+      return () => true;
     case 'hex': {
-      const re = /_0x[a-f\d]+/i
-      return (id) => re.test(id)
+      const re = /_0x[a-f\d]+/i;
+      return (id) => re.test(id);
     }
     case 'short':
-      return (id) => id.length <= 2
+      return (id) => id.length <= 2;
     case 'custom': {
-      const pattern = options.manglePattern ?? ''
-      const flags = options.mangleFlags ?? ''
+      const pattern = options.manglePattern ?? '';
+      const flags = options.mangleFlags ?? '';
       try {
-        const re = new RegExp(pattern, flags)
-        return (id) => re.test(id)
+        const re = new RegExp(pattern, flags);
+        return (id) => re.test(id);
       } catch {}
     }
   }

@@ -1,7 +1,7 @@
-import { parse } from '@babel/parser'
-import traverse from '@babel/traverse'
-import { describe, expect, test } from 'vitest'
-import { generate, inlineFunctionAliases, inlineVariableAliases } from '../../ast-utils'
+import { parse } from '@babel/parser';
+import traverse from '@babel/traverse';
+import { describe, expect, test } from 'vitest';
+import { generate, inlineFunctionAliases, inlineVariableAliases } from '../../ast-utils';
 
 describe('inline decoder', () => {
   test('inline variable', () => {
@@ -20,16 +20,16 @@ describe('inline decoder', () => {
         alias4 = alias;
         alias4(5);
       });
-  `)
+  `);
     traverse(ast, {
       FunctionDeclaration(path) {
-        const binding = path.scope.getBinding('decoder')!
-        inlineVariableAliases(binding)
-        path.stop()
+        const binding = path.scope.getBinding('decoder')!;
+        inlineVariableAliases(binding);
+        path.stop();
       },
-    })
-    expect(generate(ast)).toMatchSnapshot()
-  })
+    });
+    expect(generate(ast)).toMatchSnapshot();
+  });
 
   test('inline function', () => {
     const ast = parse(`
@@ -47,15 +47,15 @@ describe('inline decoder', () => {
           alias2(4, 5);
         })();
       })();
-  `)
+  `);
     traverse(ast, {
       FunctionDeclaration(path) {
-        const binding = path.scope.parent.bindings.decoder
-        inlineFunctionAliases(binding)
-        path.stop()
+        const binding = path.scope.parent.bindings.decoder;
+        inlineFunctionAliases(binding);
+        path.stop();
       },
-    })
+    });
 
-    expect(generate(ast)).toMatchSnapshot()
-  })
-})
+    expect(generate(ast)).toMatchSnapshot();
+  });
+});

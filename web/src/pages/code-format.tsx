@@ -1,28 +1,28 @@
-import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
-import clsx from 'clsx'
-import toast from 'react-hot-toast'
-import { AppSelect, type AppSelectOption } from '@/components/ui/app-select'
-import { CodeEditor, type CodeEditorLanguage } from '@/components/ui/code-editor'
-import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button'
-import type { FormatLanguage, FormatOptions } from './code-format.worker'
-import CodeFormatWorker from './code-format.worker?worker'
-import classes from './code-format.module.scss'
+import { startTransition, useEffect, useMemo, useRef, useState } from 'react';
+import clsx from 'clsx';
+import toast from 'react-hot-toast';
+import { AppSelect, type AppSelectOption } from '@/components/ui/app-select';
+import { CodeEditor, type CodeEditorLanguage } from '@/components/ui/code-editor';
+import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
+import type { FormatLanguage, FormatOptions } from './code-format.worker';
+import CodeFormatWorker from './code-format.worker?worker';
+import classes from './code-format.module.scss';
 
 type FormatWorkerResponse =
   | { type: 'formatted'; code: string }
-  | { type: 'error'; message: string }
+  | { type: 'error'; message: string };
 
 interface StoredState {
-  inputCode: string
-  language: FormatLanguage
-  options: FormatOptions
+  inputCode: string;
+  language: FormatLanguage;
+  options: FormatOptions;
 }
 
 interface LangConfig {
-  label: string
-  description: string
-  editorLanguage: CodeEditorLanguage
-  fileExtension: string
+  label: string;
+  description: string;
+  editorLanguage: CodeEditorLanguage;
+  fileExtension: string;
 }
 
 const langConfigs: Record<FormatLanguage, LangConfig> = {
@@ -86,7 +86,7 @@ const langConfigs: Record<FormatLanguage, LangConfig> = {
     editorLanguage: 'plain',
     fileExtension: '.graphql',
   },
-}
+};
 
 const langOptions: AppSelectOption<FormatLanguage>[] = Object.entries(langConfigs).map(
   ([value, config]) => ({
@@ -94,15 +94,15 @@ const langOptions: AppSelectOption<FormatLanguage>[] = Object.entries(langConfig
     label: config.label,
     description: config.description,
   }),
-)
+);
 
 const trailingCommaOptions: AppSelectOption<FormatOptions['trailingComma']>[] = [
   { value: 'es5', label: 'ES5', description: '函数参数除外，其余尾部加逗号（推荐）。' },
   { value: 'all', label: '全部', description: '包括函数参数在内，全部添加尾逗号。' },
   { value: 'none', label: '不加', description: '不添加任何尾逗号。' },
-]
+];
 
-const storageKey = 'revjs:code-format:state'
+const storageKey = 'revjs:code-format:state';
 
 const defaultOptions: FormatOptions = {
   printWidth: 80,
@@ -111,24 +111,24 @@ const defaultOptions: FormatOptions = {
   semi: true,
   singleQuote: false,
   trailingComma: 'es5',
-}
+};
 
 const defaultState: StoredState = {
   inputCode: '',
   language: 'javascript',
   options: defaultOptions,
-}
+};
 
-let workerSingleton: Worker | null = null
+let workerSingleton: Worker | null = null;
 
 function getFormatWorker(): Worker {
   if (!workerSingleton) {
-    workerSingleton = new CodeFormatWorker()
+    workerSingleton = new CodeFormatWorker();
     workerSingleton.onerror = () => {
-      workerSingleton = null
-    }
+      workerSingleton = null;
+    };
   }
-  return workerSingleton
+  return workerSingleton;
 }
 
 function formatWithWorker(
@@ -137,179 +137,179 @@ function formatWithWorker(
   options: FormatOptions,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    const worker = getFormatWorker()
+    const worker = getFormatWorker();
 
     worker.onmessage = (event: MessageEvent<FormatWorkerResponse>) => {
       if (event.data.type === 'formatted') {
-        resolve(event.data.code)
-        return
+        resolve(event.data.code);
+        return;
       }
 
-      workerSingleton = null
-      reject(new Error(event.data.message))
-    }
+      workerSingleton = null;
+      reject(new Error(event.data.message));
+    };
 
     worker.onerror = () => {
-      workerSingleton = null
-      reject(new Error('Worker 异常，请刷新页面后重试。'))
-    }
+      workerSingleton = null;
+      reject(new Error('Worker 异常，请刷新页面后重试。'));
+    };
 
-    worker.postMessage({ code, language, options })
-  })
+    worker.postMessage({ code, language, options });
+  });
 }
 
 function readStoredState(): StoredState {
-  if (typeof window === 'undefined') return defaultState
+  if (typeof window === 'undefined') return defaultState;
 
-  const raw = window.localStorage.getItem(storageKey)
-  if (!raw) return defaultState
+  const raw = window.localStorage.getItem(storageKey);
+  if (!raw) return defaultState;
 
   try {
-    const parsed = JSON.parse(raw) as Partial<StoredState>
+    const parsed = JSON.parse(raw) as Partial<StoredState>;
     const language =
       parsed.language && parsed.language in langConfigs
         ? parsed.language
-        : defaultState.language
+        : defaultState.language;
 
     return {
       inputCode:
         typeof parsed.inputCode === 'string' ? parsed.inputCode : defaultState.inputCode,
       language,
       options: { ...defaultOptions, ...(parsed.options ?? {}) },
-    }
+    };
   } catch {
-    return defaultState
+    return defaultState;
   }
 }
 
 function countLines(value: string) {
-  if (!value) return 0
-  return value.split(/\r?\n/).length
+  if (!value) return 0;
+  return value.split(/\r?\n/).length;
 }
 
 function CodeFormatPage() {
-  const sourceFileInputRef = useRef<HTMLInputElement | null>(null)
-  const [state, setState] = useState<StoredState>(readStoredState)
-  const [outputCode, setOutputCode] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
-  const [isFormatting, setIsFormatting] = useState(false)
-  const [copyState, setCopyState] = useState<'idle' | 'done' | 'failed'>('idle')
+  const sourceFileInputRef = useRef<HTMLInputElement | null>(null);
+  const [state, setState] = useState<StoredState>(readStoredState);
+  const [outputCode, setOutputCode] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isFormatting, setIsFormatting] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'done' | 'failed'>('idle');
 
-  const currentLang = langConfigs[state.language]
-  const inputLineCount = useMemo(() => countLines(state.inputCode), [state.inputCode])
-  const outputLineCount = useMemo(() => countLines(outputCode), [outputCode])
-
-  useEffect(() => {
-    window.localStorage.setItem(storageKey, JSON.stringify(state))
-  }, [state])
+  const currentLang = langConfigs[state.language];
+  const inputLineCount = useMemo(() => countLines(state.inputCode), [state.inputCode]);
+  const outputLineCount = useMemo(() => countLines(outputCode), [outputCode]);
 
   useEffect(() => {
-    if (copyState === 'idle') return
-    const timer = window.setTimeout(() => setCopyState('idle'), 1600)
-    return () => window.clearTimeout(timer)
-  }, [copyState])
+    window.localStorage.setItem(storageKey, JSON.stringify(state));
+  }, [state]);
+
+  useEffect(() => {
+    if (copyState === 'idle') return;
+    const timer = window.setTimeout(() => setCopyState('idle'), 1600);
+    return () => window.clearTimeout(timer);
+  }, [copyState]);
 
   function updateState(patch: Partial<StoredState>) {
-    setState((current) => ({ ...current, ...patch }))
+    setState((current) => ({ ...current, ...patch }));
   }
 
   function updateOptions(patch: Partial<FormatOptions>) {
-    setState((current) => ({ ...current, options: { ...current.options, ...patch } }))
+    setState((current) => ({ ...current, options: { ...current.options, ...patch } }));
   }
 
   async function runFormat() {
     if (!state.inputCode.trim()) {
-      setErrorMessage('请先输入需要格式化的代码。')
-      setOutputCode('')
-      return
+      setErrorMessage('请先输入需要格式化的代码。');
+      setOutputCode('');
+      return;
     }
 
-    setIsFormatting(true)
-    setErrorMessage('')
+    setIsFormatting(true);
+    setErrorMessage('');
 
     try {
       const formatted = await formatWithWorker(
         state.inputCode,
         state.language,
         state.options,
-      )
+      );
 
       startTransition(() => {
-        setOutputCode(formatted.trimEnd())
-        setErrorMessage('')
-      })
+        setOutputCode(formatted.trimEnd());
+        setErrorMessage('');
+      });
     } catch (error) {
-      setOutputCode('')
+      setOutputCode('');
       setErrorMessage(
         error instanceof Error ? error.message : '格式化失败，请检查代码语法。',
-      )
+      );
     } finally {
-      setIsFormatting(false)
+      setIsFormatting(false);
     }
   }
 
   function clearAll() {
-    setState({ ...defaultState })
-    setOutputCode('')
-    setErrorMessage('')
-    window.localStorage.removeItem(storageKey)
+    setState({ ...defaultState });
+    setOutputCode('');
+    setErrorMessage('');
+    window.localStorage.removeItem(storageKey);
   }
 
   async function pasteFromClipboard() {
     try {
-      const text = await navigator.clipboard.readText()
+      const text = await navigator.clipboard.readText();
       if (!text.trim()) {
-        toast.error('剪贴板里没有可用内容')
-        return
+        toast.error('剪贴板里没有可用内容');
+        return;
       }
-      updateState({ inputCode: text })
-      setOutputCode('')
-      setErrorMessage('')
-      toast.success('已从剪贴板粘贴')
+      updateState({ inputCode: text });
+      setOutputCode('');
+      setErrorMessage('');
+      toast.success('已从剪贴板粘贴');
     } catch {
-      toast.error('读取剪贴板失败，请检查浏览器权限')
+      toast.error('读取剪贴板失败，请检查浏览器权限');
     }
   }
 
   async function importSourceFile(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
+    const file = event.target.files?.[0];
+    if (!file) return;
 
     try {
-      const text = await file.text()
-      updateState({ inputCode: text })
-      setOutputCode('')
-      setErrorMessage('')
+      const text = await file.text();
+      updateState({ inputCode: text });
+      setOutputCode('');
+      setErrorMessage('');
     } catch {
-      setErrorMessage('导入文件失败，请重新选择后再试。')
+      setErrorMessage('导入文件失败，请重新选择后再试。');
     } finally {
-      event.target.value = ''
+      event.target.value = '';
     }
   }
 
   async function copyOutput() {
-    if (!outputCode) return
+    if (!outputCode) return;
 
     try {
-      await navigator.clipboard.writeText(outputCode)
-      setCopyState('done')
-      toast.success('已复制到剪贴板')
+      await navigator.clipboard.writeText(outputCode);
+      setCopyState('done');
+      toast.success('已复制到剪贴板');
     } catch {
-      setCopyState('failed')
-      toast.error('复制失败，请检查浏览器权限')
+      setCopyState('failed');
+      toast.error('复制失败，请检查浏览器权限');
     }
   }
 
   function downloadOutput() {
-    if (!outputCode) return
+    if (!outputCode) return;
 
-    const blob = new Blob([outputCode], { type: 'text/plain;charset=utf-8' })
-    const url = window.URL.createObjectURL(blob)
-    const anchor = document.createElement('a')
-    anchor.href = url
-    anchor.download = `formatted${currentLang.fileExtension}`
-    anchor.click()
-    window.URL.revokeObjectURL(url)
+    const blob = new Blob([outputCode], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `formatted${currentLang.fileExtension}`;
+    anchor.click();
+    window.URL.revokeObjectURL(url);
   }
 
   return (
@@ -443,9 +443,9 @@ function CodeFormatPage() {
                 options={langOptions}
                 ariaLabel="选择代码语言"
                 onChange={(value) => {
-                  updateState({ language: value })
-                  setOutputCode('')
-                  setErrorMessage('')
+                  updateState({ language: value });
+                  setOutputCode('');
+                  setErrorMessage('');
                 }}
               />
             </div>
@@ -574,7 +574,7 @@ function CodeFormatPage() {
         </div>
       </div>
     </main>
-  )
+  );
 }
 
-export default CodeFormatPage
+export default CodeFormatPage;

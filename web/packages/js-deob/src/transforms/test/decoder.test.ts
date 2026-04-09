@@ -1,11 +1,11 @@
-import { parse } from '@babel/parser'
-import { describe, expect, it } from 'vitest'
-import { evalCode } from '../..'
-import { generate } from '../../ast-utils'
-import { createNodeSandbox } from '../../deobfuscate'
-import { decodeStrings } from '../decode-strings'
-import { findDecoderByArray } from '../find-decoder-by-array'
-import { findDecoderByCallCount } from '../find-decoder-by-call-count'
+import { parse } from '@babel/parser';
+import { describe, expect, it } from 'vitest';
+import { evalCode } from '../..';
+import { generate } from '../../ast-utils';
+import { createNodeSandbox } from '../../deobfuscate';
+import { decodeStrings } from '../decode-strings';
+import { findDecoderByArray } from '../find-decoder-by-array';
+import { findDecoderByCallCount } from '../find-decoder-by-call-count';
 
 describe('decoder', async () => {
   it('find decoder by call count', async () => {
@@ -16,22 +16,22 @@ describe('decoder', async () => {
   
       decoder("SGVsbG8sIHdvcmxk")
       decoder("ZGVidWdnZXI=")
-      `)
+      `);
 
-    const sandbox = createNodeSandbox()
-    const { decoders, setupCode } = findDecoderByCallCount(ast, 2)
+    const sandbox = createNodeSandbox();
+    const { decoders, setupCode } = findDecoderByCallCount(ast, 2);
 
-    await evalCode(sandbox, setupCode)
-    await decodeStrings(sandbox, decoders)
+    await evalCode(sandbox, setupCode);
+    await decodeStrings(sandbox, decoders);
 
-    decoders.forEach((d) => d.path.remove())
+    decoders.forEach((d) => d.path.remove());
 
-    expect(decoders[0].name).toBe('decoder')
+    expect(decoders[0].name).toBe('decoder');
     expect(generate(ast)).toMatchInlineSnapshot(`
       ""Hello, world";
       "debugger";"
-    `)
-  })
+    `);
+  });
 
   it('find decoder by call count when exported', async () => {
     const ast = parse(
@@ -44,21 +44,21 @@ describe('decoder', async () => {
       decoder("ZGVidWdnZXI=")
       `,
       { sourceType: 'module' },
-    )
+    );
 
-    const sandbox = createNodeSandbox()
-    const { decoders, setupCode } = findDecoderByCallCount(ast, 2)
+    const sandbox = createNodeSandbox();
+    const { decoders, setupCode } = findDecoderByCallCount(ast, 2);
 
-    await evalCode(sandbox, setupCode)
-    await decodeStrings(sandbox, decoders)
+    await evalCode(sandbox, setupCode);
+    await decodeStrings(sandbox, decoders);
 
-    decoders.forEach((d) => d.path.remove())
+    decoders.forEach((d) => d.path.remove());
 
-    expect(decoders[0].name).toBe('decoder')
+    expect(decoders[0].name).toBe('decoder');
     expect(generate(ast)).toMatchInlineSnapshot(`
       "\"Hello, world\";\n\"debugger\";"
-    `)
-  })
+    `);
+  });
 
   it('find decoder by array', async () => {
     const ast = parse(`
@@ -72,26 +72,26 @@ describe('decoder', async () => {
 
       decoder(0)
       decoder(1)
-      `)
+      `);
 
-    const sandbox = createNodeSandbox()
+    const sandbox = createNodeSandbox();
 
-    const { stringArray, decoders, rotators, setupCode } = findDecoderByArray(ast)
+    const { stringArray, decoders, rotators, setupCode } = findDecoderByArray(ast);
 
-    await evalCode(sandbox, setupCode)
-    await decodeStrings(sandbox, decoders)
+    await evalCode(sandbox, setupCode);
+    await decodeStrings(sandbox, decoders);
 
-    stringArray?.path.remove()
-    decoders.forEach((d) => d.path.remove())
-    rotators.forEach((r) => r.remove())
-    expect(stringArray!.name).toBe('arr')
-    expect(decoders[0].name).toBe('decoder')
+    stringArray?.path.remove();
+    decoders.forEach((d) => d.path.remove());
+    rotators.forEach((r) => r.remove());
+    expect(stringArray!.name).toBe('arr');
+    expect(decoders[0].name).toBe('decoder');
 
     expect(generate(ast)).toMatchInlineSnapshot(`
       ""hello,world";
       "debugger";"
-    `)
-  })
+    `);
+  });
 
   it('find decoder by array when exported', async () => {
     const ast = parse(
@@ -108,25 +108,25 @@ describe('decoder', async () => {
       decoder(1)
       `,
       { sourceType: 'module' },
-    )
+    );
 
-    const sandbox = createNodeSandbox()
+    const sandbox = createNodeSandbox();
 
-    const { stringArray, decoders, rotators, setupCode } = findDecoderByArray(ast)
+    const { stringArray, decoders, rotators, setupCode } = findDecoderByArray(ast);
 
-    await evalCode(sandbox, setupCode)
-    await decodeStrings(sandbox, decoders)
+    await evalCode(sandbox, setupCode);
+    await decodeStrings(sandbox, decoders);
 
-    stringArray?.path.remove()
-    decoders.forEach((d) => d.path.remove())
-    rotators.forEach((r) => r.remove())
-    expect(stringArray!.name).toBe('arr')
-    expect(decoders[0].name).toBe('decoder')
+    stringArray?.path.remove();
+    decoders.forEach((d) => d.path.remove());
+    rotators.forEach((r) => r.remove());
+    expect(stringArray!.name).toBe('arr');
+    expect(decoders[0].name).toBe('decoder');
 
     expect(generate(ast)).toMatchInlineSnapshot(`
       "export const first = \"hello,world\";\n\"debugger\";"
-    `)
-  })
+    `);
+  });
 
   it('filters string array candidates by expected length', () => {
     const ast = parse(`
@@ -145,13 +145,13 @@ describe('decoder', async () => {
       (function(a, b) {
         // rotator function
       })(arr, 0x128)
-    `)
+    `);
 
-    const { stringArray, decoders } = findDecoderByArray(ast, 2)
+    const { stringArray, decoders } = findDecoderByArray(ast, 2);
 
-    expect(stringArray?.name).toBe('arr')
-    expect(decoders[0]?.name).toBe('decoder')
-  })
+    expect(stringArray?.name).toBe('arr');
+    expect(decoders[0]?.name).toBe('decoder');
+  });
 
   it('finds wrapped string arrays built via concat iifes', async () => {
     const ast = parse(`
@@ -181,25 +181,25 @@ describe('decoder', async () => {
       decoder(1)
       decoder(2)
       decoder(3)
-    `)
+    `);
 
-    const sandbox = createNodeSandbox()
-    const { stringArray, decoders, rotators, setupCode } = findDecoderByArray(ast)
+    const sandbox = createNodeSandbox();
+    const { stringArray, decoders, rotators, setupCode } = findDecoderByArray(ast);
 
-    await evalCode(sandbox, setupCode)
-    await decodeStrings(sandbox, decoders)
+    await evalCode(sandbox, setupCode);
+    await decodeStrings(sandbox, decoders);
 
-    stringArray?.path.remove()
-    decoders.forEach((d) => d.path.remove())
-    rotators.forEach((r) => r.remove())
+    stringArray?.path.remove();
+    decoders.forEach((d) => d.path.remove());
+    rotators.forEach((r) => r.remove());
 
-    expect(stringArray?.name).toBe('arrWrap')
-    expect(stringArray?.length).toBe(4)
-    expect(decoders[0]?.name).toBe('decoder')
+    expect(stringArray?.name).toBe('arrWrap');
+    expect(stringArray?.length).toBe(4);
+    expect(decoders[0]?.name).toBe('decoder');
     expect(generate(ast)).toMatchInlineSnapshot(`
       "var seed = \"jsjiami.com.v7\";\n\"hello\";\n\"world\";\n\"debugger\";"
-    `)
-  })
+    `);
+  });
 
   it('finds wrapped string arrays built via nested spread iifes', async () => {
     const ast = parse(`
@@ -231,23 +231,23 @@ describe('decoder', async () => {
       decoder(1)
       decoder(2)
       decoder(3)
-    `)
+    `);
 
-    const sandbox = createNodeSandbox()
-    const { stringArray, decoders, rotators, setupCode } = findDecoderByArray(ast)
+    const sandbox = createNodeSandbox();
+    const { stringArray, decoders, rotators, setupCode } = findDecoderByArray(ast);
 
-    await evalCode(sandbox, setupCode)
-    await decodeStrings(sandbox, decoders)
+    await evalCode(sandbox, setupCode);
+    await decodeStrings(sandbox, decoders);
 
-    stringArray?.path.remove()
-    decoders.forEach((d) => d.path.remove())
-    rotators.forEach((r) => r.remove())
+    stringArray?.path.remove();
+    decoders.forEach((d) => d.path.remove());
+    rotators.forEach((r) => r.remove());
 
-    expect(stringArray?.name).toBe('arrWrap')
-    expect(stringArray?.length).toBe(4)
-    expect(decoders[0]?.name).toBe('decoder')
+    expect(stringArray?.name).toBe('arrWrap');
+    expect(stringArray?.length).toBe(4);
+    expect(decoders[0]?.name).toBe('decoder');
     expect(generate(ast)).toMatchInlineSnapshot(`
       "var seed = \"jsjiami.cn.v7\";\n\"hello\";\n\"world\";\n\"debugger\";"
-    `)
-  })
-})
+    `);
+  });
+});

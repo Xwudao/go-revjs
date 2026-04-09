@@ -1,27 +1,27 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-export type ThemeMode = 'light' | 'dark'
-export type AccentPreset = 'violet' | 'emerald' | 'amber'
+export type ThemeMode = 'light' | 'dark';
+export type AccentPreset = 'violet' | 'emerald' | 'amber';
 
 type AppConfigState = {
-  theme: ThemeMode
-  accent: AccentPreset
-  setTheme: (theme: ThemeMode) => void
-  toggleTheme: () => void
-  setAccent: (accent: AccentPreset) => void
-}
+  theme: ThemeMode;
+  accent: AccentPreset;
+  setTheme: (theme: ThemeMode) => void;
+  toggleTheme: () => void;
+  setAccent: (accent: AccentPreset) => void;
+};
 
 const getSystemTheme = (): ThemeMode => {
   if (
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-color-scheme: dark)').matches
   ) {
-    return 'dark'
+    return 'dark';
   }
 
-  return 'light'
-}
+  return 'light';
+};
 
 const useAppConfigStore = create<AppConfigState>()(
   persist(
@@ -39,6 +39,6 @@ const useAppConfigStore = create<AppConfigState>()(
       name: 'app-config',
     },
   ),
-)
+);
 
-export default useAppConfigStore
+export default useAppConfigStore;

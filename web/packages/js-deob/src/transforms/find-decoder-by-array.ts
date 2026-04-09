@@ -1,12 +1,12 @@
-import type { Binding, NodePath } from '@babel/traverse'
-import * as t from '@babel/types'
-import type { ArrayRotator } from '../deobfuscate/array-rotator'
+import type { Binding, NodePath } from '@babel/traverse';
+import * as t from '@babel/types';
+import type { ArrayRotator } from '../deobfuscate/array-rotator';
 
-import traverse from '../interop/babel-traverse'
-import * as m from '@codemod/matchers'
-import { deobLogger as logger, undefinedMatcher } from '../ast-utils'
-import { Decoder } from '../deobfuscate/decoder'
-import { buildSetupCode } from './setup-code'
+import traverse from '../interop/babel-traverse';
+import * as m from '@codemod/matchers';
+import { deobLogger as logger, undefinedMatcher } from '../ast-utils';
+import { Decoder } from '../deobfuscate/decoder';
+import { buildSetupCode } from './setup-code';
 
 /**
  * Checks if the array variable is passed as the first argument to an IIFE
@@ -15,13 +15,13 @@ import { buildSetupCode } from './setup-code'
 function hasIIFEReference(binding: Binding): boolean {
   const iifeMatcher = m.callExpression(
     m.or(m.functionExpression(), m.arrowFunctionExpression()),
-  )
+  );
   return binding.referencePaths.some((refPath) => {
-    const parent = refPath.parent
-    if (!iifeMatcher.match(parent)) return false
-    const callExpr = parent as t.CallExpression
-    return callExpr.arguments[0] === refPath.node
-  })
+    const parent = refPath.parent;
+    if (!iifeMatcher.match(parent)) return false;
+    const callExpr = parent as t.CallExpression;
+    return callExpr.arguments[0] === refPath.node;
+  });
 }
 
 /**
@@ -33,40 +33,40 @@ function hasIIFEReference(binding: Binding): boolean {
  */
 function hasMemberAccessInFunction(binding: Binding): boolean {
   return binding.referencePaths.some((refPath) => {
-    if (refPath.parentKey !== 'object') return false
+    if (refPath.parentKey !== 'object') return false;
     // Check if this reference is inside a function
-    return refPath.findParent((p) => p.isFunction()) !== null
-  })
+    return refPath.findParent((p) => p.isFunction()) !== null;
+  });
 }
 
 function getStringArrayLength(node: t.Node | null | undefined): number | undefined {
-  if (!node) return
+  if (!node) return;
 
   if (t.isArrayExpression(node)) {
-    let length = 0
+    let length = 0;
     for (const element of node.elements) {
       if (
         element === null ||
         t.isIdentifier(element, { name: 'undefined' }) ||
         t.isIdentifier(element)
       ) {
-        length++
-        continue
+        length++;
+        continue;
       }
       if (t.isStringLiteral(element)) {
-        length++
-        continue
+        length++;
+        continue;
       }
       // Handle spread elements: [...subArray] or ...(IIFE)()
       if (t.isSpreadElement(element)) {
-        const spreadLength = getStringArrayLength(element.argument)
-        if (spreadLength === undefined) return
-        length += spreadLength
-        continue
+        const spreadLength = getStringArrayLength(element.argument);
+        if (spreadLength === undefined) return;
+        length += spreadLength;
+        continue;
       }
-      return
+      return;
     }
-    return length
+    return length;
   }
 
   if (
@@ -75,21 +75,21 @@ function getStringArrayLength(node: t.Node | null | undefined): number | undefin
     !node.callee.computed &&
     t.isIdentifier(node.callee.property, { name: 'concat' })
   ) {
-    const baseLength = getStringArrayLength(node.callee.object)
-    if (baseLength === undefined) return
+    const baseLength = getStringArrayLength(node.callee.object);
+    if (baseLength === undefined) return;
 
-    let totalLength = baseLength
+    let totalLength = baseLength;
     for (const argument of node.arguments) {
       if (!t.isExpression(argument)) {
-        return
+        return;
       }
 
-      const argumentLength = getStringArrayLength(argument)
-      if (argumentLength === undefined) return
-      totalLength += argumentLength
+      const argumentLength = getStringArrayLength(argument);
+      if (argumentLength === undefined) return;
+      totalLength += argumentLength;
     }
 
-    return totalLength
+    return totalLength;
   }
 
   if (
@@ -98,51 +98,51 @@ function getStringArrayLength(node: t.Node | null | undefined): number | undefin
     node.arguments.length === 0
   ) {
     if (t.isBlockStatement(node.callee.body)) {
-      if (node.callee.body.body.length !== 1) return
-      const [statement] = node.callee.body.body
-      if (!t.isReturnStatement(statement)) return
-      return getStringArrayLength(statement.argument)
+      if (node.callee.body.body.length !== 1) return;
+      const [statement] = node.callee.body.body;
+      if (!t.isReturnStatement(statement)) return;
+      return getStringArrayLength(statement.argument);
     }
 
-    return getStringArrayLength(node.callee.body)
+    return getStringArrayLength(node.callee.body);
   }
 }
 
 function getWrappedStringArrayInfo(path: NodePath<t.FunctionDeclaration>) {
-  const { id, params, body } = path.node
-  if (!id || params.length !== 0 || body.body.length < 2) return
+  const { id, params, body } = path.node;
+  if (!id || params.length !== 0 || body.body.length < 2) return;
 
-  const [firstStatement] = body.body
+  const [firstStatement] = body.body;
   if (
     !t.isVariableDeclaration(firstStatement) ||
     firstStatement.declarations.length !== 1
   ) {
-    return
+    return;
   }
 
-  const [declarator] = firstStatement.declarations
-  if (!t.isIdentifier(declarator.id)) return
+  const [declarator] = firstStatement.declarations;
+  if (!t.isIdentifier(declarator.id)) return;
 
-  const length = getStringArrayLength(declarator.init)
-  if (length === undefined) return
+  const length = getStringArrayLength(declarator.init);
+  if (length === undefined) return;
 
-  const arrayIdentifier = declarator.id.name
-  const tailStatements = body.body.slice(1)
+  const arrayIdentifier = declarator.id.name;
+  const tailStatements = body.body.slice(1);
 
   const isArrayGetter = (fn: t.FunctionExpression | t.ArrowFunctionExpression) => {
-    if (fn.params.length !== 0) return false
+    if (fn.params.length !== 0) return false;
 
     if (t.isBlockStatement(fn.body)) {
-      if (fn.body.body.length !== 1) return false
-      const [statement] = fn.body.body
+      if (fn.body.body.length !== 1) return false;
+      const [statement] = fn.body.body;
       return (
         t.isReturnStatement(statement) &&
         t.isIdentifier(statement.argument, { name: arrayIdentifier })
-      )
+      );
     }
 
-    return t.isIdentifier(fn.body, { name: arrayIdentifier })
-  }
+    return t.isIdentifier(fn.body, { name: arrayIdentifier });
+  };
 
   const isSelfAssignment = (expression: t.AssignmentExpression) => {
     return (
@@ -150,23 +150,23 @@ function getWrappedStringArrayInfo(path: NodePath<t.FunctionDeclaration>) {
       (t.isFunctionExpression(expression.right) ||
         t.isArrowFunctionExpression(expression.right)) &&
       isArrayGetter(expression.right)
-    )
-  }
+    );
+  };
 
   if (tailStatements.length === 1) {
-    const [statement] = tailStatements
+    const [statement] = tailStatements;
     if (
       t.isReturnStatement(statement) &&
       t.isCallExpression(statement.argument) &&
       t.isAssignmentExpression(statement.argument.callee) &&
       isSelfAssignment(statement.argument.callee)
     ) {
-      return { name: id.name, length }
+      return { name: id.name, length };
     }
   }
 
   if (tailStatements.length === 2) {
-    const [assignmentStatement, returnStatement] = tailStatements
+    const [assignmentStatement, returnStatement] = tailStatements;
     if (
       t.isExpressionStatement(assignmentStatement) &&
       t.isAssignmentExpression(assignmentStatement.expression) &&
@@ -176,7 +176,7 @@ function getWrappedStringArrayInfo(path: NodePath<t.FunctionDeclaration>) {
       t.isIdentifier(returnStatement.argument.callee, { name: id.name }) &&
       returnStatement.argument.arguments.length === 0
     ) {
-      return { name: id.name, length }
+      return { name: id.name, length };
     }
   }
 }
@@ -190,11 +190,11 @@ function getWrappedStringArrayInfo(path: NodePath<t.FunctionDeclaration>) {
  * }
  */
 function createWrappedArrayMatcher() {
-  const functionName = m.capture(m.anyString())
-  const arrayIdentifier = m.capture(m.identifier())
+  const functionName = m.capture(m.anyString());
+  const arrayIdentifier = m.capture(m.identifier());
   const arrayExpression = m.capture(
     m.arrayExpression(m.arrayOf(m.or(m.stringLiteral(), undefinedMatcher))),
-  )
+  );
 
   // getStringArray = function () { return array; };
   const functionAssignment = m.assignmentExpression(
@@ -205,11 +205,11 @@ function createWrappedArrayMatcher() {
       [],
       m.blockStatement([m.returnStatement(m.fromCapture(arrayIdentifier))]),
     ),
-  )
+  );
 
   const variableDeclaration = m.variableDeclaration(undefined, [
     m.variableDeclarator(arrayIdentifier, arrayExpression),
-  ])
+  ]);
 
   // function getStringArray() { ... }
   const matcher = m.functionDeclaration(
@@ -231,9 +231,9 @@ function createWrappedArrayMatcher() {
         m.returnStatement(m.callExpression(m.identifier(functionName))),
       ]),
     ),
-  )
+  );
 
-  return { matcher, functionName, arrayExpression }
+  return { matcher, functionName, arrayExpression };
 }
 
 /**
@@ -247,34 +247,34 @@ function processReferences(
 ) {
   binding.referencePaths.forEach((r) => {
     if (r.parentKey === 'callee') {
-      const parent = r.find((p) => p.isFunctionDeclaration())
+      const parent = r.find((p) => p.isFunctionDeclaration());
       if (parent?.isFunctionDeclaration() && parent.node.id!.name !== stringArrayName) {
         // function decoder(x){
         //   return array(x)
         // }
-        decoders.push(new Decoder(parent.node.id!.name, parent.node.id!.name, parent))
+        decoders.push(new Decoder(parent.node.id!.name, parent.node.id!.name, parent));
       }
     }
 
     if (r.parentKey === 'object') {
-      const parent = r.find((p) => p.isFunctionDeclaration())
+      const parent = r.find((p) => p.isFunctionDeclaration());
       if (parent?.isFunctionDeclaration() && parent.node.id!.name !== stringArrayName) {
         // function decoder(x){
         //   return array[x]
         // }
-        decoders.push(new Decoder(parent.node.id!.name, parent.node.id!.name, parent))
+        decoders.push(new Decoder(parent.node.id!.name, parent.node.id!.name, parent));
       }
     }
 
     if (r.parentKey === 'arguments') {
-      const parent = r.parentPath
-      const parent_expression = parent?.findParent((p) => p.isExpressionStatement())
+      const parent = r.parentPath;
+      const parent_expression = parent?.findParent((p) => p.isExpressionStatement());
       if (parent_expression?.isExpressionStatement()) {
         // (function (h) {
         //     // ...
         // })(array)
-        rotators.push(parent_expression)
-        return
+        rotators.push(parent_expression);
+        return;
       }
 
       if (parent?.parentPath?.isVariableDeclarator()) {
@@ -283,50 +283,50 @@ function processReferences(
         // }
         const funcDeclaration = parent?.parentPath.findParent((p) =>
           p.isFunctionDeclaration(),
-        )
+        );
         if (funcDeclaration?.isFunctionDeclaration()) {
-          logger(`发现解密器 (变量派生): ${funcDeclaration.node.id!.name}`)
+          logger(`发现解密器 (变量派生): ${funcDeclaration.node.id!.name}`);
           decoders.push(
             new Decoder(
               funcDeclaration.node.id!.name,
               funcDeclaration.node.id!.name,
               funcDeclaration,
             ),
-          )
+          );
         }
       }
     }
-  })
+  });
 }
 
 function normalizeExpectedLength(expectedLength?: number) {
   return typeof expectedLength === 'number' && expectedLength > 0
     ? expectedLength
-    : undefined
+    : undefined;
 }
 
 export function findDecoderByArray(ast: t.Node, expectedLength?: number) {
   // 大数组 有可能是以函数形式包裹的
   let stringArray:
     | {
-        path: NodePath<t.Node>
-        references: NodePath[]
-        name: string
-        length: number
+        path: NodePath<t.Node>;
+        references: NodePath[];
+        name: string;
+        length: number;
       }
-    | undefined
+    | undefined;
   // 乱序函数
-  const rotators: ArrayRotator[] = []
+  const rotators: ArrayRotator[] = [];
   // 解密器
-  const decoders: Decoder[] = []
+  const decoders: Decoder[] = [];
 
   // Create matcher for wrapped array function pattern
   const {
     matcher: wrappedArrayMatcher,
     functionName: wrappedFunctionName,
     arrayExpression: wrappedArrayExpression,
-  } = createWrappedArrayMatcher()
-  const targetLength = normalizeExpectedLength(expectedLength)
+  } = createWrappedArrayMatcher();
+  const targetLength = normalizeExpectedLength(expectedLength);
 
   traverse(ast, {
     // Handle wrapped string array function pattern:
@@ -336,125 +336,125 @@ export function findDecoderByArray(ast: t.Node, expectedLength?: number) {
     //   return _0x4e5f();
     // }
     FunctionDeclaration(path) {
-      if (stringArray) return // Already found
+      if (stringArray) return; // Already found
 
-      const wrappedInfo = getWrappedStringArrayInfo(path)
+      const wrappedInfo = getWrappedStringArrayInfo(path);
 
       if (wrappedInfo) {
-        const { name, length } = wrappedInfo
+        const { name, length } = wrappedInfo;
 
         if (targetLength !== undefined && length !== targetLength) {
-          logger(`跳过包装字符串数组函数: ${name}，长度 ${length}，期望 ${targetLength}`)
-          return
+          logger(`跳过包装字符串数组函数: ${name}，长度 ${length}，期望 ${targetLength}`);
+          return;
         }
 
-        const binding = path.scope.getBinding(name)
+        const binding = path.scope.getBinding(name);
 
-        if (!binding) return
+        if (!binding) return;
 
-        logger(`发现包装的字符串数组函数: ${name}`)
+        logger(`发现包装的字符串数组函数: ${name}`);
 
         stringArray = {
           path,
           references: binding.referencePaths,
           name,
           length,
-        }
+        };
 
         // 通过引用 找到 数组乱序代码 与 解密函数代码
-        processReferences(binding, name, rotators, decoders)
+        processReferences(binding, name, rotators, decoders);
 
-        path.skip()
-        return
+        path.skip();
+        return;
       }
 
       if (wrappedArrayMatcher.match(path.node)) {
-        const name = wrappedFunctionName.current!
-        const length = wrappedArrayExpression.current!.elements.length
+        const name = wrappedFunctionName.current!;
+        const length = wrappedArrayExpression.current!.elements.length;
 
         if (targetLength !== undefined && length !== targetLength) {
-          logger(`跳过包装字符串数组函数: ${name}，长度 ${length}，期望 ${targetLength}`)
-          return
+          logger(`跳过包装字符串数组函数: ${name}，长度 ${length}，期望 ${targetLength}`);
+          return;
         }
 
-        const binding = path.scope.getBinding(name)
+        const binding = path.scope.getBinding(name);
 
-        if (!binding) return
+        if (!binding) return;
 
-        logger(`发现包装的字符串数组函数: ${name}`)
+        logger(`发现包装的字符串数组函数: ${name}`);
 
         stringArray = {
           path,
           references: binding.referencePaths,
           name,
           length,
-        }
+        };
 
         // 通过引用 找到 数组乱序代码 与 解密函数代码
-        processReferences(binding, name, rotators, decoders)
+        processReferences(binding, name, rotators, decoders);
 
-        path.skip()
+        path.skip();
       }
     },
 
     ArrayExpression(path) {
-      if (stringArray) return // Already found by FunctionDeclaration visitor
+      if (stringArray) return; // Already found by FunctionDeclaration visitor
 
       const stringArrayDeclaration = path.findParent(
         (p) =>
           p.isVariableDeclarator() ||
           p.isFunctionDeclaration() ||
           p.isExpressionStatement(),
-      )
+      );
 
-      if (!stringArrayDeclaration) return
+      if (!stringArrayDeclaration) return;
 
       // if (!stringArrayDeclaration?.parentPath?.isProgram())
       // return
 
-      let stringArrayName = ''
-      let stringArrayPath
+      let stringArrayName = '';
+      let stringArrayPath;
       if (stringArrayDeclaration.isVariableDeclarator()) {
         // var a = []
-        stringArrayName = (stringArrayDeclaration.node.id as t.Identifier).name
-        stringArrayPath = stringArrayDeclaration.parentPath
+        stringArrayName = (stringArrayDeclaration.node.id as t.Identifier).name;
+        stringArrayPath = stringArrayDeclaration.parentPath;
 
         // 可能会被在包裹一层
-        const parent = stringArrayPath.findParent((p) => p.isFunctionDeclaration())
+        const parent = stringArrayPath.findParent((p) => p.isFunctionDeclaration());
         if (parent && parent.isFunctionDeclaration()) {
-          stringArrayName = parent.node.id!.name
-          stringArrayPath = parent
+          stringArrayName = parent.node.id!.name;
+          stringArrayPath = parent;
         }
       } else if (stringArrayDeclaration.isFunctionDeclaration()) {
         // function a(){ return []}
-        stringArrayName = (stringArrayDeclaration.node.id as t.Identifier).name
-        stringArrayPath = stringArrayDeclaration
+        stringArrayName = (stringArrayDeclaration.node.id as t.Identifier).name;
+        stringArrayPath = stringArrayDeclaration;
       } else if (stringArrayDeclaration.isExpressionStatement()) {
         if (stringArrayDeclaration.node.expression.type === 'AssignmentExpression') {
           // a = []
           stringArrayName = (stringArrayDeclaration.node.expression.left as t.Identifier)
-            .name
-          stringArrayPath = stringArrayDeclaration
+            .name;
+          stringArrayPath = stringArrayDeclaration;
         }
       }
 
-      const binding = path.scope.getBinding(stringArrayName)
-      if (!binding) return
+      const binding = path.scope.getBinding(stringArrayName);
+      if (!binding) return;
 
-      const candidateLength = path.node.elements.length
+      const candidateLength = path.node.elements.length;
 
       if (targetLength !== undefined && candidateLength !== targetLength) {
         logger(
           `跳过字符串数组候选: ${stringArrayName || '<anonymous>'}，长度 ${candidateLength}，期望 ${targetLength}`,
-        )
-        return
+        );
+        return;
       }
 
       // Check if the array variable satisfies both conditions:
       // 1. Passed as first argument to an IIFE
       // 2. Accessed as member expression inside a function
       if (!hasIIFEReference(binding) || !hasMemberAccessInFunction(binding)) {
-        return
+        return;
       }
 
       stringArray = {
@@ -462,14 +462,14 @@ export function findDecoderByArray(ast: t.Node, expectedLength?: number) {
         references: binding.referencePaths,
         name: stringArrayName,
         length: candidateLength,
-      }
+      };
 
       // 通过引用 找到 数组乱序代码 与 解密函数代码
-      processReferences(binding, stringArrayName, rotators, decoders)
+      processReferences(binding, stringArrayName, rotators, decoders);
 
-      path.skip()
+      path.skip();
     },
-  })
+  });
 
   const setupCode =
     'program' in ast
@@ -478,12 +478,12 @@ export function findDecoderByArray(ast: t.Node, expectedLength?: number) {
           ...rotators,
           ...decoders.map((decoder) => decoder.path),
         ])
-      : ''
+      : '';
 
   return {
     stringArray,
     rotators,
     decoders,
     setupCode,
-  }
+  };
 }

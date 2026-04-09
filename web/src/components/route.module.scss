@@ -1,0 +1,71 @@
+.route-status-viewport {
+  display: grid;
+  place-items: center;
+  min-height: 20rem;
+  padding: var(--space-6);
+}
+
+.route-status-card {
+  @include card-surface;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-8) var(--space-10);
+  text-align: center;
+  max-width: 24rem;
+  box-shadow: var(--shadow-md);
+}
+
+.route-status-icon {
+  font-size: 2rem;
+  color: var(--color-text-muted);
+}
+
+.route-status-icon-error {
+  color: var(--color-danger);
+}
+
+.route-status-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+}
+
+.route-status-title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-strong);
+  margin: 0;
+}
+
+.route-status-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+  word-break: break-all;
+  max-width: 20rem;
+}
+
+.route-status-action {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--padding-control-sm);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-border);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-accent-soft) 180%, transparent);
+    border-color: var(--color-accent);
+  }
+}

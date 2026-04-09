@@ -1,12 +1,12 @@
-import type { PropsWithChildren } from 'react'
-import clsx from 'clsx'
-import { Link, useRouterState } from '@tanstack/react-router'
-import useAppConfigStore, { type AccentPreset } from '@/store/useAppConfig'
-import { useAppConfig } from '@/provider/ConfigProvider'
-import { SearchModal, useSearchModal } from './search-modal'
-import classes from './front-shell.module.scss'
+import type { PropsWithChildren } from 'react';
+import clsx from 'clsx';
+import { Link, useRouterState } from '@tanstack/react-router';
+import useAppConfigStore, { type AccentPreset } from '@/store/useAppConfig';
+import { useAppConfig } from '@/provider/ConfigProvider';
+import { SearchModal, useSearchModal } from './search-modal';
+import classes from './front-shell.module.scss';
 
-type FrontShellProps = PropsWithChildren
+type FrontShellProps = PropsWithChildren;
 
 const navItems = [
   { key: 'home', label: '首页', to: '/' },
@@ -14,14 +14,14 @@ const navItems = [
   { key: 'js-deob', label: 'JS Deob', to: '/js-deob' },
   { key: 'code-format', label: 'Formatter', to: '/code-format' },
   { key: 'ast-explorer', label: 'AST Explorer', to: '/ast-explorer' },
-] as const
+] as const;
 
-type NavKey = (typeof navItems)[number]['key']
+type NavKey = (typeof navItems)[number]['key'];
 
 export function FrontShell({ children }: FrontShellProps) {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
-  })
+  });
   const current = pathname.startsWith('/js-deob')
     ? 'js-deob'
     : pathname.startsWith('/crypto-lab')
@@ -30,9 +30,9 @@ export function FrontShell({ children }: FrontShellProps) {
         ? 'code-format'
         : pathname.startsWith('/ast-explorer')
           ? 'ast-explorer'
-          : 'home'
+          : 'home';
 
-  const search = useSearchModal()
+  const search = useSearchModal();
 
   return (
     <div className={clsx(classes.frontShell)}>
@@ -43,7 +43,7 @@ export function FrontShell({ children }: FrontShellProps) {
       <FrontFooter />
       <SearchModal open={search.isOpen} onClose={search.close} />
     </div>
-  )
+  );
 }
 
 export function RoutePending() {
@@ -57,25 +57,25 @@ export function RoutePending() {
         <span>页面切换中...</span>
       </div>
     </div>
-  )
+  );
 }
 
 function FrontHeader({
   current,
   onSearchOpen,
 }: {
-  current: NavKey
-  onSearchOpen: () => void
+  current: NavKey;
+  onSearchOpen: () => void;
 }) {
-  const { theme, accent } = useAppConfig()
-  const toggleTheme = useAppConfigStore((state) => state.toggleTheme)
-  const setAccent = useAppConfigStore((state) => state.setAccent)
+  const { theme, accent } = useAppConfig();
+  const toggleTheme = useAppConfigStore((state) => state.toggleTheme);
+  const setAccent = useAppConfigStore((state) => state.setAccent);
 
   const accentPresets: { key: AccentPreset; label: string }[] = [
     { key: 'violet', label: '绿色' },
     { key: 'emerald', label: '青绿' },
     { key: 'amber', label: '琥珀' },
-  ]
+  ];
 
   return (
     <header className={clsx(classes.siteHeader)}>
@@ -149,7 +149,7 @@ function FrontHeader({
         </div>
       </div>
     </header>
-  )
+  );
 }
 
 function FrontFooter() {
@@ -162,5 +162,5 @@ function FrontFooter() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

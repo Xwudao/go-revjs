@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
-import clsx from 'clsx'
+import type { ReactNode } from 'react';
+import clsx from 'clsx';
 import {
   DndContext,
   closestCenter,
@@ -8,39 +8,39 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
-} from '@dnd-kit/core'
+} from '@dnd-kit/core';
 import {
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
   arrayMove,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import classes from './sortable-list.module.scss'
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import classes from './sortable-list.module.scss';
 
 // ── Public types ─────────────────────────────────────────────────────────────
 
 export interface SortableItem {
   /** Stable unique key used as the dnd-kit id. */
-  uid: string
+  uid: string;
 }
 
 export interface SortableListProps<T extends SortableItem> {
-  items: T[]
-  onReorder: (items: T[]) => void
-  renderItem: (item: T, index: number) => ReactNode
+  items: T[];
+  onReorder: (items: T[]) => void;
+  renderItem: (item: T, index: number) => ReactNode;
   /** Extra class applied to each row wrapper. */
-  itemClassName?: string
+  itemClassName?: string;
 }
 
 // ── Internal row ─────────────────────────────────────────────────────────────
 
 interface RowProps<T extends SortableItem> {
-  item: T
-  index: number
-  renderItem: (item: T, index: number) => ReactNode
-  itemClassName?: string
+  item: T;
+  index: number;
+  renderItem: (item: T, index: number) => ReactNode;
+  itemClassName?: string;
 }
 
 function SortableRow<T extends SortableItem>({
@@ -52,12 +52,12 @@ function SortableRow<T extends SortableItem>({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({
       id: item.uid,
-    })
+    });
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-  }
+  };
 
   return (
     <div
@@ -78,7 +78,7 @@ function SortableRow<T extends SortableItem>({
 
       {renderItem(item, index)}
     </div>
-  )
+  );
 }
 
 // ── Public component ─────────────────────────────────────────────────────────
@@ -92,15 +92,15 @@ export function SortableList<T extends SortableItem>({
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  )
+  );
 
   function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-    const oldIndex = items.findIndex((i) => i.uid === active.id)
-    const newIndex = items.findIndex((i) => i.uid === over.id)
-    if (oldIndex < 0 || newIndex < 0) return
-    onReorder(arrayMove(items, oldIndex, newIndex))
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = items.findIndex((i) => i.uid === active.id);
+    const newIndex = items.findIndex((i) => i.uid === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    onReorder(arrayMove(items, oldIndex, newIndex));
   }
 
   return (
@@ -124,5 +124,5 @@ export function SortableList<T extends SortableItem>({
         ))}
       </SortableContext>
     </DndContext>
-  )
+  );
 }

@@ -5,16 +5,16 @@ export type ToolRoute =
   | '/js-deob'
   | '/code-format'
   | '/string-tools'
-  | '/text-pipeline'
+  | '/text-pipeline';
 
 export interface HubTool {
-  title: string
-  description: string
-  iconClass: string
-  to: ToolRoute
-  keywords: readonly string[]
+  title: string;
+  description: string;
+  iconClass: string;
+  to: ToolRoute;
+  keywords: readonly string[];
   /** Badge label displayed on the homepage card grid. Absent for entries that are search-only (e.g. homepage). */
-  cardState?: string
+  cardState?: string;
 }
 
 export const HUB_TOOLS = [
@@ -90,9 +90,9 @@ export const HUB_TOOLS = [
     keywords: ['pipeline', 'text', '管道', 'transform', '处理'],
     cardState: '已上线',
   },
-] as const satisfies readonly HubTool[]
+] as const satisfies readonly HubTool[];
 
 /** Tools that appear as cards on the homepage grid (those with a cardState badge). */
 export const HUB_CARDS = (HUB_TOOLS as readonly HubTool[]).filter(
   (t): t is HubTool & { cardState: string } => t.cardState !== undefined,
-)
+);

@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
-import clsx from 'clsx'
-import { CodeEditor } from '@/components/ui/code-editor'
-import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button'
+import { useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
+import { CodeEditor } from '@/components/ui/code-editor';
+import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
 import {
   type FlatRow,
   NODE_CATEGORY_MAP,
   useAstExplorer,
-} from './hooks/ast-explorer.hook'
-import classes from './ast-explorer.module.scss'
+} from './hooks/ast-explorer.hook';
+import classes from './ast-explorer.module.scss';
 
 export default function AstExplorerPage() {
   const {
@@ -27,38 +27,38 @@ export default function AstExplorerPage() {
     handleResetCode,
     handleCopyCode,
     handleCursorChange,
-  } = useAstExplorer()
+  } = useAstExplorer();
 
-  const { ast, error, parseTime } = parseResult
+  const { ast, error, parseTime } = parseResult;
 
   // ── Context menu ────────────────────────────────────────────────────────────
   const [ctxMenu, setCtxMenu] = useState<{
-    path: string
-    x: number
-    y: number
-  } | null>(null)
+    path: string;
+    x: number;
+    y: number;
+  } | null>(null);
 
   useEffect(() => {
-    if (!ctxMenu) return
+    if (!ctxMenu) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setCtxMenu(null)
-    }
-    document.addEventListener('keydown', handleKey)
-    return () => document.removeEventListener('keydown', handleKey)
-  }, [ctxMenu])
+      if (e.key === 'Escape') setCtxMenu(null);
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [ctxMenu]);
 
   // ── Scroll to selected AST node ─────────────────────────────────────────────
-  const astContainerRef = useRef<HTMLDivElement>(null)
+  const astContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!selectedPath || rightTab !== 'ast') return
+    if (!selectedPath || rightTab !== 'ast') return;
     requestAnimationFrame(() => {
       const el = astContainerRef.current?.querySelector(
         `[data-ast-path="${CSS.escape(selectedPath)}"]`,
-      ) as HTMLElement | null
-      el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-    })
-  }, [selectedPath, rightTab])
+      ) as HTMLElement | null;
+      el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
+  }, [selectedPath, rightTab]);
 
   return (
     <div className={classes.page}>
@@ -164,7 +164,7 @@ export default function AstExplorerPage() {
               )}
               {!error &&
                 flatRows.map((row: FlatRow) => {
-                  const isSelected = selectedPath === row.pathKey
+                  const isSelected = selectedPath === row.pathKey;
                   return (
                     <div
                       key={row.pathKey}
@@ -177,9 +177,9 @@ export default function AstExplorerPage() {
                       style={{ paddingLeft: `${row.depth * 16 + 6}px` }}
                       onClick={() => row.hasChildren && handleToggleExpand(row.pathKey)}
                       onContextMenu={(e) => {
-                        if (row.kind !== 'node') return
-                        e.preventDefault()
-                        setCtxMenu({ path: row.pathKey, x: e.clientX, y: e.clientY })
+                        if (row.kind !== 'node') return;
+                        e.preventDefault();
+                        setCtxMenu({ path: row.pathKey, x: e.clientX, y: e.clientY });
                       }}
                     >
                       <span className={classes.flatToggle}>
@@ -228,7 +228,7 @@ export default function AstExplorerPage() {
                         <span className={classes.flatPrimitive}>{row.primitiveVal}</span>
                       )}
                     </div>
-                  )
+                  );
                 })}
             </div>
           )}
@@ -290,8 +290,8 @@ export default function AstExplorerPage() {
             style={{ position: 'fixed', inset: 0, zIndex: 998 }}
             onClick={() => setCtxMenu(null)}
             onContextMenu={(e) => {
-              e.preventDefault()
-              setCtxMenu(null)
+              e.preventDefault();
+              setCtxMenu(null);
             }}
           />
           <div
@@ -302,8 +302,8 @@ export default function AstExplorerPage() {
               type="button"
               className={classes.contextMenuItem}
               onClick={() => {
-                handleSelectNode(ctxMenu.path)
-                setCtxMenu(null)
+                handleSelectNode(ctxMenu.path);
+                setCtxMenu(null);
               }}
             >
               <span className="i-mdi-code-block-tags text-sm" aria-hidden="true" />
@@ -313,5 +313,5 @@ export default function AstExplorerPage() {
         </>
       )}
     </div>
-  )
+  );
 }

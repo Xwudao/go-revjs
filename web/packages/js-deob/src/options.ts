@@ -1,35 +1,35 @@
-import type { Sandbox } from './deobfuscate/vm'
-import { createBrowserSandbox, createNodeSandbox } from './deobfuscate/vm'
-import { isBrowser } from './utils/platform'
+import type { Sandbox } from './deobfuscate/vm';
+import { createBrowserSandbox, createNodeSandbox } from './deobfuscate/vm';
+import { isBrowser } from './utils/platform';
 
 export interface Options {
   /** 解密器定位方式 */
-  decoderLocationMethod?: 'callCount' | 'stringArray' | 'evalCode'
+  decoderLocationMethod?: 'callCount' | 'stringArray' | 'evalCode';
   /** 字符串数组长度，0 表示自动匹配 */
-  decoderStringArrayLength?: number
+  decoderStringArrayLength?: number;
   /** 解密器调用次数 */
-  decoderCallCount?: number
+  decoderCallCount?: number;
   /** 执行代码函数 */
-  setupCode?: string
+  setupCode?: string;
   /** 指明解密函数 */
-  decoderNames?: string | string[]
+  decoderNames?: string | string[];
 
   /** 是否标记关键信息 */
-  isMarkEnable?: boolean
+  isMarkEnable?: boolean;
   /** 关键标识符 */
-  keywords?: string[]
+  keywords?: string[];
   /** 变量名优化模式 */
-  mangleMode?: 'off' | 'all' | 'hex' | 'short' | 'custom'
+  mangleMode?: 'off' | 'all' | 'hex' | 'short' | 'custom';
   /** 自定义变量名优化正则 */
-  manglePattern?: string
+  manglePattern?: string;
   /** 自定义变量名优化正则标志位 */
-  mangleFlags?: string
+  mangleFlags?: string;
   /** 沙盒 */
-  sandbox?: Sandbox
+  sandbox?: Sandbox;
 }
 
 export function createDefaultSandbox() {
-  return isBrowser() ? createBrowserSandbox() : createNodeSandbox()
+  return isBrowser() ? createBrowserSandbox() : createNodeSandbox();
 }
 
 export const defaultOptions: Required<Options> = {
@@ -46,17 +46,17 @@ export const defaultOptions: Required<Options> = {
   manglePattern: '',
   mangleFlags: '',
   sandbox: createDefaultSandbox(),
-}
+};
 
 export function mergeOptions(options: Options): asserts options is Required<Options> {
   const mergedOptions: Required<Options> = {
     ...defaultOptions,
     ...options,
     sandbox: options.sandbox ?? createDefaultSandbox(),
-  }
+  };
   // backward compatibility: boolean mangle -> mode
   if (!options.mangleMode && typeof (options as any).mangle === 'boolean') {
-    mergedOptions.mangleMode = (options as any).mangle ? 'all' : 'off'
+    mergedOptions.mangleMode = (options as any).mangle ? 'all' : 'off';
   }
-  Object.assign(options, mergedOptions)
+  Object.assign(options, mergedOptions);
 }

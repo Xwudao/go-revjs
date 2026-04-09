@@ -1,8 +1,8 @@
-import clsx from 'clsx'
-import classes from './toolbar-button.module.scss'
+import clsx from 'clsx';
+import classes from './toolbar-button.module.scss';
 
 interface ToolbarButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'primary'
+  variant?: 'default' | 'primary';
 }
 
 export function ToolbarButton({
@@ -24,9 +24,9 @@ export function ToolbarButton({
     >
       {children}
     </button>
-  )
+  );
 }
 
 export function ToolbarDivider() {
-  return <div className={clsx(classes.toolbarDivider)} aria-hidden="true" />
+  return <div className={clsx(classes.toolbarDivider)} aria-hidden="true" />;
 }

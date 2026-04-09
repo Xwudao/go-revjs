@@ -1,12 +1,12 @@
-import type { Transform } from '../ast-utils'
-import * as m from '@codemod/matchers'
+import type { Transform } from '../ast-utils';
+import * as m from '@codemod/matchers';
 import {
   constKey,
   constMemberExpression,
   getPropName,
   inlineObjectProperties,
   isReadonlyObject,
-} from '../ast-utils'
+} from '../ast-utils';
 
 // TODO: move do decoder.ts collectCalls to avoid traversing the whole AST
 
@@ -32,9 +32,9 @@ export default {
   tags: ['safe'],
   scope: true,
   visitor() {
-    const varId = m.capture(m.identifier())
-    const propertyName = m.capture(m.matcher<string>((name) => /^\w+$/.test(name)))
-    const propertyKey = constKey(propertyName)
+    const varId = m.capture(m.identifier());
+    const propertyName = m.capture(m.matcher<string>((name) => /^\w+$/.test(name)));
+    const propertyKey = constKey(propertyName);
     // E.g. "_0x51b74a": 0x80
     const objectProperties = m.capture(
       m.arrayOf(
@@ -43,32 +43,32 @@ export default {
           m.or(m.stringLiteral(), m.numericLiteral(), m.booleanLiteral()),
         ),
       ),
-    )
+    );
     // E.g. obj._0x51b74a
-    const memberAccess = constMemberExpression(m.fromCapture(varId), propertyName)
-    const varMatcher = m.variableDeclarator(varId, m.objectExpression(objectProperties))
+    const memberAccess = constMemberExpression(m.fromCapture(varId), propertyName);
+    const varMatcher = m.variableDeclarator(varId, m.objectExpression(objectProperties));
     // E.g. { e: 0x80 }.e
     const literalMemberAccess = constMemberExpression(
       m.objectExpression(objectProperties),
       propertyName,
-    )
+    );
 
     return {
       MemberExpression(path) {
-        if (!literalMemberAccess.match(path.node)) return
+        if (!literalMemberAccess.match(path.node)) return;
         const property = objectProperties.current!.find(
           (p) => getPropName(p.key) === propertyName.current,
-        )
-        if (!property) return
-        path.replaceWith(property.value)
-        this.changes++
+        );
+        if (!property) return;
+        path.replaceWith(property.value);
+        this.changes++;
       },
       VariableDeclarator(path) {
-        if (!varMatcher.match(path.node)) return
-        if (objectProperties.current!.length === 0) return
+        if (!varMatcher.match(path.node)) return;
+        if (objectProperties.current!.length === 0) return;
 
-        const binding = path.scope.getBinding(varId.current!.name)
-        if (!binding || !isReadonlyObject(binding, memberAccess)) return
+        const binding = path.scope.getBinding(varId.current!.name);
+        if (!binding || !isReadonlyObject(binding, memberAccess)) return;
 
         inlineObjectProperties(
           binding,
@@ -76,9 +76,9 @@ export default {
             propertyKey,
             m.or(m.stringLiteral(), m.numericLiteral(), m.booleanLiteral()),
           ),
-        )
-        this.changes++
+        );
+        this.changes++;
       },
-    }
+    };
   },
-} satisfies Transform
+} satisfies Transform;

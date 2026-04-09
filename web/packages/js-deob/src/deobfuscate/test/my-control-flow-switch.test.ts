@@ -1,8 +1,8 @@
-import { test } from 'vitest'
-import { testTransform } from '../../../test'
-import myControlFlowSwitch from '../my-control-flow-switch'
+import { test } from 'vitest';
+import { testTransform } from '../../../test';
+import myControlFlowSwitch from '../my-control-flow-switch';
 
-const expectJS = testTransform(myControlFlowSwitch)
+const expectJS = testTransform(myControlFlowSwitch);
 
 test('flatten multi-statement cases in order', () =>
   expectJS(`
@@ -28,7 +28,7 @@ test('flatten multi-statement cases in order', () =>
       value += 1;
       return value;
     }
-  `))
+  `));
 
 test('infer decoder-hidden sequence string by matching case count', () =>
   expectJS(`
@@ -66,7 +66,7 @@ test('infer decoder-hidden sequence string by matching case count', () =>
       first();
       return 3;
     }
-  `))
+  `));
 
 test('prefer the exact split property when multiple sequence strings share the same case count', () =>
   expectJS(`
@@ -104,4 +104,4 @@ test('prefer the exact split property when multiple sequence strings share the s
       second();
       return done;
     }
-  `))
+  `));

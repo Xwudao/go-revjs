@@ -1,12 +1,12 @@
-import clsx from 'clsx'
-import classes from './app-checkbox.module.scss'
+import clsx from 'clsx';
+import classes from './app-checkbox.module.scss';
 
 interface AppCheckboxProps {
-  checked: boolean
-  onChange: (checked: boolean) => void
-  label: string
-  description?: string
-  disabled?: boolean
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label: string;
+  description?: string;
+  disabled?: boolean;
 }
 
 export function AppCheckbox({
@@ -39,5 +39,5 @@ export function AppCheckbox({
         )}
       </span>
     </label>
-  )
+  );
 }

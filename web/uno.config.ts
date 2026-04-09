@@ -1,5 +1,5 @@
-import presetIcons from '@unocss/preset-icons'
-import { defineConfig, presetWind3 } from 'unocss'
+import presetIcons from '@unocss/preset-icons';
+import { defineConfig, presetWind3 } from 'unocss';
 
 export default defineConfig({
   presets: [
@@ -16,11 +16,11 @@ export default defineConfig({
       },
       customizations: {
         customize(props) {
-          props.width = '1em'
-          props.height = '1em'
-          return props
+          props.width = '1em';
+          props.height = '1em';
+          return props;
         },
       },
     }),
   ],
-})
+});

@@ -1,10 +1,10 @@
-import { format } from 'prettier'
-import babel from 'prettier/plugins/babel'
-import estree from 'prettier/plugins/estree'
-import html from 'prettier/plugins/html'
-import postcss from 'prettier/plugins/postcss'
-import graphql from 'prettier/plugins/graphql'
-import markdown from 'prettier/plugins/markdown'
+import { format } from 'prettier';
+import babel from 'prettier/plugins/babel';
+import estree from 'prettier/plugins/estree';
+import html from 'prettier/plugins/html';
+import postcss from 'prettier/plugins/postcss';
+import graphql from 'prettier/plugins/graphql';
+import markdown from 'prettier/plugins/markdown';
 
 export type FormatLanguage =
   | 'javascript'
@@ -16,26 +16,26 @@ export type FormatLanguage =
   | 'json'
   | 'json5'
   | 'markdown'
-  | 'graphql'
+  | 'graphql';
 
 export interface FormatOptions {
-  printWidth: number
-  tabWidth: number
-  useTabs: boolean
-  semi: boolean
-  singleQuote: boolean
-  trailingComma: 'none' | 'es5' | 'all'
+  printWidth: number;
+  tabWidth: number;
+  useTabs: boolean;
+  semi: boolean;
+  singleQuote: boolean;
+  trailingComma: 'none' | 'es5' | 'all';
 }
 
 interface FormatRequest {
-  code: string
-  language: FormatLanguage
-  options: FormatOptions
+  code: string;
+  language: FormatLanguage;
+  options: FormatOptions;
 }
 
 type FormatResponse =
   | { type: 'formatted'; code: string }
-  | { type: 'error'; message: string }
+  | { type: 'error'; message: string };
 
 const parserMap: Record<FormatLanguage, string> = {
   javascript: 'babel',
@@ -48,7 +48,7 @@ const parserMap: Record<FormatLanguage, string> = {
   json5: 'json5',
   markdown: 'markdown',
   graphql: 'graphql',
-}
+};
 
 function getPlugins(language: FormatLanguage) {
   switch (language) {
@@ -56,22 +56,22 @@ function getPlugins(language: FormatLanguage) {
     case 'typescript':
     case 'json':
     case 'json5':
-      return [babel, estree]
+      return [babel, estree];
     case 'html':
-      return [html]
+      return [html];
     case 'css':
     case 'scss':
     case 'less':
-      return [postcss]
+      return [postcss];
     case 'markdown':
-      return [markdown]
+      return [markdown];
     case 'graphql':
-      return [graphql]
+      return [graphql];
   }
 }
 
 self.onmessage = async (event: MessageEvent<FormatRequest>) => {
-  const { code, language, options } = event.data
+  const { code, language, options } = event.data;
 
   try {
     const formatted = await format(code, {
@@ -83,15 +83,15 @@ self.onmessage = async (event: MessageEvent<FormatRequest>) => {
       semi: options.semi,
       singleQuote: options.singleQuote,
       trailingComma: options.trailingComma,
-    })
+    });
 
-    const response: FormatResponse = { type: 'formatted', code: formatted }
-    self.postMessage(response)
+    const response: FormatResponse = { type: 'formatted', code: formatted };
+    self.postMessage(response);
   } catch (error) {
     const response: FormatResponse = {
       type: 'error',
       message: error instanceof Error ? error.message : '格式化失败',
-    }
-    self.postMessage(response)
+    };
+    self.postMessage(response);
   }
-}
+};

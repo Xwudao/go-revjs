@@ -1,29 +1,29 @@
-import { createContext, useContext, useEffect, type PropsWithChildren } from 'react'
-import { Toaster } from 'react-hot-toast'
+import { createContext, useContext, useEffect, type PropsWithChildren } from 'react';
+import { Toaster } from 'react-hot-toast';
 import useAppConfigStore, {
   type AccentPreset,
   type ThemeMode,
-} from '@/store/useAppConfig'
+} from '@/store/useAppConfig';
 
 type ConfigContextValue = {
-  accent: AccentPreset
-  theme: ThemeMode
-}
+  accent: AccentPreset;
+  theme: ThemeMode;
+};
 
 type AccentTokenSet = {
-  accent: string
-  hover: string
-  active: string
-  soft: string
-  border: string
-  contrast: string
-}
+  accent: string;
+  hover: string;
+  active: string;
+  soft: string;
+  border: string;
+  contrast: string;
+};
 
 const accentTokens: Record<
   AccentPreset,
   {
-    dark: AccentTokenSet
-    light: AccentTokenSet
+    dark: AccentTokenSet;
+    light: AccentTokenSet;
   }
 > = {
   violet: {
@@ -80,36 +80,36 @@ const accentTokens: Record<
       contrast: '#ffffff',
     },
   },
-}
+};
 
-const ConfigContext = createContext<ConfigContextValue | null>(null)
+const ConfigContext = createContext<ConfigContextValue | null>(null);
 
 export function ConfigProvider({ children }: PropsWithChildren) {
-  const accent = useAppConfigStore((state) => state.accent)
-  const theme = useAppConfigStore((state) => state.theme)
+  const accent = useAppConfigStore((state) => state.accent);
+  const theme = useAppConfigStore((state) => state.theme);
 
   useEffect(() => {
-    const root = document.documentElement
-    root.dataset.theme = theme
-    root.style.colorScheme = theme
-  }, [theme])
+    const root = document.documentElement;
+    root.dataset.theme = theme;
+    root.style.colorScheme = theme;
+  }, [theme]);
 
   useEffect(() => {
-    const root = document.documentElement
-    const tokens = accentTokens[accent][theme]
+    const root = document.documentElement;
+    const tokens = accentTokens[accent][theme];
 
-    root.style.setProperty('--color-accent', tokens.accent)
-    root.style.setProperty('--color-accent-hover', tokens.hover)
-    root.style.setProperty('--color-accent-active', tokens.active)
-    root.style.setProperty('--color-accent-soft', tokens.soft)
-    root.style.setProperty('--color-accent-border', tokens.border)
-    root.style.setProperty('--color-accent-contrast', tokens.contrast)
-    root.style.setProperty('--accent', tokens.accent)
-    root.style.setProperty('--accent-bg', tokens.soft)
-    root.style.setProperty('--accent-border', tokens.border)
-    root.style.setProperty('--color-signal', tokens.accent)
-    root.style.setProperty('--color-signal-soft', tokens.soft)
-  }, [accent, theme])
+    root.style.setProperty('--color-accent', tokens.accent);
+    root.style.setProperty('--color-accent-hover', tokens.hover);
+    root.style.setProperty('--color-accent-active', tokens.active);
+    root.style.setProperty('--color-accent-soft', tokens.soft);
+    root.style.setProperty('--color-accent-border', tokens.border);
+    root.style.setProperty('--color-accent-contrast', tokens.contrast);
+    root.style.setProperty('--accent', tokens.accent);
+    root.style.setProperty('--accent-bg', tokens.soft);
+    root.style.setProperty('--accent-border', tokens.border);
+    root.style.setProperty('--color-signal', tokens.accent);
+    root.style.setProperty('--color-signal-soft', tokens.soft);
+  }, [accent, theme]);
 
   return (
     <ConfigContext.Provider
@@ -154,15 +154,15 @@ export function ConfigProvider({ children }: PropsWithChildren) {
         }}
       />
     </ConfigContext.Provider>
-  )
+  );
 }
 
 export function useAppConfig() {
-  const context = useContext(ConfigContext)
+  const context = useContext(ConfigContext);
 
   if (!context) {
-    throw new Error('useAppConfig must be used within ConfigProvider')
+    throw new Error('useAppConfig must be used within ConfigProvider');
   }
 
-  return context
+  return context;
 }

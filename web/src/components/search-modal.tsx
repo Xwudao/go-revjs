@@ -1,102 +1,102 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import clsx from 'clsx'
-import { HUB_TOOLS, type HubTool } from '@/data/hub-tools'
-import classes from './search-modal.module.scss'
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
+import clsx from 'clsx';
+import { HUB_TOOLS, type HubTool } from '@/data/hub-tools';
+import classes from './search-modal.module.scss';
 
 function filterItems(query: string): readonly HubTool[] {
-  const q = query.trim().toLowerCase()
-  if (!q) return HUB_TOOLS
+  const q = query.trim().toLowerCase();
+  if (!q) return HUB_TOOLS;
   return HUB_TOOLS.filter((item) => {
     const haystack = [item.title, item.description, ...item.keywords]
       .join(' ')
-      .toLowerCase()
-    return haystack.includes(q)
-  })
+      .toLowerCase();
+    return haystack.includes(q);
+  });
 }
 
 interface SearchModalProps {
-  open: boolean
-  onClose: () => void
+  open: boolean;
+  onClose: () => void;
 }
 
 export function SearchModal({ open, onClose }: SearchModalProps) {
-  const navigate = useNavigate()
-  const [query, setQuery] = useState('')
-  const [activeIndex, setActiveIndex] = useState(0)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const backdropRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+  const [activeIndex, setActiveIndex] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
 
-  const results = filterItems(query)
+  const results = filterItems(query);
 
   // reset state on open
   useEffect(() => {
     if (open) {
-      setQuery('')
-      setActiveIndex(0)
+      setQuery('');
+      setActiveIndex(0);
       // defer focus so the element is visible
       requestAnimationFrame(() => {
-        inputRef.current?.focus()
-      })
+        inputRef.current?.focus();
+      });
     }
-  }, [open])
+  }, [open]);
 
   // clamp active index when results change
   useEffect(() => {
     setActiveIndex((prev) =>
       results.length === 0 ? 0 : Math.min(prev, results.length - 1),
-    )
-  }, [results.length])
+    );
+  }, [results.length]);
 
   const handleSelect = useCallback(
     (item: HubTool) => {
-      onClose()
-      void navigate({ to: item.to })
+      onClose();
+      void navigate({ to: item.to });
     },
     [navigate, onClose],
-  )
+  );
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       switch (e.key) {
         case 'ArrowDown':
-          e.preventDefault()
-          setActiveIndex((prev) => (prev + 1) % Math.max(results.length, 1))
-          break
+          e.preventDefault();
+          setActiveIndex((prev) => (prev + 1) % Math.max(results.length, 1));
+          break;
         case 'ArrowUp':
-          e.preventDefault()
+          e.preventDefault();
           setActiveIndex(
             (prev) =>
               (prev - 1 + Math.max(results.length, 1)) % Math.max(results.length, 1),
-          )
-          break
+          );
+          break;
         case 'Enter':
-          e.preventDefault()
+          e.preventDefault();
           if (results[activeIndex]) {
-            handleSelect(results[activeIndex])
+            handleSelect(results[activeIndex]);
           }
-          break
+          break;
         case 'Escape':
-          e.preventDefault()
-          onClose()
-          break
+          e.preventDefault();
+          onClose();
+          break;
         default:
-          break
+          break;
       }
     },
     [results, activeIndex, handleSelect, onClose],
-  )
+  );
 
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent) => {
       if (e.target === backdropRef.current) {
-        onClose()
+        onClose();
       }
     },
     [onClose],
-  )
+  );
 
-  if (!open) return null
+  if (!open) return null;
 
   return (
     <div
@@ -122,8 +122,8 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
             placeholder="搜索工具..."
             value={query}
             onChange={(e) => {
-              setQuery(e.target.value)
-              setActiveIndex(0)
+              setQuery(e.target.value);
+              setActiveIndex(0);
             }}
             autoComplete="off"
             autoCorrect="off"
@@ -187,26 +187,26 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 /** Global Cmd+K / Ctrl+K hook — call once at the shell level */
 export function useSearchModal() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault()
-        setOpen((prev) => !prev)
+        e.preventDefault();
+        setOpen((prev) => !prev);
       }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
-  const open_ = useCallback(() => setOpen(true), [])
-  const close = useCallback(() => setOpen(false), [])
+  const open_ = useCallback(() => setOpen(true), []);
+  const close = useCallback(() => setOpen(false), []);
 
-  return { isOpen: open, open: open_, close }
+  return { isOpen: open, open: open_, close };
 }

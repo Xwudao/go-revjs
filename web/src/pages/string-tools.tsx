@@ -1,6 +1,6 @@
-import clsx from 'clsx'
-import { tabs, opsByTab, useStringTools } from './hooks/string-tools.hook'
-import classes from './string-tools.module.scss'
+import clsx from 'clsx';
+import { tabs, opsByTab, useStringTools } from './hooks/string-tools.hook';
+import classes from './string-tools.module.scss';
 
 // ── Component ────────────────────────────────────────────────────────────────
 
@@ -21,7 +21,7 @@ export default function StringToolsPage() {
     handleCopyOutput,
     handleUseOutputAsInput,
     handleClear,
-  } = useStringTools()
+  } = useStringTools();
 
   return (
     <div className={classes.page}>
@@ -219,5 +219,5 @@ export default function StringToolsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

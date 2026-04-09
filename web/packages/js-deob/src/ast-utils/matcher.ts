@@ -1,6 +1,6 @@
-import type { Binding, NodePath } from '@babel/traverse'
-import * as t from '@babel/types'
-import * as m from '@codemod/matchers'
+import type { Binding, NodePath } from '@babel/traverse';
+import * as t from '@babel/types';
+import * as m from '@codemod/matchers';
 
 /**
  * Matches any literal except for template literals with expressions (that could have side effects)
@@ -8,7 +8,7 @@ import * as m from '@codemod/matchers'
 export const safeLiteral: m.Matcher<t.Literal> = m.matcher(
   (node) =>
     t.isLiteral(node) && (!t.isTemplateLiteral(node) || node.expressions.length === 0),
-)
+);
 
 export function infiniteLoop(
   body?: m.Matcher<t.Statement>,
@@ -17,13 +17,13 @@ export function infiniteLoop(
     m.forStatement(undefined, null, undefined, body),
     m.forStatement(undefined, truthyMatcher, undefined, body),
     m.whileStatement(truthyMatcher, body),
-  )
+  );
 }
 
 export function constKey(
   name?: string | m.Matcher<string>,
 ): m.Matcher<t.Identifier | t.StringLiteral> {
-  return m.or(m.identifier(name), m.stringLiteral(name))
+  return m.or(m.identifier(name), m.stringLiteral(name));
 }
 
 export function constObjectProperty(
@@ -32,7 +32,7 @@ export function constObjectProperty(
   return m.or(
     m.objectProperty(m.identifier(), value, false),
     m.objectProperty(m.or(m.stringLiteral(), m.numericLiteral()), value),
-  )
+  );
 }
 
 export function anonymousFunction(
@@ -44,7 +44,7 @@ export function anonymousFunction(
   return m.or(
     m.functionExpression(null, params, body, false),
     m.arrowFunctionExpression(params, body),
-  )
+  );
 }
 
 export function iife(
@@ -53,7 +53,7 @@ export function iife(
     | (m.Matcher<t.Identifier> | m.Matcher<t.Pattern> | m.Matcher<t.RestElement>)[],
   body?: m.Matcher<t.BlockStatement>,
 ): m.Matcher<t.CallExpression> {
-  return m.callExpression(anonymousFunction(params, body))
+  return m.callExpression(anonymousFunction(params, body));
 }
 
 /**
@@ -63,31 +63,31 @@ export function constMemberExpression(
   object: string | m.Matcher<t.Expression>,
   property?: string | m.Matcher<string>,
 ): m.Matcher<t.MemberExpression> {
-  if (typeof object === 'string') object = m.identifier(object)
+  if (typeof object === 'string') object = m.identifier(object);
   return m.or(
     m.memberExpression(object, m.identifier(property), false),
     m.memberExpression(object, m.stringLiteral(property), true),
-  )
+  );
 }
 
 export const undefinedMatcher = m.or(
   m.identifier('undefined'),
   m.unaryExpression('void', m.numericLiteral(0)),
-)
+);
 
 export const trueMatcher = m.or(
   m.booleanLiteral(true),
   m.unaryExpression('!', m.numericLiteral(0)),
   m.unaryExpression('!', m.unaryExpression('!', m.numericLiteral(1))),
   m.unaryExpression('!', m.unaryExpression('!', m.arrayExpression([]))),
-)
+);
 
 export const falseMatcher = m.or(
   m.booleanLiteral(false),
   m.unaryExpression('!', m.arrayExpression([])),
-)
+);
 
-export const truthyMatcher = m.or(trueMatcher, m.arrayExpression([]))
+export const truthyMatcher = m.or(trueMatcher, m.arrayExpression([]));
 
 /**
  * Starting at the parent path of the current `NodePath` and going up the
@@ -98,7 +98,7 @@ export function findParent<T extends t.Node>(
   path: NodePath,
   matcher: m.Matcher<T>,
 ): NodePath<T> | null {
-  return path.findParent((path) => matcher.match(path.node)) as NodePath<T> | null
+  return path.findParent((path) => matcher.match(path.node)) as NodePath<T> | null;
 }
 
 /**
@@ -110,7 +110,7 @@ export function findPath<T extends t.Node>(
   path: NodePath,
   matcher: m.Matcher<T>,
 ): NodePath<T> | null {
-  return path.find((path) => matcher.match(path.node)) as NodePath<T> | null
+  return path.find((path) => matcher.match(path.node)) as NodePath<T> | null;
 }
 
 /**
@@ -123,13 +123,13 @@ export function createFunctionMatcher(
     ...captures: m.Matcher<t.Identifier>[]
   ) => m.Matcher<t.Statement[]> | m.Matcher<t.Statement>[],
 ): m.Matcher<t.FunctionExpression> {
-  const captures = Array.from({ length: params }, () => m.capture(m.anyString()))
+  const captures = Array.from({ length: params }, () => m.capture(m.anyString()));
 
   return m.functionExpression(
     undefined,
     captures.map(m.identifier),
     m.blockStatement(body(...captures.map((c) => m.identifier(m.fromCapture(c))))),
-  )
+  );
 }
 
 /**
@@ -140,10 +140,10 @@ export function isReadonlyObject(
   memberAccess: m.Matcher<t.MemberExpression>,
 ): boolean {
   // Workaround because sometimes babel treats the VariableDeclarator/binding itself as a violation
-  if (!binding.constant && binding.constantViolations[0] !== binding.path) return false
+  if (!binding.constant && binding.constantViolations[0] !== binding.path) return false;
 
   function isPatternAssignment(member: NodePath<t.Node>) {
-    const { parentPath } = member
+    const { parentPath } = member;
     return (
       // [obj.property] = [1];
       parentPath?.isArrayPattern() ||
@@ -155,7 +155,7 @@ export function isReadonlyObject(
       // ([obj.property = 1] = [])
       // ({ property: obj.property = 1 } = {})
       parentPath?.isAssignmentPattern({ left: member.node })
-    )
+    );
   }
 
   return binding.referencePaths.every(
@@ -176,7 +176,7 @@ export function isReadonlyObject(
         operator: 'delete',
       }) &&
       !isPatternAssignment(path.parentPath!),
-  )
+  );
 }
 
 /**
@@ -200,35 +200,35 @@ export function isTemporaryVariable(
     (kind === 'var'
       ? binding.path.isVariableDeclarator() && binding.path.node.init === null
       : binding.path.listKey === 'params' && binding.path.isIdentifier())
-  )
+  );
 }
 
 export class AnySubListMatcher<T> extends m.Matcher<T[]> {
-  private readonly matchers: m.Matcher<T>[]
+  private readonly matchers: m.Matcher<T>[];
 
   constructor(matchers: m.Matcher<T>[]) {
-    super()
-    this.matchers = matchers
+    super();
+    this.matchers = matchers;
   }
 
   matchValue(array: unknown, keys: readonly PropertyKey[]): array is T[] {
-    if (!Array.isArray(array)) return false
-    if (this.matchers.length === 0 && array.length === 0) return true
+    if (!Array.isArray(array)) return false;
+    if (this.matchers.length === 0 && array.length === 0) return true;
 
-    let j = 0
+    let j = 0;
     for (let i = 0; i < array.length; i++) {
-      const matches = this.matchers[j].matchValue(array[i], [...keys, i])
+      const matches = this.matchers[j].matchValue(array[i], [...keys, i]);
 
       if (matches) {
-        j++
+        j++;
 
         if (j === this.matchers.length) {
-          return true
+          return true;
         }
       }
     }
 
-    return false
+    return false;
   }
 }
 
@@ -236,5 +236,5 @@ export class AnySubListMatcher<T> extends m.Matcher<T[]> {
  * Greedy matches elements in the specified order, allowing for any number of elements in between
  */
 export function anySubList<T>(...elements: Array<m.Matcher<T>>): m.Matcher<Array<T>> {
-  return new AnySubListMatcher(elements)
+  return new AnySubListMatcher(elements);
 }

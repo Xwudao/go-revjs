@@ -1,7 +1,7 @@
-import { Link } from '@tanstack/react-router'
-import clsx from 'clsx'
-import { HUB_CARDS } from '@/data/hub-tools'
-import classes from './index.module.scss'
+import { Link } from '@tanstack/react-router';
+import clsx from 'clsx';
+import { HUB_CARDS } from '@/data/hub-tools';
+import classes from './index.module.scss';
 
 const commandEntries = [
   { label: '打开 cURL 2 Req', value: '可用' },
@@ -10,7 +10,7 @@ const commandEntries = [
   { label: '打开 Code Formatter', value: '可用' },
   { label: '打开 String Tools', value: '可用' },
   { label: '打开 Text Pipeline', value: '可用' },
-] as const
+] as const;
 
 const scopeEntries = [
   '已上线 cURL 转请求代码工具，支持 Python、Go、Fetch、Axios、OkHttp 和原始 HTTP。',
@@ -20,12 +20,12 @@ const scopeEntries = [
   '已上线字符串工具箱，涵盖 Hash、编解码、文本变换、行操作等常用处理。',
   '已上线文本依次处理工具，40+ 步骤自由组合成处理管道，Worker 后台运行。',
   '所有工具均在本地浏览器中运行，代码不会上传至服务器。',
-] as const
+] as const;
 
 const runtimeStats = [
   { label: '在线工具', value: '06' },
   { label: '本地运行', value: '100%' },
-] as const
+] as const;
 
 function IndexPage() {
   return (
@@ -148,7 +148,7 @@ function IndexPage() {
         </div>
       </section>
     </main>
-  )
+  );
 }
 
-export default IndexPage
+export default IndexPage;

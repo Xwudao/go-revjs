@@ -1,14 +1,14 @@
-import type { NodePath } from '@babel/traverse'
-import type * as t from '@babel/types'
-import traverse from '../interop/babel-traverse'
-import { deobLogger as logger } from '../ast-utils'
-import { buildSetupCode } from './setup-code'
+import type { NodePath } from '@babel/traverse';
+import type * as t from '@babel/types';
+import traverse from '../interop/babel-traverse';
+import { deobLogger as logger } from '../ast-utils';
+import { buildSetupCode } from './setup-code';
 
 /** Returns true when a string looks like a deobfuscated identifier or literal value. */
 function isAsciiPrintable(s: unknown): s is string {
   return (
     typeof s === 'string' && s.length > 0 && s.length < 100 && /^[\x20-\x7E]+$/.test(s)
-  )
+  );
 }
 
 /**
@@ -16,22 +16,22 @@ function isAsciiPrintable(s: unknown): s is string {
  * a decoder name.  Repeated until stable.
  */
 function expandAliases(ast: t.Node, baseNames: Set<string>): Set<string> {
-  const all = new Set(baseNames)
-  let changed = true
+  const all = new Set(baseNames);
+  let changed = true;
   while (changed) {
-    changed = false
+    changed = false;
     traverse(ast, {
       VariableDeclarator(path) {
-        const { id, init } = path.node
-        if (id.type !== 'Identifier' || !init || init.type !== 'Identifier') return
+        const { id, init } = path.node;
+        if (id.type !== 'Identifier' || !init || init.type !== 'Identifier') return;
         if (all.has(init.name) && !all.has(id.name)) {
-          all.add(id.name)
-          changed = true
+          all.add(id.name);
+          changed = true;
         }
       },
-    })
+    });
   }
-  return all
+  return all;
 }
 
 /** Collect up to `limit` literal-argument call sites for any name in `names`. */
@@ -40,22 +40,22 @@ function collectSampleCalls(
   names: Set<string>,
   limit = 25,
 ): Array<[number, string]> {
-  const out: Array<[number, string]> = []
+  const out: Array<[number, string]> = [];
   traverse(ast, {
     CallExpression(path) {
       if (out.length >= limit) {
-        path.stop()
-        return
+        path.stop();
+        return;
       }
-      const { callee, arguments: args } = path.node
-      if (callee.type !== 'Identifier' || !names.has(callee.name)) return
-      if (args.length < 2) return
-      const [a0, a1] = args
-      if (a0.type !== 'NumericLiteral' || a1.type !== 'StringLiteral') return
-      out.push([a0.value, a1.value])
+      const { callee, arguments: args } = path.node;
+      if (callee.type !== 'Identifier' || !names.has(callee.name)) return;
+      if (args.length < 2) return;
+      const [a0, a1] = args;
+      if (a0.type !== 'NumericLiteral' || a1.type !== 'StringLiteral') return;
+      out.push([a0.value, a1.value]);
     },
-  })
-  return out
+  });
+  return out;
 }
 
 /**
@@ -80,48 +80,48 @@ export function findBestRotation(
   arrayFnName: string,
   arrayLength: number,
 ): number {
-  const noRotatorCode = buildSetupCode(ast, [stringArrayPath, ...decoderPaths])
-  if (!noRotatorCode) return 0
+  const noRotatorCode = buildSetupCode(ast, [stringArrayPath, ...decoderPaths]);
+  if (!noRotatorCode) return 0;
 
-  const aliasNames = expandAliases(ast, new Set([decoderName]))
+  const aliasNames = expandAliases(ast, new Set([decoderName]));
   // Prefer direct decoder-name calls for the test (avoids alias complexity)
-  const directCalls = collectSampleCalls(ast, new Set([decoderName]))
+  const directCalls = collectSampleCalls(ast, new Set([decoderName]));
   const aliasCalls =
     directCalls.length < 10
       ? collectSampleCalls(ast, aliasNames, 25 - directCalls.length)
-      : []
-  const sampleCalls = [...directCalls, ...aliasCalls].slice(0, 25)
+      : [];
+  const sampleCalls = [...directCalls, ...aliasCalls].slice(0, 25);
 
   logger(
     `findBestRotation: ${sampleCalls.length} calls collected, scanning 0…${arrayLength}`,
-  )
-  if (sampleCalls.length === 0) return 0
+  );
+  if (sampleCalls.length === 0) return 0;
 
   const callsCode = sampleCalls
     .map(
       ([i, k]) =>
         `${decoderName}(${i},"${k.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}")`,
     )
-    .join(',')
+    .join(',');
 
-  let bestRot = 0
-  let bestScore = -1
+  let bestRot = 0;
+  let bestScore = -1;
 
   for (let rot = 0; rot <= arrayLength; rot++) {
     const fnBody = [
       noRotatorCode,
       `var _a=${arrayFnName}();for(var _i=0;_i<${rot};_i++)_a.push(_a.shift());`,
       `return[${callsCode}];`,
-    ].join('\n')
+    ].join('\n');
 
     try {
-      const vals = new Function(fnBody)() as unknown[]
-      const score = (vals as unknown[]).filter(isAsciiPrintable).length
+      const vals = new Function(fnBody)() as unknown[];
+      const score = (vals as unknown[]).filter(isAsciiPrintable).length;
       if (score > bestScore) {
-        bestScore = score
-        bestRot = rot
-        logger(`findBestRotation: rotation=${rot} score=${score}/${sampleCalls.length}`)
-        if (score === sampleCalls.length) break
+        bestScore = score;
+        bestRot = rot;
+        logger(`findBestRotation: rotation=${rot} score=${score}/${sampleCalls.length}`);
+        if (score === sampleCalls.length) break;
       }
     } catch {
       // ignore – wrong rotation / empty array errors are expected
@@ -130,8 +130,8 @@ export function findBestRotation(
 
   logger(
     `findBestRotation: selected rotation=${bestRot} (score ${bestScore}/${sampleCalls.length})`,
-  )
-  return bestRot
+  );
+  return bestRot;
 }
 
 /**
@@ -146,12 +146,12 @@ export function buildPreRotatedSetupCode(
   arrayFnName: string,
   rotation: number,
 ): string {
-  const base = buildSetupCode(ast, [stringArrayPath, ...decoderPaths])
-  if (rotation === 0) return base
+  const base = buildSetupCode(ast, [stringArrayPath, ...decoderPaths]);
+  if (rotation === 0) return base;
 
   const snippet =
     `;(function(){var _a=${arrayFnName}();` +
-    `for(var _i=0;_i<${rotation};_i++)_a.push(_a.shift());})();`
+    `for(var _i=0;_i<${rotation};_i++)_a.push(_a.shift());})();`;
 
-  return base + snippet
+  return base + snippet;
 }

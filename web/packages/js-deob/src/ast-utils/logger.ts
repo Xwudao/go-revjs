@@ -1,11 +1,11 @@
-import debug from 'debug'
+import debug from 'debug';
 
-export const deobLogger = debug('Deob')
+export const deobLogger = debug('Deob');
 
 export function createLogger(namespace: string) {
-  return debug(namespace)
+  return debug(namespace);
 }
 
 export function enableLogger(namespace = 'Deob') {
-  debug.enable(namespace)
+  debug.enable(namespace);
 }

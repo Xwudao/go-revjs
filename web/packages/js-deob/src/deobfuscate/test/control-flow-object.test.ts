@@ -1,8 +1,8 @@
-import { test } from 'vitest'
-import { testTransform } from '../../../test'
-import controlFlowObject from '../control-flow-object'
+import { test } from 'vitest';
+import { testTransform } from '../../../test';
+import controlFlowObject from '../control-flow-object';
 
-const expectJS = testTransform(controlFlowObject)
+const expectJS = testTransform(controlFlowObject);
 
 test('inline literal properties even when computed decoder lookups remain', () =>
   expectJS(`
@@ -27,7 +27,7 @@ test('inline literal properties even when computed decoder lookups remain', () =
       obj[decode(1)](1, 2);
       return "0|1".split("|");
     }
-  `))
+  `));
 
 test('inline function wrappers from mixed literal objects', () =>
   expectJS(`
@@ -46,7 +46,7 @@ test('inline function wrappers from mixed literal objects', () =>
       step();
       return true;
     }
-  `))
+  `));
 
 test('inline mixed objects with regular property names', () =>
   expectJS(`
@@ -65,4 +65,4 @@ test('inline mixed objects with regular property names', () =>
       step();
       return true;
     }
-  `))
+  `));

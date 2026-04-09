@@ -1,20 +1,20 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import clsx from 'clsx'
-import classes from './app-select.module.scss'
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import clsx from 'clsx';
+import classes from './app-select.module.scss';
 
 export interface AppSelectOption<T extends string = string> {
-  value: T
-  label: string
-  description?: string
+  value: T;
+  label: string;
+  description?: string;
 }
 
 interface AppSelectProps<T extends string> {
-  value: T
-  options: readonly AppSelectOption<T>[]
-  onChange: (value: T) => void
-  disabled?: boolean
-  ariaLabel?: string
-  menuMaxHeight?: string
+  value: T;
+  options: readonly AppSelectOption<T>[];
+  onChange: (value: T) => void;
+  disabled?: boolean;
+  ariaLabel?: string;
+  menuMaxHeight?: string;
 }
 
 export function AppSelect<T extends string>({
@@ -25,42 +25,42 @@ export function AppSelect<T extends string>({
   ariaLabel,
   menuMaxHeight = '16rem',
 }: AppSelectProps<T>) {
-  const [open, setOpen] = useState(false)
-  const [direction, setDirection] = useState<'down' | 'up'>('down')
-  const rootRef = useRef<HTMLDivElement | null>(null)
-  const reactId = useId()
-  const listboxId = `${reactId}-listbox`
+  const [open, setOpen] = useState(false);
+  const [direction, setDirection] = useState<'down' | 'up'>('down');
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const reactId = useId();
+  const listboxId = `${reactId}-listbox`;
 
   const selectedOption = useMemo(
     () => options.find((option) => option.value === value) ?? options[0],
     [options, value],
-  )
+  );
 
   useEffect(() => {
-    if (!open) return
+    if (!open) return;
 
     function handlePointerDown(event: PointerEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false)
-        setDirection('down')
+        setOpen(false);
+        setDirection('down');
       }
     }
 
     function handleEscape(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        setOpen(false)
-        setDirection('down')
+        setOpen(false);
+        setDirection('down');
       }
     }
 
-    window.addEventListener('pointerdown', handlePointerDown)
-    window.addEventListener('keydown', handleEscape)
+    window.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('keydown', handleEscape);
 
     return () => {
-      window.removeEventListener('pointerdown', handlePointerDown)
-      window.removeEventListener('keydown', handleEscape)
-    }
-  }, [open])
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [open]);
 
   return (
     <div
@@ -80,14 +80,14 @@ export function AppSelect<T extends string>({
         disabled={disabled}
         onClick={() => {
           if (!open && rootRef.current) {
-            const rect = rootRef.current.getBoundingClientRect()
-            const spaceBelow = window.innerHeight - rect.bottom
-            const menuEstimate = 260
+            const rect = rootRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const menuEstimate = 260;
             setDirection(
               spaceBelow < menuEstimate && rect.top > spaceBelow ? 'up' : 'down',
-            )
+            );
           }
-          setOpen((current) => !current)
+          setOpen((current) => !current);
         }}
       >
         <span className={clsx(classes.appSelectValue)}>
@@ -122,9 +122,9 @@ export function AppSelect<T extends string>({
                 aria-selected={option.value === value}
                 data-selected={option.value === value}
                 onClick={() => {
-                  onChange(option.value)
-                  setOpen(false)
-                  setDirection('down')
+                  onChange(option.value);
+                  setOpen(false);
+                  setDirection('down');
                 }}
               >
                 <span className={clsx(classes.appSelectOptionCopy)}>
@@ -149,5 +149,5 @@ export function AppSelect<T extends string>({
         </div>
       )}
     </div>
-  )
+  );
 }

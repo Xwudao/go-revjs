@@ -1,5 +1,5 @@
-import { expect, test } from 'vitest'
-import { deob } from '../index'
+import { expect, test } from 'vitest';
+import { deob } from '../index';
 
 test('pipeline flattens while true blocks and inlines boolean object props', async () => {
   const { code } = await deob(`
@@ -24,13 +24,13 @@ test('pipeline flattens while true blocks and inlines boolean object props', asy
         break;
       }
     }
-  `)
+  `);
 
-  expect(code).toContain('step();')
-  expect(code).toContain('return true;')
-  expect(code).not.toContain('while (true)')
-  expect(code).not.toContain('.split("|")')
-})
+  expect(code).toContain('step();');
+  expect(code).toContain('return true;');
+  expect(code).not.toContain('while (true)');
+  expect(code).not.toContain('.split("|")');
+});
 
 test('pipeline decodes wrapped concat string arrays', async () => {
   const { code } = await deob(`
@@ -61,15 +61,15 @@ test('pipeline decodes wrapped concat string arrays', async () => {
     })(window, document);
 
     var version_ = "jsjiami.com.v7";
-  `)
+  `);
 
-  expect(code).toContain('.update = "2023年01月17日05:34:29更新";')
+  expect(code).toContain('.update = "2023年01月17日05:34:29更新";');
   expect(code).toContain(
     '.info = "本站历时1年半研发的新版本V7初版，具有多态性加密，破解难度更高。";',
-  )
-  expect(code).not.toContain('decoder(')
-  expect(code).not.toContain('jsjiami.com.v7')
-})
+  );
+  expect(code).not.toContain('decoder(');
+  expect(code).not.toContain('jsjiami.com.v7');
+});
 
 test('pipeline supports module syntax when evaluating decoder setup code', async () => {
   const { code } = await deob(`
@@ -101,16 +101,16 @@ test('pipeline supports module syntax when evaluating decoder setup code', async
     export const node = _jsx('div', {
       title: decoder(1),
     });
-  `)
+  `);
 
   expect(code).toMatch(
     /import\s+\{\s*jsx\s+as\s+_jsx\s*\}\s+from\s+['"]\.\/jsx-runtime\.js['"];/,
-  )
-  expect(code).toMatch(/_jsx\(['"]span['"], \{\s*hidden: true/s)
-  expect(code).toMatch(/export const node = _jsx\(['"]div['"], \{/)
-  expect(code).toMatch(/title: ['"]decoded value['"]/)
-  expect(code).not.toContain('decoder(1)')
-})
+  );
+  expect(code).toMatch(/_jsx\(['"]span['"], \{\s*hidden: true/s);
+  expect(code).toMatch(/export const node = _jsx\(['"]div['"], \{/);
+  expect(code).toMatch(/title: ['"]decoded value['"]/);
+  expect(code).not.toContain('decoder(1)');
+});
 
 test('pipeline removes debug-protection variants with setup declarations', async () => {
   const { code } = await deob(`
@@ -154,13 +154,13 @@ test('pipeline removes debug-protection variants with setup declarations', async
         }
       } catch (error) {}
     }
-  `)
+  `);
 
-  expect(code).not.toContain('setInterval(protect, 2000)')
-  expect(code).not.toContain('function protect')
-  expect(code).not.toContain('function inner')
-  expect(code).not.toContain('debugger')
-})
+  expect(code).not.toContain('setInterval(protect, 2000)');
+  expect(code).not.toContain('function protect');
+  expect(code).not.toContain('function inner');
+  expect(code).not.toContain('debugger');
+});
 
 test('pipeline decodes variable-declared string-array decoders', async () => {
   const { code } = await deob(`
@@ -182,11 +182,11 @@ test('pipeline decodes variable-declared string-array decoders', async () => {
     };
 
     console.log(window[decoder(1, 'salt')]);
-  `)
+  `);
 
-  expect(code).toContain('window.beta')
-  expect(code).not.toContain("decoder(1, 'salt')")
-})
+  expect(code).toContain('window.beta');
+  expect(code).not.toContain("decoder(1, 'salt')");
+});
 
 test('pipeline removes self-defending wrappers with encoded apply access', async () => {
   const { code } = await deob(`
@@ -215,13 +215,13 @@ test('pipeline removes self-defending wrappers with encoded apply access', async
 
     guarded();
     console.log('done');
-  `)
+  `);
 
-  expect(code).toContain('console.log("done")')
-  expect(code).not.toContain('var once')
-  expect(code).not.toContain('guarded()')
-  expect(code).not.toContain('_0xdeadbe')
-})
+  expect(code).toContain('console.log("done")');
+  expect(code).not.toContain('var once');
+  expect(code).not.toContain('guarded()');
+  expect(code).not.toContain('_0xdeadbe');
+});
 
 test('pipeline removes self-defending wrappers with noisy encoded apply branches', async () => {
   const { code } = await deob(`
@@ -256,13 +256,13 @@ test('pipeline removes self-defending wrappers with noisy encoded apply branches
 
     guarded();
     console.log('done');
-  `)
+  `);
 
-  expect(code).toContain('console.log("done")')
-  expect(code).not.toContain('var once')
-  expect(code).not.toContain('guarded()')
-  expect(code).not.toContain('_0xfeedaa')
-})
+  expect(code).toContain('console.log("done")');
+  expect(code).not.toContain('var once');
+  expect(code).not.toContain('guarded()');
+  expect(code).not.toContain('_0xfeedaa');
+});
 
 test('pipeline removes self-defending wrappers with setup declarations', async () => {
   const { code } = await deob(`
@@ -297,13 +297,13 @@ test('pipeline removes self-defending wrappers with setup declarations', async (
 
     guarded();
     console.log('done');
-  `)
+  `);
 
-  expect(code).toContain('console.log("done")')
-  expect(code).not.toContain('var once')
-  expect(code).not.toContain('guarded()')
-  expect(code).not.toContain('_0xbeef01')
-})
+  expect(code).toContain('console.log("done")');
+  expect(code).not.toContain('var once');
+  expect(code).not.toContain('guarded()');
+  expect(code).not.toContain('_0xbeef01');
+});
 
 // jsjiami.cn.v7: rotator IIFE compares a checksum of decoded strings (runs many iterations)
 // and would exceed the sandbox timeout. The pipeline must fall back to brute-force rotation.
@@ -364,8 +364,8 @@ test('pipeline uses brute-force rotation fallback for jsjiami.cn.v7 slow rotator
     }(_getArr, 'helloworldconsolelogtestdone'));
     var result = _dec(0, 'k0') + ' ' + _dec(1, 'k1');
     console.log(result);
-  `)
+  `);
 
-  expect(code).not.toContain('_dec(')
-  expect(code).toContain('"hello world"')
-})
+  expect(code).not.toContain('_dec(');
+  expect(code).toContain('"hello world"');
+});

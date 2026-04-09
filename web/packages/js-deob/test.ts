@@ -1,30 +1,30 @@
-import { parse } from '@babel/parser'
-import { expect } from 'vitest'
-import { applyTransform, generate, type Transform } from './src/ast-utils'
+import { parse } from '@babel/parser';
+import { expect } from 'vitest';
+import { applyTransform, generate, type Transform } from './src/ast-utils';
 
 function normalizeGeneratedCode(code: string) {
   if (code.length >= 2 && code.startsWith('"') && code.endsWith('"')) {
     try {
-      return JSON.parse(code) as string
+      return JSON.parse(code) as string;
     } catch {
-      return code.slice(1, -1)
+      return code.slice(1, -1);
     }
   }
-  return code
+  return code;
 }
 
 function normalizeSnapshotText(snapshot: string) {
-  const normalized = snapshot.replace(/\r\n/g, '\n')
+  const normalized = snapshot.replace(/\r\n/g, '\n');
   if (!normalized.includes('\n')) {
-    return normalized
+    return normalized;
   }
 
-  const lines = normalized.split('\n')
+  const lines = normalized.split('\n');
   if (lines[0]?.trim() === '') {
-    lines.shift()
+    lines.shift();
   }
   if (lines.at(-1)?.trim() === '') {
-    lines.pop()
+    lines.pop();
   }
 
   const indent = lines
@@ -32,13 +32,13 @@ function normalizeSnapshotText(snapshot: string) {
     .reduce(
       (min, line) => Math.min(min, line.match(/^\s*/)?.[0].length ?? 0),
       Number.POSITIVE_INFINITY,
-    )
+    );
 
   if (!Number.isFinite(indent)) {
-    return lines.join('\n')
+    return lines.join('\n');
   }
 
-  return lines.map((line) => line.slice(indent)).join('\n')
+  return lines.map((line) => line.slice(indent)).join('\n');
 }
 
 export function testTransform<TOptions>(
@@ -51,17 +51,17 @@ export function testTransform<TOptions>(
       allowReturnOutsideFunction: true,
       errorRecovery: true,
       plugins: ['jsx'],
-    })
+    });
 
-    applyTransform(ast, transform, options)
-    const output = normalizeGeneratedCode(generate(ast))
+    applyTransform(ast, transform, options);
+    const output = normalizeGeneratedCode(generate(ast));
     return {
       toMatchInlineSnapshot(snapshot: string) {
-        expect(output).toBe(normalizeSnapshotText(snapshot))
+        expect(output).toBe(normalizeSnapshotText(snapshot));
       },
       toMatchSnapshot() {
-        expect(output).toMatchSnapshot()
+        expect(output).toMatchSnapshot();
       },
-    }
-  }
+    };
+  };
 }
