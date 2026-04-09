@@ -10,5 +10,11 @@
   "rules": {
     "no-unused-vars": "warn"
   },
-  "ignorePatterns": ["dist/**", "**/dist/**", "**/node_modules/**", "**/tmp/**"]
+  "ignorePatterns": [
+    "dist/**",
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/tmp/**",
+    "**/routeTree.gen.ts"
+  ]
 }

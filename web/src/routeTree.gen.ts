@@ -8,90 +8,90 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as TextPipelineRouteImport } from './routes/text-pipeline'
-import { Route as StringToolsRouteImport } from './routes/string-tools'
-import { Route as JsDeobRouteImport } from './routes/js-deob'
-import { Route as CurlToCodeRouteImport } from './routes/curl-to-code'
-import { Route as CryptoLabRouteImport } from './routes/crypto-lab'
-import { Route as CodeFormatRouteImport } from './routes/code-format'
-import { Route as AstExplorerRouteImport } from './routes/ast-explorer'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as rootRouteImport } from './routes/__root';
+import { Route as TextPipelineRouteImport } from './routes/text-pipeline';
+import { Route as StringToolsRouteImport } from './routes/string-tools';
+import { Route as JsDeobRouteImport } from './routes/js-deob';
+import { Route as CurlToCodeRouteImport } from './routes/curl-to-code';
+import { Route as CryptoLabRouteImport } from './routes/crypto-lab';
+import { Route as CodeFormatRouteImport } from './routes/code-format';
+import { Route as AstExplorerRouteImport } from './routes/ast-explorer';
+import { Route as IndexRouteImport } from './routes/index';
 
 const TextPipelineRoute = TextPipelineRouteImport.update({
   id: '/text-pipeline',
   path: '/text-pipeline',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const StringToolsRoute = StringToolsRouteImport.update({
   id: '/string-tools',
   path: '/string-tools',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const JsDeobRoute = JsDeobRouteImport.update({
   id: '/js-deob',
   path: '/js-deob',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const CurlToCodeRoute = CurlToCodeRouteImport.update({
   id: '/curl-to-code',
   path: '/curl-to-code',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const CryptoLabRoute = CryptoLabRouteImport.update({
   id: '/crypto-lab',
   path: '/crypto-lab',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const CodeFormatRoute = CodeFormatRouteImport.update({
   id: '/code-format',
   path: '/code-format',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const AstExplorerRoute = AstExplorerRouteImport.update({
   id: '/ast-explorer',
   path: '/ast-explorer',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/ast-explorer': typeof AstExplorerRoute
-  '/code-format': typeof CodeFormatRoute
-  '/crypto-lab': typeof CryptoLabRoute
-  '/curl-to-code': typeof CurlToCodeRoute
-  '/js-deob': typeof JsDeobRoute
-  '/string-tools': typeof StringToolsRoute
-  '/text-pipeline': typeof TextPipelineRoute
+  '/': typeof IndexRoute;
+  '/ast-explorer': typeof AstExplorerRoute;
+  '/code-format': typeof CodeFormatRoute;
+  '/crypto-lab': typeof CryptoLabRoute;
+  '/curl-to-code': typeof CurlToCodeRoute;
+  '/js-deob': typeof JsDeobRoute;
+  '/string-tools': typeof StringToolsRoute;
+  '/text-pipeline': typeof TextPipelineRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/ast-explorer': typeof AstExplorerRoute
-  '/code-format': typeof CodeFormatRoute
-  '/crypto-lab': typeof CryptoLabRoute
-  '/curl-to-code': typeof CurlToCodeRoute
-  '/js-deob': typeof JsDeobRoute
-  '/string-tools': typeof StringToolsRoute
-  '/text-pipeline': typeof TextPipelineRoute
+  '/': typeof IndexRoute;
+  '/ast-explorer': typeof AstExplorerRoute;
+  '/code-format': typeof CodeFormatRoute;
+  '/crypto-lab': typeof CryptoLabRoute;
+  '/curl-to-code': typeof CurlToCodeRoute;
+  '/js-deob': typeof JsDeobRoute;
+  '/string-tools': typeof StringToolsRoute;
+  '/text-pipeline': typeof TextPipelineRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/ast-explorer': typeof AstExplorerRoute
-  '/code-format': typeof CodeFormatRoute
-  '/crypto-lab': typeof CryptoLabRoute
-  '/curl-to-code': typeof CurlToCodeRoute
-  '/js-deob': typeof JsDeobRoute
-  '/string-tools': typeof StringToolsRoute
-  '/text-pipeline': typeof TextPipelineRoute
+  __root__: typeof rootRouteImport;
+  '/': typeof IndexRoute;
+  '/ast-explorer': typeof AstExplorerRoute;
+  '/code-format': typeof CodeFormatRoute;
+  '/crypto-lab': typeof CryptoLabRoute;
+  '/curl-to-code': typeof CurlToCodeRoute;
+  '/js-deob': typeof JsDeobRoute;
+  '/string-tools': typeof StringToolsRoute;
+  '/text-pipeline': typeof TextPipelineRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | '/'
     | '/ast-explorer'
@@ -100,8 +100,8 @@ export interface FileRouteTypes {
     | '/curl-to-code'
     | '/js-deob'
     | '/string-tools'
-    | '/text-pipeline'
-  fileRoutesByTo: FileRoutesByTo
+    | '/text-pipeline';
+  fileRoutesByTo: FileRoutesByTo;
   to:
     | '/'
     | '/ast-explorer'
@@ -110,7 +110,7 @@ export interface FileRouteTypes {
     | '/curl-to-code'
     | '/js-deob'
     | '/string-tools'
-    | '/text-pipeline'
+    | '/text-pipeline';
   id:
     | '__root__'
     | '/'
@@ -120,78 +120,78 @@ export interface FileRouteTypes {
     | '/curl-to-code'
     | '/js-deob'
     | '/string-tools'
-    | '/text-pipeline'
-  fileRoutesById: FileRoutesById
+    | '/text-pipeline';
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AstExplorerRoute: typeof AstExplorerRoute
-  CodeFormatRoute: typeof CodeFormatRoute
-  CryptoLabRoute: typeof CryptoLabRoute
-  CurlToCodeRoute: typeof CurlToCodeRoute
-  JsDeobRoute: typeof JsDeobRoute
-  StringToolsRoute: typeof StringToolsRoute
-  TextPipelineRoute: typeof TextPipelineRoute
+  IndexRoute: typeof IndexRoute;
+  AstExplorerRoute: typeof AstExplorerRoute;
+  CodeFormatRoute: typeof CodeFormatRoute;
+  CryptoLabRoute: typeof CryptoLabRoute;
+  CurlToCodeRoute: typeof CurlToCodeRoute;
+  JsDeobRoute: typeof JsDeobRoute;
+  StringToolsRoute: typeof StringToolsRoute;
+  TextPipelineRoute: typeof TextPipelineRoute;
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/text-pipeline': {
-      id: '/text-pipeline'
-      path: '/text-pipeline'
-      fullPath: '/text-pipeline'
-      preLoaderRoute: typeof TextPipelineRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/text-pipeline';
+      path: '/text-pipeline';
+      fullPath: '/text-pipeline';
+      preLoaderRoute: typeof TextPipelineRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/string-tools': {
-      id: '/string-tools'
-      path: '/string-tools'
-      fullPath: '/string-tools'
-      preLoaderRoute: typeof StringToolsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/string-tools';
+      path: '/string-tools';
+      fullPath: '/string-tools';
+      preLoaderRoute: typeof StringToolsRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/js-deob': {
-      id: '/js-deob'
-      path: '/js-deob'
-      fullPath: '/js-deob'
-      preLoaderRoute: typeof JsDeobRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/js-deob';
+      path: '/js-deob';
+      fullPath: '/js-deob';
+      preLoaderRoute: typeof JsDeobRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/curl-to-code': {
-      id: '/curl-to-code'
-      path: '/curl-to-code'
-      fullPath: '/curl-to-code'
-      preLoaderRoute: typeof CurlToCodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/curl-to-code';
+      path: '/curl-to-code';
+      fullPath: '/curl-to-code';
+      preLoaderRoute: typeof CurlToCodeRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/crypto-lab': {
-      id: '/crypto-lab'
-      path: '/crypto-lab'
-      fullPath: '/crypto-lab'
-      preLoaderRoute: typeof CryptoLabRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/crypto-lab';
+      path: '/crypto-lab';
+      fullPath: '/crypto-lab';
+      preLoaderRoute: typeof CryptoLabRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/code-format': {
-      id: '/code-format'
-      path: '/code-format'
-      fullPath: '/code-format'
-      preLoaderRoute: typeof CodeFormatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/code-format';
+      path: '/code-format';
+      fullPath: '/code-format';
+      preLoaderRoute: typeof CodeFormatRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/ast-explorer': {
-      id: '/ast-explorer'
-      path: '/ast-explorer'
-      fullPath: '/ast-explorer'
-      preLoaderRoute: typeof AstExplorerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/ast-explorer';
+      path: '/ast-explorer';
+      fullPath: '/ast-explorer';
+      preLoaderRoute: typeof AstExplorerRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+      id: '/';
+      path: '/';
+      fullPath: '/';
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
@@ -204,7 +204,7 @@ const rootRouteChildren: RootRouteChildren = {
   JsDeobRoute: JsDeobRoute,
   StringToolsRoute: StringToolsRoute,
   TextPipelineRoute: TextPipelineRoute,
-}
+};
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+  ._addFileTypes<FileRouteTypes>();
