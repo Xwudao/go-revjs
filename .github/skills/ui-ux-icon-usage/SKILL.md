@@ -59,6 +59,17 @@ Do not guess icon names. Check the icon exists in the local UnoCSS/Iconify datas
 
 For `i-mdi-*`, verify against the installed MDI collection in the workspace dependencies before finalizing a new class name.
 
+Use `rg` or an equivalent fast search tool to inspect the actual Iconify JSON files under `node_modules/@iconify/json/json/*.json`.
+
+Examples:
+
+```bash
+rg '"information-outline"' node_modules/@iconify/json/json/mdi.json
+rg '"play-circle-outline"' node_modules/@iconify/json/json/mdi.json
+```
+
+Do not rely on memory alone when choosing a new icon class. The check should come from the local dataset file that backs the project.
+
 If a guessed icon does not exist:
 
 - do not invent a close-looking class
@@ -115,7 +126,7 @@ revjs pages are tool-oriented and content-dense. Icons should support compact re
 - [ ] Did I avoid adding icons to every repeated label?
 - [ ] Did I use `aria-hidden="true"` for purely decorative icons?
 - [ ] Did I merge utility classes and module classes with `clsx` when needed?
-- [ ] Did I verify any newly introduced icon name actually exists?
+- [ ] Did I verify any newly introduced icon name actually exists by checking `node_modules/@iconify/json/json/*.json` with `rg` or an equivalent tool?
 
 ## References
 

@@ -104,6 +104,7 @@
 .panelHeader {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border-bottom: 1px solid var(--color-border-soft);
@@ -406,6 +407,161 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   font-family: var(--font-mono);
+}
+
+/* ── Handbook panel ── */
+
+.handbookContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow: auto;
+  padding: var(--space-3);
+}
+
+.handbookAccordion {
+  min-width: 0;
+}
+
+.handbookIntro {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2-5);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--color-surface-muted) 84%, transparent);
+}
+
+.handbookIntroIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-accent);
+  font-size: 1rem;
+}
+
+.handbookIntroBody {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.handbookIntroTitle {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.handbookIntroText {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.6;
+}
+
+.handbookSectionBody {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-2-5);
+}
+
+.handbookLead {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+  line-height: 1.6;
+}
+
+.handbookList {
+  display: grid;
+  gap: var(--space-1-5);
+  margin: 0;
+  padding-left: 1rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.6;
+}
+
+.handbookApiList {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.handbookApiRow {
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+  padding: var(--space-2) var(--space-2-5);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-surface-muted) 88%, transparent);
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.handbookApiName {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-2xs);
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+.handbookApiDescription {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.55;
+}
+
+.handbookExample {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.handbookExampleTitle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.handbookCodeBlock {
+  margin: 0;
+  padding: var(--space-3);
+  overflow: auto;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-surface-muted) 92%, transparent);
+  color: var(--color-text-strong);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-2xs);
+  line-height: 1.65;
+}
+
+.handbookTip {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2-5);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-accent-soft) 70%, transparent);
+}
+
+.handbookTipIcon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--color-accent);
+}
+
+.handbookTipText {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-xs);
+  line-height: 1.55;
 }
 
 /* ── Context menu ── */

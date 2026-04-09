@@ -20,7 +20,7 @@ export interface ParseResult {
   parseTime: number;
 }
 
-export type RightTab = 'ast' | 'snippet';
+export type RightTab = 'ast' | 'snippet' | 'handbook';
 
 // ── Default code ──────────────────────────────────────────────────────────────
 

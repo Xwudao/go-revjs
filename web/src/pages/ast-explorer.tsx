@@ -1,13 +1,64 @@
 import { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
+import { Accordion } from '@/components/ui/accordion';
 import { CodeEditor } from '@/components/ui/code-editor';
 import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
+import {
+  AST_EXPLORER_HANDBOOK,
+  type AstExplorerHandbookSection,
+} from './ast-explorer-handbook';
 import {
   type FlatRow,
   NODE_CATEGORY_MAP,
   useAstExplorer,
 } from './hooks/ast-explorer.hook';
 import classes from './ast-explorer.module.scss';
+
+function HandbookSectionBody({ section }: { section: AstExplorerHandbookSection }) {
+  return (
+    <div className={clsx(classes.handbookSectionBody)}>
+      <p className={clsx(classes.handbookLead)}>{section.lead}</p>
+
+      <ul className={clsx(classes.handbookList)}>
+        {section.points.map((point) => (
+          <li key={point}>{point}</li>
+        ))}
+      </ul>
+
+      <div className={clsx(classes.handbookApiList)}>
+        {section.apiList.map((entry) => (
+          <div key={entry.name} className={clsx(classes.handbookApiRow)}>
+            <code className={clsx(classes.handbookApiName)}>{entry.name}</code>
+            <span className={clsx(classes.handbookApiDescription)}>
+              {entry.description}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {section.example && (
+        <div className={clsx(classes.handbookExample)}>
+          <div className={clsx(classes.handbookExampleTitle)}>
+            {section.example.title}
+          </div>
+          <pre className={clsx(classes.handbookCodeBlock)}>
+            <code>{section.example.code}</code>
+          </pre>
+        </div>
+      )}
+
+      {section.note && (
+        <div className={clsx(classes.handbookTip)}>
+          <span
+            className={clsx('i-mdi-information-outline', classes.handbookTipIcon)}
+            aria-hidden="true"
+          />
+          <p className={clsx(classes.handbookTipText)}>{section.note}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AstExplorerPage() {
   const {
@@ -59,6 +110,14 @@ export default function AstExplorerPage() {
       el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     });
   }, [selectedPath, rightTab]);
+
+  const handbookItems = AST_EXPLORER_HANDBOOK.map((section) => ({
+    id: section.id,
+    title: section.title,
+    description: section.summary,
+    iconClassName: section.iconClassName,
+    content: <HandbookSectionBody section={section} />,
+  }));
 
   return (
     <div className={classes.page}>
@@ -130,6 +189,14 @@ export default function AstExplorerPage() {
               <span className="i-mdi-code-block-tags text-sm" aria-hidden="true" />
               Babel 代码片段
               {selectedNode && <span className={classes.tabDot} />}
+            </button>
+            <button
+              type="button"
+              className={clsx(classes.tab, rightTab === 'handbook' && classes.tabActive)}
+              onClick={() => setRightTab('handbook')}
+            >
+              <span className="i-mdi-information-outline text-sm" aria-hidden="true" />
+              Babel 手册
             </button>
             <div className={classes.panelHeaderSpacer} />
             {rightTab === 'snippet' && selectedNode && (
@@ -277,6 +344,31 @@ export default function AstExplorerPage() {
                   />
                 </div>
               )}
+            </div>
+          )}
+
+          {rightTab === 'handbook' && (
+            <div className={clsx(classes.handbookContainer)}>
+              <div className={clsx(classes.handbookIntro)}>
+                <span
+                  className={clsx('i-mdi-information-outline', classes.handbookIntroIcon)}
+                  aria-hidden="true"
+                />
+                <div className={clsx(classes.handbookIntroBody)}>
+                  <p className={clsx(classes.handbookIntroTitle)}>
+                    Babel AST 常用操作速查
+                  </p>
+                  <p className={clsx(classes.handbookIntroText)}>
+                    这里收的是 AST Explorer 里最常见的一组
+                    API：构造节点、从代码解析、按类型判断、替换节点以及重新生成代码。
+                  </p>
+                </div>
+              </div>
+
+              <Accordion
+                items={handbookItems}
+                className={clsx(classes.handbookAccordion)}
+              />
             </div>
           )}
         </div>
