@@ -70,11 +70,17 @@ export function useWubiTyping() {
   const [totalErrors, setTotalErrors] = useState(0);
   const [totalCorrectKeys, setTotalCorrectKeys] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // ── Start-from-position ──
+  const [startTaskIndex, setStartTaskIndex] = useState(0);
+  const [sessionStartIndex, setSessionStartIndex] = useState(0);
 
   // ── Timer ──
   const startTimeRef = useRef<number | null>(null);
   const [elapsedSec, setElapsedSec] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const accumulatedSecRef = useRef(0);
 
   // ── Derived: text & tasks ──
   const rawText = useMemo(() => {
@@ -121,7 +127,9 @@ export function useWubiTyping() {
   }, [displayChars, currentTask, isFinished, displayIndexToTaskIndex, taskHadError]);
 
   // ── Stats ──
-  const completedTasks = isFinished ? typingTasks.length : taskIndex;
+  const completedTasks = isFinished
+    ? typingTasks.length - sessionStartIndex
+    : taskIndex - sessionStartIndex;
 
   const wpm = useMemo(() => {
     if (elapsedSec === 0 || completedTasks === 0) return 0;
@@ -135,9 +143,10 @@ export function useWubiTyping() {
   }, [totalCorrectKeys, totalErrors]);
 
   const progress = useMemo(() => {
-    if (typingTasks.length === 0) return 0;
-    return Math.round((completedTasks / typingTasks.length) * 100);
-  }, [completedTasks, typingTasks.length]);
+    const total = typingTasks.length - sessionStartIndex;
+    if (total <= 0) return 0;
+    return Math.round((completedTasks / total) * 100);
+  }, [completedTasks, typingTasks.length, sessionStartIndex]);
 
   // ── Timer control ──
   const startTimer = useCallback(() => {
@@ -145,7 +154,10 @@ export function useWubiTyping() {
     startTimeRef.current = Date.now();
     timerRef.current = setInterval(() => {
       if (startTimeRef.current !== null) {
-        setElapsedSec(Math.floor((Date.now() - startTimeRef.current) / 1000));
+        setElapsedSec(
+          accumulatedSecRef.current +
+            Math.floor((Date.now() - startTimeRef.current) / 1000),
+        );
       }
     }, 500);
   }, []);
@@ -156,6 +168,14 @@ export function useWubiTyping() {
       timerRef.current = null;
     }
   }, []);
+
+  const pauseTimer = useCallback(() => {
+    if (startTimeRef.current !== null) {
+      accumulatedSecRef.current += Math.floor((Date.now() - startTimeRef.current) / 1000);
+      startTimeRef.current = null;
+    }
+    stopTimer();
+  }, [stopTimer]);
 
   useEffect(() => () => stopTimer(), [stopTimer]);
 
@@ -200,7 +220,7 @@ export function useWubiTyping() {
   // Process a string of typed Chinese characters (may be more than one at a time)
   const processInputString = useCallback(
     (input: string) => {
-      if (!isStarted || isFinished || !currentTask) return;
+      if (!isStarted || isPaused || isFinished || !currentTask) return;
       startTimer();
 
       const chars = Array.from(input);
@@ -257,7 +277,16 @@ export function useWubiTyping() {
         setTaskIndex(idx);
       }
     },
-    [isStarted, isFinished, currentTask, taskIndex, typingTasks, startTimer, stopTimer],
+    [
+      isStarted,
+      isPaused,
+      isFinished,
+      currentTask,
+      taskIndex,
+      typingTasks,
+      startTimer,
+      stopTimer,
+    ],
   );
 
   const handleCompositionStart = useCallback(() => {
@@ -300,10 +329,34 @@ export function useWubiTyping() {
 
   // ── Controls ──
   const handleStart = useCallback(() => {
+    const clampedStart = Math.min(
+      Math.max(0, startTaskIndex),
+      Math.max(0, typingTasks.length - 1),
+    );
     stopTimer();
     startTimeRef.current = null;
+    accumulatedSecRef.current = 0;
     setIsStarted(true);
+    setIsPaused(false);
     setIsFinished(false);
+    setSessionStartIndex(clampedStart);
+    setTaskIndex(clampedStart);
+    setCurrentInput('');
+    setTaskHadError([]);
+    setTotalErrors(0);
+    setTotalCorrectKeys(0);
+    setElapsedSec(0);
+    setErrorFlash(false);
+  }, [stopTimer, startTaskIndex, typingTasks.length]);
+
+  const handleReset = useCallback(() => {
+    stopTimer();
+    startTimeRef.current = null;
+    accumulatedSecRef.current = 0;
+    setIsStarted(false);
+    setIsPaused(false);
+    setIsFinished(false);
+    setSessionStartIndex(0);
     setTaskIndex(0);
     setCurrentInput('');
     setTaskHadError([]);
@@ -313,19 +366,15 @@ export function useWubiTyping() {
     setErrorFlash(false);
   }, [stopTimer]);
 
-  const handleReset = useCallback(() => {
-    stopTimer();
-    startTimeRef.current = null;
-    setIsStarted(false);
-    setIsFinished(false);
-    setTaskIndex(0);
-    setCurrentInput('');
-    setTaskHadError([]);
-    setTotalErrors(0);
-    setTotalCorrectKeys(0);
-    setElapsedSec(0);
-    setErrorFlash(false);
-  }, [stopTimer]);
+  const handlePause = useCallback(() => {
+    pauseTimer();
+    setIsPaused(true);
+  }, [pauseTimer]);
+
+  const handleResume = useCallback(() => {
+    setIsPaused(false);
+    startTimer();
+  }, [startTimer]);
 
   const toggleHint = useCallback(() => setIsHintVisible((v) => !v), []);
   const toggleSettings = useCallback(() => setSettingsOpen((v) => !v), []);
@@ -334,6 +383,7 @@ export function useWubiTyping() {
   // Reset practice when text changes
   useEffect(() => {
     handleReset();
+    setStartTaskIndex(0);
   }, [rawText, handleReset]);
 
   return {
@@ -380,6 +430,11 @@ export function useWubiTyping() {
     // controls
     handleStart,
     handleReset,
+    handlePause,
+    handleResume,
+    isPaused,
+    startTaskIndex,
+    setStartTaskIndex,
     // refs
     containerRef,
     currentCharRef,

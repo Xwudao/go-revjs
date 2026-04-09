@@ -34,6 +34,11 @@ export default function WubiTypingPage() {
     toggleHint,
     handleStart,
     handleReset,
+    handlePause,
+    handleResume,
+    isPaused,
+    startTaskIndex,
+    setStartTaskIndex,
     containerRef,
     currentCharRef,
     inputRef,
@@ -97,11 +102,28 @@ export default function WubiTypingPage() {
                     <span className="i-mdi-play-outline" aria-hidden="true" />
                     开始练习
                   </button>
+                ) : isPaused ? (
+                  <>
+                    <button
+                      className={clsx(classes.ctrlBtn, classes.ctrlBtnPrimary)}
+                      onClick={handleResume}
+                    >
+                      <span className="i-mdi-play-outline" aria-hidden="true" />
+                      继续
+                    </button>
+                    <button
+                      className={clsx(classes.ctrlBtn, classes.ctrlBtnDanger)}
+                      onClick={handleReset}
+                    >
+                      <span className="i-mdi-restart" aria-hidden="true" />
+                      重置
+                    </button>
+                  </>
                 ) : (
                   <>
                     <button
                       className={clsx(classes.ctrlBtn, classes.ctrlBtnWarning)}
-                      onClick={handleReset}
+                      onClick={handlePause}
                     >
                       <span className="i-mdi-pause" aria-hidden="true" />
                       暂停
@@ -140,6 +162,26 @@ export default function WubiTypingPage() {
                   className={classes.checkbox}
                 />
                 显示编码提示
+              </label>
+              <label className={classes.checkRow}>
+                从第
+                <input
+                  type="number"
+                  min={1}
+                  max={typingTasks.length || 1}
+                  value={startTaskIndex + 1}
+                  onChange={(e) =>
+                    setStartTaskIndex(
+                      Math.max(
+                        0,
+                        Math.min(Number(e.target.value) - 1, typingTasks.length - 1),
+                      ),
+                    )
+                  }
+                  disabled={isStarted}
+                  className={classes.numberInput}
+                />
+                字开始
               </label>
             </div>
 
@@ -254,7 +296,7 @@ export default function WubiTypingPage() {
             </div>
 
             {/* Guide card */}
-            {isStarted && !isFinished && currentTask ? (
+            {isStarted && !isPaused && !isFinished && currentTask ? (
               <div
                 className={clsx(classes.guideCard, errorFlash && classes.guideCardError)}
               >
@@ -277,7 +319,8 @@ export default function WubiTypingPage() {
                 )}
               </div>
             ) : (
-              !isFinished && (
+              !isFinished &&
+              !isStarted && (
                 <div className={classes.idleCard}>
                   <span className="i-mdi-keyboard-outline" aria-hidden="true" />
                   <p>点击「开始练习」，然后用键盘输入五笔码</p>
@@ -285,8 +328,16 @@ export default function WubiTypingPage() {
               )
             )}
 
+            {/* Paused overlay */}
+            {isStarted && isPaused && !isFinished && (
+              <div className={classes.pausedCard}>
+                <span className="i-mdi-pause-circle-outline" aria-hidden="true" />
+                <p>已暂停，点击「继续」恢复练习</p>
+              </div>
+            )}
+
             {/* Input box — real input, handles IME / Mac composing correctly */}
-            {isStarted && !isFinished && (
+            {isStarted && !isFinished && !isPaused && (
               <div
                 className={clsx(classes.inputBox, errorFlash && classes.inputBoxError)}
               >

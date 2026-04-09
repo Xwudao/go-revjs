@@ -413,6 +413,56 @@
   background: transparent;
 }
 
+/* ── Number input ────────────────────────────────────────────────────────── */
+
+.number-input {
+  width: 3.5rem;
+  padding: var(--space-0-5) var(--space-1-5);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-sans);
+  color: var(--color-text-strong);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-sm);
+  outline: none;
+  text-align: center;
+  transition: border-color var(--duration-fast);
+
+  &:focus {
+    border-color: var(--color-accent-border);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* ── Paused card ─────────────────────────────────────────────────────────── */
+
+.paused-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 7rem;
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--color-border-soft);
+  flex-shrink: 0;
+
+  [class*='i-mdi'] {
+    font-size: 2rem;
+    color: var(--color-accent);
+  }
+
+  p {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+}
+
 /* ── Idle card ───────────────────────────────────────────────────────────── */
 
 .idle-card {
