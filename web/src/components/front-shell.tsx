@@ -13,6 +13,7 @@ const navItems = [
   { key: 'crypto-lab', label: 'Crypto Lab', to: '/crypto-lab' },
   { key: 'js-deob', label: 'JS Deob', to: '/js-deob' },
   { key: 'code-format', label: 'Formatter', to: '/code-format' },
+  { key: 'ast-explorer', label: 'AST Explorer', to: '/ast-explorer' },
 ] as const
 
 type NavKey = (typeof navItems)[number]['key']
@@ -27,7 +28,9 @@ export function FrontShell({ children }: FrontShellProps) {
       ? 'crypto-lab'
       : pathname.startsWith('/code-format')
         ? 'code-format'
-        : 'home'
+        : pathname.startsWith('/ast-explorer')
+          ? 'ast-explorer'
+          : 'home'
 
   const search = useSearchModal()
 
@@ -57,7 +60,13 @@ export function RoutePending() {
   )
 }
 
-function FrontHeader({ current, onSearchOpen }: { current: NavKey; onSearchOpen: () => void }) {
+function FrontHeader({
+  current,
+  onSearchOpen,
+}: {
+  current: NavKey
+  onSearchOpen: () => void
+}) {
   const { theme, accent } = useAppConfig()
   const toggleTheme = useAppConfigStore((state) => state.toggleTheme)
   const setAccent = useAppConfigStore((state) => state.setAccent)

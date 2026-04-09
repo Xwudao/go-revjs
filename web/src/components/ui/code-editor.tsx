@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import clsx from 'clsx'
 import { css } from '@codemirror/lang-css'
 import { go } from '@codemirror/lang-go'
@@ -10,6 +10,7 @@ import { json } from '@codemirror/lang-json'
 import { python } from '@codemirror/lang-python'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { EditorView } from '@codemirror/view'
+import type { ViewUpdate } from '@codemirror/view'
 import CodeMirror from '@uiw/react-codemirror'
 import { useAppConfig } from '@/provider/ConfigProvider'
 import classes from './code-editor.module.scss'
@@ -32,7 +33,10 @@ interface CodeEditorProps {
   height?: string
   minHeight?: string
   compact?: boolean
+  /** Remove border and border-radius so the editor fills a parent bordered panel seamlessly. */
+  seamless?: boolean
   language?: CodeEditorLanguage
+  onCursorChange?: (pos: { line: number; col: number }) => void
 }
 
 function buildLangExtension(language: CodeEditorLanguage) {
@@ -65,10 +69,24 @@ export function CodeEditor({
   height,
   minHeight = '33rem',
   compact = false,
+  seamless = false,
   language = 'javascript',
+  onCursorChange,
 }: CodeEditorProps) {
   const { theme } = useAppConfig()
-  const editorHeight = height ?? minHeight
+  // In seamless mode the .root is flex:1 inside its panel, so CodeMirror must
+  // fill 100% of that flex space rather than an explicit calc() value.
+  const editorHeight = seamless ? '100%' : (height ?? minHeight)
+
+  const onCursorChangeRef = useRef(onCursorChange)
+  onCursorChangeRef.current = onCursorChange
+
+  const handleUpdate = useCallback((update: ViewUpdate) => {
+    if (!update.selectionSet || !onCursorChangeRef.current) return
+    const sel = update.state.selection.main
+    const lineInfo = update.state.doc.lineAt(sel.head)
+    onCursorChangeRef.current({ line: lineInfo.number, col: sel.head - lineInfo.from })
+  }, [])
 
   const extensions = useMemo(() => {
     const langExt = buildLangExtension(language)
@@ -81,6 +99,7 @@ export function CodeEditor({
         classes.root,
         compact && classes.compact,
         readOnly && classes.readOnly,
+        seamless && classes.seamless,
       )}
       style={
         {
@@ -97,6 +116,7 @@ export function CodeEditor({
         editable={!readOnly}
         readOnly={readOnly}
         onChange={onChange}
+        onUpdate={handleUpdate}
         basicSetup={{
           foldGutter: false,
           highlightActiveLine: false,

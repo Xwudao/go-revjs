@@ -83,7 +83,9 @@ export function AppSelect<T extends string>({
             const rect = rootRef.current.getBoundingClientRect()
             const spaceBelow = window.innerHeight - rect.bottom
             const menuEstimate = 260
-            setDirection(spaceBelow < menuEstimate && rect.top > spaceBelow ? 'up' : 'down')
+            setDirection(
+              spaceBelow < menuEstimate && rect.top > spaceBelow ? 'up' : 'down',
+            )
           }
           setOpen((current) => !current)
         }}
@@ -106,11 +108,7 @@ export function AppSelect<T extends string>({
       </button>
 
       {open && (
-        <div
-          className={clsx(classes.appSelectMenu)}
-          id={listboxId}
-          role="listbox"
-        >
+        <div className={clsx(classes.appSelectMenu)} id={listboxId} role="listbox">
           <div
             className={clsx(classes.appSelectScroll)}
             style={{ maxHeight: menuMaxHeight }}
@@ -130,7 +128,9 @@ export function AppSelect<T extends string>({
                 }}
               >
                 <span className={clsx(classes.appSelectOptionCopy)}>
-                  <span className={clsx(classes.appSelectOptionLabel)}>{option.label}</span>
+                  <span className={clsx(classes.appSelectOptionLabel)}>
+                    {option.label}
+                  </span>
                   {option.description && (
                     <span className={clsx(classes.appSelectOptionDescription)}>
                       {option.description}

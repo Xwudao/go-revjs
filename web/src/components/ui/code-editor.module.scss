@@ -33,6 +33,19 @@
     --editor-min-height: 11rem;
   }
 
+  /* Fill a bordered parent panel — no own border or radius */
+  &.seamless {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    flex: 1;
+    min-height: 0;
+
+    &:focus-within {
+      box-shadow: none;
+    }
+  }
+
   :global(.cm-editor) {
     height: var(--editor-height);
     min-height: var(--editor-min-height);

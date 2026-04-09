@@ -13,7 +13,9 @@
   color: var(--color-text-muted);
   cursor: grab;
   border-radius: var(--radius-sm);
-  transition: color 100ms, background 100ms;
+  transition:
+    color 100ms,
+    background 100ms;
 
   &:hover {
     color: var(--color-text);

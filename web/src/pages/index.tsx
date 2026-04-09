@@ -82,7 +82,9 @@ function IndexPage() {
             to={feature.to}
             className={clsx(classes.frontPagePanelLink)}
           >
-            <article className={clsx(classes.frontPagePanel, classes.frontPagePanelFeature)}>
+            <article
+              className={clsx(classes.frontPagePanel, classes.frontPagePanelFeature)}
+            >
               <div className={clsx(classes.frontPagePanelHead)}>
                 <span className={clsx(classes.frontPageFeatureIcon)} aria-hidden="true">
                   <span className={feature.iconClass} />

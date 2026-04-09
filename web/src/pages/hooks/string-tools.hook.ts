@@ -61,7 +61,10 @@ const hashDefs: HashDef[] = [
   { label: 'SHA3-256', fn: (s) => CryptoJS.SHA3(s, { outputLength: 256 }).toString() },
   { label: 'SHA3-512', fn: (s) => CryptoJS.SHA3(s, { outputLength: 512 }).toString() },
   { label: 'RIPEMD160', fn: (s) => CryptoJS.RIPEMD160(s).toString() },
-  { label: 'HmacMD5', fn: (s) => CryptoJS.HmacMD5(s, 'secret').toString() + '  (key=secret)' },
+  {
+    label: 'HmacMD5',
+    fn: (s) => CryptoJS.HmacMD5(s, 'secret').toString() + '  (key=secret)',
+  },
   {
     label: 'HmacSHA256',
     fn: (s) => CryptoJS.HmacSHA256(s, 'secret').toString() + '  (key=secret)',
@@ -125,14 +128,18 @@ function unicodeEscape(s: string): string {
       if (cp > 0xffff) {
         return `\\u{${cp.toString(16).toUpperCase()}}`
       }
-      return cp > 127 || cp < 32 ? `\\u${cp.toString(16).toUpperCase().padStart(4, '0')}` : c
+      return cp > 127 || cp < 32
+        ? `\\u${cp.toString(16).toUpperCase().padStart(4, '0')}`
+        : c
     })
     .join('')
 }
 
 function unicodeUnescape(s: string): string {
   return s
-    .replace(/\\u\{([0-9a-fA-F]+)\}/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/\\u\{([0-9a-fA-F]+)\}/g, (_, hex) =>
+      String.fromCodePoint(parseInt(hex, 16)),
+    )
     .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
 }
 
@@ -241,8 +248,16 @@ export const opsByTab: Record<Exclude<TabKey, 'hash'>, OpDef[]> = {
     { label: 'Unicode 还原', icon: 'i-mdi-translate', fn: safeOp(unicodeUnescape) },
   ],
   transform: [
-    { label: 'UPPERCASE', icon: 'i-mdi-format-letter-case-upper', fn: (s) => s.toUpperCase() },
-    { label: 'lowercase', icon: 'i-mdi-format-letter-case-lower', fn: (s) => s.toLowerCase() },
+    {
+      label: 'UPPERCASE',
+      icon: 'i-mdi-format-letter-case-upper',
+      fn: (s) => s.toUpperCase(),
+    },
+    {
+      label: 'lowercase',
+      icon: 'i-mdi-format-letter-case-lower',
+      fn: (s) => s.toLowerCase(),
+    },
     { label: 'Title Case', icon: 'i-mdi-format-letter-case', fn: safeOp(toTitleCase) },
     { label: 'camelCase', icon: 'i-mdi-format-letter-case', fn: safeOp(toCamelCase) },
     { label: 'PascalCase', icon: 'i-mdi-format-letter-case', fn: safeOp(toPascalCase) },
@@ -259,7 +274,11 @@ export const opsByTab: Record<Exclude<TabKey, 'hash'>, OpDef[]> = {
       icon: 'i-mdi-collapse-all-outline',
       fn: (s) => s.replace(/\s+/g, ' ').trim(),
     },
-    { label: '去除所有空格', icon: 'i-mdi-eraser-variant', fn: (s) => s.replace(/\s/g, '') },
+    {
+      label: '去除所有空格',
+      icon: 'i-mdi-eraser-variant',
+      fn: (s) => s.replace(/\s/g, ''),
+    },
     {
       label: '换行转空格',
       icon: 'i-mdi-wrap',

@@ -646,7 +646,11 @@ function JsDeobPage() {
           </ToolbarButton>
           <ToolbarButton onClick={copyOutput} disabled={!outputCode}>
             <span className="i-mdi-content-copy" aria-hidden="true" />
-            {copyState === 'done' ? '已复制' : copyState === 'failed' ? '失败' : '复制输出'}
+            {copyState === 'done'
+              ? '已复制'
+              : copyState === 'failed'
+                ? '失败'
+                : '复制输出'}
           </ToolbarButton>
           <ToolbarButton onClick={downloadOutput} disabled={!outputCode}>
             <span className="i-mdi-download" aria-hidden="true" />
@@ -685,9 +689,7 @@ function JsDeobPage() {
             <div className={clsx(classes.jsDeobError)}>{errorMessage}</div>
           ) : (
             <div className={clsx(classes.jsDeobNote)}>
-              {parseTime === null
-                ? '运行后结果会在这里出现'
-                : `处理耗时 ${parseTime} ms`}
+              {parseTime === null ? '运行后结果会在这里出现' : `处理耗时 ${parseTime} ms`}
             </div>
           )}
           <CodeEditor readOnly value={outputCode} />

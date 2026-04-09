@@ -52,7 +52,12 @@ export default function StringToolsPage() {
                 <span className="i-mdi-pencil-outline" aria-hidden="true" />
                 <span className={classes.editorLabel}>输入</span>
               </div>
-              <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+              <span
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-text-muted)',
+                }}
+              >
                 {inputStats.chars} 字符 · {inputStats.lines} 行
               </span>
             </div>
@@ -84,7 +89,12 @@ export default function StringToolsPage() {
                 <span className="i-mdi-text-box-check-outline" aria-hidden="true" />
                 <span className={classes.editorLabel}>输出</span>
               </div>
-              <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+              <span
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-text-muted)',
+                }}
+              >
                 {outputStats.chars} 字符 · {outputStats.lines} 行
               </span>
             </div>
@@ -131,7 +141,12 @@ export default function StringToolsPage() {
           {activeTab === 'hash' && (
             <div className={classes.hashGrid}>
               {!input && (
-                <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+                <p
+                  style={{
+                    fontSize: 'var(--font-size-xs)',
+                    color: 'var(--color-text-muted)',
+                  }}
+                >
                   在上方输入内容后，所有 Hash 值将自动计算。
                 </p>
               )}
@@ -160,7 +175,11 @@ export default function StringToolsPage() {
           {activeTab !== 'hash' && (
             <div className={classes.opGrid}>
               {opsByTab[activeTab].map((op) => (
-                <button key={op.label} className={classes.opBtn} onClick={() => applyOp(op)}>
+                <button
+                  key={op.label}
+                  className={classes.opBtn}
+                  onClick={() => applyOp(op)}
+                >
                   <span className={op.icon} aria-hidden="true" />
                   {op.label}
                 </button>
@@ -174,7 +193,8 @@ export default function StringToolsPage() {
           <div className={classes.actionBarLeft}>
             <span className="i-mdi-information-outline" aria-hidden="true" />
             <span>
-              输入：{inputStats.chars} 字符 / {inputStats.words} 词 / {inputStats.bytes} 字节
+              输入：{inputStats.chars} 字符 / {inputStats.words} 词 / {inputStats.bytes}{' '}
+              字节
             </span>
           </div>
           <div className={classes.actionBarRight}>

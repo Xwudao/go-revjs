@@ -43,7 +43,10 @@ function collectSampleCalls(
   const out: Array<[number, string]> = []
   traverse(ast, {
     CallExpression(path) {
-      if (out.length >= limit) { path.stop(); return }
+      if (out.length >= limit) {
+        path.stop()
+        return
+      }
       const { callee, arguments: args } = path.node
       if (callee.type !== 'Identifier' || !names.has(callee.name)) return
       if (args.length < 2) return
@@ -83,9 +86,10 @@ export function findBestRotation(
   const aliasNames = expandAliases(ast, new Set([decoderName]))
   // Prefer direct decoder-name calls for the test (avoids alias complexity)
   const directCalls = collectSampleCalls(ast, new Set([decoderName]))
-  const aliasCalls = directCalls.length < 10
-    ? collectSampleCalls(ast, aliasNames, 25 - directCalls.length)
-    : []
+  const aliasCalls =
+    directCalls.length < 10
+      ? collectSampleCalls(ast, aliasNames, 25 - directCalls.length)
+      : []
   const sampleCalls = [...directCalls, ...aliasCalls].slice(0, 25)
 
   logger(
@@ -94,7 +98,10 @@ export function findBestRotation(
   if (sampleCalls.length === 0) return 0
 
   const callsCode = sampleCalls
-    .map(([i, k]) => `${decoderName}(${i},"${k.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}")`)
+    .map(
+      ([i, k]) =>
+        `${decoderName}(${i},"${k.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}")`,
+    )
     .join(',')
 
   let bestRot = 0
@@ -121,7 +128,9 @@ export function findBestRotation(
     }
   }
 
-  logger(`findBestRotation: selected rotation=${bestRot} (score ${bestScore}/${sampleCalls.length})`)
+  logger(
+    `findBestRotation: selected rotation=${bestRot} (score ${bestScore}/${sampleCalls.length})`,
+  )
   return bestRot
 }
 
@@ -146,4 +155,3 @@ export function buildPreRotatedSetupCode(
 
   return base + snippet
 }
-

@@ -414,7 +414,9 @@ function CodeFormatPage() {
           ) : (
             <div className={clsx(classes.fmtNote)}>
               <span className="i-mdi-information-outline" aria-hidden="true" />
-              {outputCode ? '格式化完成，可直接复制或下载。' : '配置好选项后点"立即格式化"。'}
+              {outputCode
+                ? '格式化完成，可直接复制或下载。'
+                : '配置好选项后点"立即格式化"。'}
             </div>
           )}
           <div className={clsx(classes.fmtEditorWrap)}>
@@ -565,7 +567,9 @@ function CodeFormatPage() {
             ) : null}
           </dl>
           {!outputCode && (
-            <p className={clsx(classes.fmtEmpty)}>格式化后这里会同步显示输入 / 输出行数。</p>
+            <p className={clsx(classes.fmtEmpty)}>
+              格式化后这里会同步显示输入 / 输出行数。
+            </p>
           )}
         </div>
       </div>

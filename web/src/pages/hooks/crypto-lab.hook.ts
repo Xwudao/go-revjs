@@ -127,7 +127,10 @@ export function parseWordArray(value: string, encoding: TextEncoding) {
   }
 }
 
-export function stringifyWordArray(wordArray: CryptoJS.lib.WordArray, encoding: TextEncoding) {
+export function stringifyWordArray(
+  wordArray: CryptoJS.lib.WordArray,
+  encoding: TextEncoding,
+) {
   switch (encoding) {
     case 'Hex':
       return CryptoJS.enc.Hex.stringify(wordArray)
@@ -268,8 +271,20 @@ function readStoredState(): FormState {
 // ── Code generation ──────────────────────────────────────────────────────────
 
 export function generateCode(state: FormState): string {
-  const { algorithm, direction, mode, padding, key, iv, passphrase, usePassphrase,
-    dataEncoding, secretEncoding, cipherEncoding, inputText } = state
+  const {
+    algorithm,
+    direction,
+    mode,
+    padding,
+    key,
+    iv,
+    passphrase,
+    usePassphrase,
+    dataEncoding,
+    secretEncoding,
+    cipherEncoding,
+    inputText,
+  } = state
 
   const lines: string[] = ["import CryptoJS from 'crypto-js';", '']
 
@@ -322,16 +337,22 @@ export function generateCode(state: FormState): string {
       lines.push(`console.log(decrypted.toString(CryptoJS.enc.${dataEncoding}));`)
     }
   } else {
-    lines.push(`const key = CryptoJS.enc.${secretEncoding}.parse(${JSON.stringify(key.trim() || '<key>')});`)
+    lines.push(
+      `const key = CryptoJS.enc.${secretEncoding}.parse(${JSON.stringify(key.trim() || '<key>')});`,
+    )
     if (needsIv) {
-      lines.push(`const iv = CryptoJS.enc.${secretEncoding}.parse(${JSON.stringify(iv.trim() || '<iv>')});`)
+      lines.push(
+        `const iv = CryptoJS.enc.${secretEncoding}.parse(${JSON.stringify(iv.trim() || '<iv>')});`,
+      )
     }
     lines.push('')
 
     const opts = pushOpts(needsIv)
 
     if (direction === 'encrypt') {
-      lines.push(`const payload = CryptoJS.enc.${dataEncoding}.parse(${JSON.stringify(inputText)});`)
+      lines.push(
+        `const payload = CryptoJS.enc.${dataEncoding}.parse(${JSON.stringify(inputText)});`,
+      )
       lines.push('')
       if (opts.length) {
         lines.push(`const encrypted = CryptoJS.${algorithm}.encrypt(payload, key, {`)
@@ -344,11 +365,15 @@ export function generateCode(state: FormState): string {
       if (cipherEncoding === 'Base64') {
         lines.push('console.log(encrypted.ciphertext.toString(CryptoJS.enc.Base64));')
       } else {
-        lines.push('console.log(encrypted.ciphertext.toString()); // Hex (CryptoJS default)')
+        lines.push(
+          'console.log(encrypted.ciphertext.toString()); // Hex (CryptoJS default)',
+        )
       }
     } else {
       lines.push('const cipherParams = CryptoJS.lib.CipherParams.create({')
-      lines.push(`  ciphertext: CryptoJS.enc.${cipherEncoding}.parse(${JSON.stringify(inputText.trim())}),`)
+      lines.push(
+        `  ciphertext: CryptoJS.enc.${cipherEncoding}.parse(${JSON.stringify(inputText.trim())}),`,
+      )
       lines.push('});')
       lines.push('')
       if (opts.length) {

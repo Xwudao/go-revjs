@@ -420,7 +420,11 @@ function CurlToCodePage() {
         </div>
 
         <div className={clsx(classes.curlToolbarActions)}>
-          <ToolbarButton variant="primary" onClick={runConversion} disabled={isConverting}>
+          <ToolbarButton
+            variant="primary"
+            onClick={runConversion}
+            disabled={isConverting}
+          >
             <span
               className={clsx(
                 isConverting ? 'i-mdi-loading animate-spin' : 'i-mdi-play-circle-outline',
@@ -449,7 +453,11 @@ function CurlToCodePage() {
 
           <ToolbarButton onClick={copyOutput} disabled={!outputCode}>
             <span className="i-mdi-content-copy" aria-hidden="true" />
-            {copyState === 'done' ? '已复制' : copyState === 'failed' ? '失败' : '复制结果'}
+            {copyState === 'done'
+              ? '已复制'
+              : copyState === 'failed'
+                ? '失败'
+                : '复制结果'}
           </ToolbarButton>
           <ToolbarButton onClick={downloadOutput} disabled={!outputCode}>
             <span className="i-mdi-download" aria-hidden="true" />
@@ -513,7 +521,9 @@ function CurlToCodePage() {
 
       {/* ── Bottom row: options + warnings ── */}
       <div className={clsx(classes.curlBottomRow)}>
-        <div className={clsx(classes.curlPanel, classes.curlSection, classes.curlOptions)}>
+        <div
+          className={clsx(classes.curlPanel, classes.curlSection, classes.curlOptions)}
+        >
           <h2 className={clsx(classes.curlSectionTitle)}>输出配置</h2>
 
           <div className={clsx(classes.curlForm)}>

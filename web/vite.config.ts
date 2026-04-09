@@ -8,7 +8,7 @@ import IconsResolver from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import { defineConfig } from 'vite'
 import checker from 'vite-plugin-checker'
-import nodePolyfills from "@rolldown/plugin-node-polyfills";
+import nodePolyfills from '@rolldown/plugin-node-polyfills'
 
 import UnoCSS from 'unocss/vite'
 import { compression, defineAlgorithm } from 'vite-plugin-compression2'

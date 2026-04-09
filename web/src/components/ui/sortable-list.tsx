@@ -49,9 +49,10 @@ function SortableRow<T extends SortableItem>({
   renderItem,
   itemClassName,
 }: RowProps<T>) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: item.uid,
-  })
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({
+      id: item.uid,
+    })
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -103,8 +104,15 @@ export function SortableList<T extends SortableItem>({
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={items.map((i) => i.uid)} strategy={verticalListSortingStrategy}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext
+        items={items.map((i) => i.uid)}
+        strategy={verticalListSortingStrategy}
+      >
         {items.map((item, idx) => (
           <SortableRow
             key={item.uid}

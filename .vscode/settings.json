@@ -24,12 +24,10 @@
   },
   "oxc.requireConfig": true,
   "oxc.lint.run": "onSave",
-  "oxc.enable.oxlint": true,
   "oxc.configPath": "web/.oxlintrc.json",
   "oxc.fmt.configPath": "web/.oxfmtrc.json",
   "chat.tools.terminal.autoApprove": {
     "pnpm": true
   },
-  "oxc.enable.oxfmt": true,
   "oxc.enable": true,
 }

@@ -15,7 +15,6 @@ import {
 } from './hooks/crypto-lab.hook'
 import classes from './crypto-lab.module.scss'
 
-
 function CryptoLabPage() {
   const {
     form,
@@ -53,10 +52,7 @@ function CryptoLabPage() {
         </div>
 
         <div className={clsx(classes.cryptoLabToolbarActions)}>
-          <ToolbarButton
-            variant="primary"
-            onClick={executeCrypto}
-          >
+          <ToolbarButton variant="primary" onClick={executeCrypto}>
             <span className="i-mdi-play-circle-outline" aria-hidden="true" />
             {form.direction === 'encrypt' ? '立即加密' : '立即解密'}
           </ToolbarButton>
@@ -66,7 +62,11 @@ function CryptoLabPage() {
           </ToolbarButton>
           <ToolbarButton onClick={copyResult} disabled={!result}>
             <span className="i-mdi-content-copy" aria-hidden="true" />
-            {copyState === 'done' ? '已复制' : copyState === 'failed' ? '失败' : '复制结果'}
+            {copyState === 'done'
+              ? '已复制'
+              : copyState === 'failed'
+                ? '失败'
+                : '复制结果'}
           </ToolbarButton>
 
           <ToolbarDivider />
@@ -297,13 +297,21 @@ function CryptoLabPage() {
               </div>
             </dl>
           ) : (
-            <p className={clsx(classes.cryptoLabEmpty)}>执行一次后，这里会显示本次参数摘要。</p>
+            <p className={clsx(classes.cryptoLabEmpty)}>
+              执行一次后，这里会显示本次参数摘要。
+            </p>
           )}
         </div>
       </div>
 
       {/* ── Code generation ── */}
-      <div className={clsx(classes.cryptoLabPanel, classes.cryptoLabSection, classes.cryptoLabCodegen)}>
+      <div
+        className={clsx(
+          classes.cryptoLabPanel,
+          classes.cryptoLabSection,
+          classes.cryptoLabCodegen,
+        )}
+      >
         <div className={clsx(classes.cryptoLabEditorHead)}>
           <h2 className={clsx(classes.cryptoLabSectionTitle)}>
             <span className="i-mdi-code-braces" aria-hidden="true" />

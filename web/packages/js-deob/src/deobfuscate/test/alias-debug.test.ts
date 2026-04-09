@@ -33,7 +33,7 @@ function decoder(x) { return 'r' + x; }
         if (path.node.id?.name === 'decoder') {
           decoderBinding = path.parentPath!.scope.getBinding('decoder')
         }
-      }
+      },
     })
 
     inlineVariableAliases(decoderBinding)

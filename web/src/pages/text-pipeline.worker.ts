@@ -123,7 +123,9 @@ function unicodeEsc(s: string): string {
     .map((c) => {
       const cp = c.codePointAt(0)!
       if (cp > 0xffff) return `\\u{${cp.toString(16).toUpperCase()}}`
-      return cp > 127 || cp < 32 ? `\\u${cp.toString(16).toUpperCase().padStart(4, '0')}` : c
+      return cp > 127 || cp < 32
+        ? `\\u${cp.toString(16).toUpperCase().padStart(4, '0')}`
+        : c
     })
     .join('')
 }
@@ -225,7 +227,11 @@ const fnMap: Record<PipelineFnId, (text: string) => string> = {
       .filter((l) => l.trim())
       .join(', '),
   joinLinesNewline: (s) => s.split('\n').join('\n'),
-  splitByComma: (s) => s.split(',').map((p) => p.trim()).join('\n'),
+  splitByComma: (s) =>
+    s
+      .split(',')
+      .map((p) => p.trim())
+      .join('\n'),
 
   // Case
   uppercase: (s) => s.toUpperCase(),
@@ -244,8 +250,9 @@ const fnMap: Record<PipelineFnId, (text: string) => string> = {
   },
   extractUrls: (s) => {
     const matches =
-      s.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/g) ??
-      []
+      s.match(
+        /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/g,
+      ) ?? []
     return [...new Set(matches)].join('\n')
   },
   extractNumbers: (s) => {

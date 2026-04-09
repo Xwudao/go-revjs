@@ -8,7 +8,9 @@ function filterItems(query: string): readonly HubTool[] {
   const q = query.trim().toLowerCase()
   if (!q) return HUB_TOOLS
   return HUB_TOOLS.filter((item) => {
-    const haystack = [item.title, item.description, ...item.keywords].join(' ').toLowerCase()
+    const haystack = [item.title, item.description, ...item.keywords]
+      .join(' ')
+      .toLowerCase()
     return haystack.includes(q)
   })
 }
@@ -41,7 +43,9 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
 
   // clamp active index when results change
   useEffect(() => {
-    setActiveIndex((prev) => (results.length === 0 ? 0 : Math.min(prev, results.length - 1)))
+    setActiveIndex((prev) =>
+      results.length === 0 ? 0 : Math.min(prev, results.length - 1),
+    )
   }, [results.length])
 
   const handleSelect = useCallback(
@@ -61,7 +65,10 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
           break
         case 'ArrowUp':
           e.preventDefault()
-          setActiveIndex((prev) => (prev - 1 + Math.max(results.length, 1)) % Math.max(results.length, 1))
+          setActiveIndex(
+            (prev) =>
+              (prev - 1 + Math.max(results.length, 1)) % Math.max(results.length, 1),
+          )
           break
         case 'Enter':
           e.preventDefault()
@@ -138,16 +145,25 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                 key={item.to}
                 role="option"
                 aria-selected={i === activeIndex}
-                className={clsx(classes.resultItem, i === activeIndex && classes.resultItemActive)}
+                className={clsx(
+                  classes.resultItem,
+                  i === activeIndex && classes.resultItemActive,
+                )}
                 onMouseEnter={() => setActiveIndex(i)}
                 onClick={() => handleSelect(item)}
               >
-                <span className={clsx(item.iconClass, classes.resultIcon)} aria-hidden="true" />
+                <span
+                  className={clsx(item.iconClass, classes.resultIcon)}
+                  aria-hidden="true"
+                />
                 <span className={clsx(classes.resultText)}>
                   <span className={clsx(classes.resultLabel)}>{item.title}</span>
                   <span className={clsx(classes.resultDesc)}>{item.description}</span>
                 </span>
-                <span className={clsx(classes.resultArrow, 'i-mdi-arrow-right')} aria-hidden="true" />
+                <span
+                  className={clsx(classes.resultArrow, 'i-mdi-arrow-right')}
+                  aria-hidden="true"
+                />
               </li>
             ))
           )}

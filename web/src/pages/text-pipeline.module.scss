@@ -263,7 +263,9 @@
   color: var(--color-text-muted);
   cursor: pointer;
   font-size: 12px;
-  transition: background 100ms, color 100ms;
+  transition:
+    background 100ms,
+    color 100ms;
 
   &:hover {
     background: color-mix(in srgb, var(--color-border) 60%, transparent);
@@ -384,7 +386,9 @@
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
   cursor: pointer;
-  transition: color 100ms, border-color 100ms;
+  transition:
+    color 100ms,
+    border-color 100ms;
 
   &:hover {
     color: var(--color-text);
