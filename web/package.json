@@ -51,8 +51,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
-    "@eslint/js": "^9.39.4",
-    "@iconify/json": "^2.2.437",
+    "@iconify/json": "^2.2.460",
     "@rolldown/plugin-babel": "^0.2.2",
     "@rolldown/plugin-node-polyfills": "^1.0.3",
     "@svgr/core": "^8.1.0",
@@ -67,21 +66,17 @@
     "@unocss/preset-icons": "^66.5.5",
     "@vitejs/plugin-react": "^6.0.1",
     "babel-plugin-react-compiler": "^1.0.0",
-    "eslint": "^9.39.4",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.57.0",
     "oxlint-tsgolint": "^0.20.0",
     "sass": "^1.89.0",
     "typescript": "~6.0.2",
-    "typescript-eslint": "^8.58.0",
     "unocss": "^66.5.5",
     "unplugin-auto-import": "^21.0.0",
     "unplugin-icons": "^23.0.1",
     "vite": "^8.0.5",
-    "vite-plugin-checker": "^0.11.0",
+    "vite-plugin-checker": "^0.12.0",
     "vite-plugin-compression2": "^2.5.3"
   }
 }
