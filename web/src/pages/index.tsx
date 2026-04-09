@@ -7,6 +7,7 @@ const commandEntries = [
   { label: '打开 cURL 2 Req', value: '可用' },
   { label: '打开 Crypto Lab', value: '可用' },
   { label: '打开 JS Deob 工作台', value: '可用' },
+  { label: '打开 AST Explorer', value: '可用' },
   { label: '打开 Code Formatter', value: '可用' },
   { label: '打开 String Tools', value: '可用' },
   { label: '打开 Text Pipeline', value: '可用' },
@@ -16,6 +17,7 @@ const scopeEntries = [
   '已上线 cURL 转请求代码工具，支持 Python、Go、Fetch、Axios、OkHttp 和原始 HTTP。',
   '已上线对称加解密实验台，适合快速验证 AES、DES、TripleDES 等参数组合。',
   '当前已上线 JS 解混淆工具，可直接粘贴混淆代码开始分析。',
+  '已上线 AST Explorer，可查看语法树、节点路径和 Babel 代码片段。',
   '已上线代码格式化工具，支持 JS、TS、HTML、CSS、JSON 等 10 种格式，基于 Prettier。',
   '已上线字符串工具箱，涵盖 Hash、编解码、文本变换、行操作等常用处理。',
   '已上线文本依次处理工具，40+ 步骤自由组合成处理管道，Worker 后台运行。',
@@ -23,7 +25,7 @@ const scopeEntries = [
 ] as const;
 
 const runtimeStats = [
-  { label: '在线工具', value: '06' },
+  { label: '在线工具', value: '07' },
   { label: '本地运行', value: '100%' },
 ] as const;
 

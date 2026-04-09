@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { Accordion } from '@/components/ui/accordion';
 import { CodeEditor } from '@/components/ui/code-editor';
+import { Tip } from '@/components/ui/tip';
 import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
 import {
   AST_EXPLORER_HANDBOOK,
@@ -48,13 +49,9 @@ function HandbookSectionBody({ section }: { section: AstExplorerHandbookSection 
       )}
 
       {section.note && (
-        <div className={clsx(classes.handbookTip)}>
-          <span
-            className={clsx('i-mdi-information-outline', classes.handbookTipIcon)}
-            aria-hidden="true"
-          />
-          <p className={clsx(classes.handbookTipText)}>{section.note}</p>
-        </div>
+        <Tip variant="callout">
+          <p>{section.note}</p>
+        </Tip>
       )}
     </div>
   );
@@ -349,11 +346,14 @@ export default function AstExplorerPage() {
 
           {rightTab === 'handbook' && (
             <div className={clsx(classes.handbookContainer)}>
-              <div className={clsx(classes.handbookIntro)}>
-                <span
-                  className={clsx('i-mdi-information-outline', classes.handbookIntroIcon)}
-                  aria-hidden="true"
-                />
+              <Tip
+                variant="callout"
+                className={clsx(classes.handbookIntro)}
+                iconClassName={clsx(
+                  'i-mdi-information-outline',
+                  classes.handbookIntroIcon,
+                )}
+              >
                 <div className={clsx(classes.handbookIntroBody)}>
                   <p className={clsx(classes.handbookIntroTitle)}>
                     Babel AST 常用操作速查
@@ -363,7 +363,7 @@ export default function AstExplorerPage() {
                     API：构造节点、从代码解析、按类型判断、替换节点以及重新生成代码。
                   </p>
                 </div>
-              </div>
+              </Tip>
 
               <Accordion
                 items={handbookItems}

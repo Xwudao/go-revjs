@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import toast from 'react-hot-toast';
 import { AppSelect, type AppSelectOption } from '@/components/ui/app-select';
 import { CodeEditor, type CodeEditorLanguage } from '@/components/ui/code-editor';
+import { Tip } from '@/components/ui/tip';
 import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
 import type { FormatLanguage, FormatOptions } from './code-format.worker';
 import CodeFormatWorker from './code-format.worker?worker';
@@ -412,12 +413,11 @@ function CodeFormatPage() {
               {errorMessage}
             </div>
           ) : (
-            <div className={clsx(classes.fmtNote)}>
-              <span className="i-mdi-information-outline" aria-hidden="true" />
+            <Tip variant="inline">
               {outputCode
                 ? '格式化完成，可直接复制或下载。'
                 : '配置好选项后点"立即格式化"。'}
-            </div>
+            </Tip>
           )}
           <div className={clsx(classes.fmtEditorWrap)}>
             <CodeEditor

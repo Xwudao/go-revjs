@@ -1,10 +1,10 @@
 # go-revjs Workspace Guidelines
 
 ## Repo Shape
+
 - Go backend code lives under `cmd`, `internal`, and `pkg`.
 - Frontend app lives under `web`.
 - The JS deobfuscation core lives under `web/packages/js-deob`.
-
 
 ## Interaction Rule
 
@@ -36,18 +36,16 @@ Before finishing your response, verify:
 A response is NOT complete without this step.
 
 <!-- intent-skills:start -->
+
 # Skill mappings - when working in these areas, load the linked skill file into context.
-skills:
-	- task: "working on TanStack Router setup, route trees, generated route files, or route file naming"
-		load: "node_modules/@tanstack/router-core/skills/router-core/SKILL.md"
-	- task: "adding or changing route loaders, pending states, cache behavior, or deferred route data"
-		load: "node_modules/@tanstack/router-core/skills/router-core/data-loading/SKILL.md"
-	- task: "changing links, navigate flows, preloading on intent, or scroll restoration"
-		load: "node_modules/@tanstack/router-core/skills/router-core/navigation/SKILL.md"
-	- task: "working with dynamic route segments, path params, or search params in URLs"
-		load: "node_modules/@tanstack/router-core/skills/router-core/path-params/SKILL.md"
-	- task: "changing the Vite TanStack Router plugin, generated routes, or automatic route code splitting"
-		load: "node_modules/@tanstack/router-plugin/skills/router-plugin/SKILL.md"
-	- task: "adding or refactoring a react-revjs page that has substantial state, handlers, or side effects, or extracting logic from a TSX file into a hook file"
-		load: ".github/skills/page-hook-split/SKILL.md"
+
+skills: - task: "working on TanStack Router setup, route trees, generated route files, or route file naming"
+load: "node_modules/@tanstack/router-core/skills/router-core/SKILL.md" - task: "adding or changing route loaders, pending states, cache behavior, or deferred route data"
+load: "node_modules/@tanstack/router-core/skills/router-core/data-loading/SKILL.md" - task: "extracting repeated small UI patterns like tip, note, helper banner, or status hint into shared React components"
+load: ".github/skills/reusable-ui-extraction/SKILL.md" - task: "changing links, navigate flows, preloading on intent, or scroll restoration"
+load: "node_modules/@tanstack/router-core/skills/router-core/navigation/SKILL.md" - task: "working with dynamic route segments, path params, or search params in URLs"
+load: "node_modules/@tanstack/router-core/skills/router-core/path-params/SKILL.md" - task: "changing the Vite TanStack Router plugin, generated routes, or automatic route code splitting"
+load: "node_modules/@tanstack/router-plugin/skills/router-plugin/SKILL.md" - task: "adding or refactoring a react-revjs page that has substantial state, handlers, or side effects, or extracting logic from a TSX file into a hook file"
+load: ".github/skills/page-hook-split/SKILL.md"
+
 <!-- intent-skills:end -->

@@ -3,6 +3,7 @@ export type ToolRoute =
   | '/crypto-lab'
   | '/curl-to-code'
   | '/js-deob'
+  | '/ast-explorer'
   | '/code-format'
   | '/string-tools'
   | '/text-pipeline';
@@ -50,6 +51,15 @@ export const HUB_TOOLS = [
     iconClass: 'i-mdi-code-json',
     to: '/js-deob',
     keywords: ['js', 'deob', '解混淆', 'javascript', 'obfuscate', 'deobfuscate'],
+    cardState: '已上线',
+  },
+  {
+    title: 'AST Explorer',
+    description:
+      '可视化查看 JavaScript AST，联动节点路径、Babel 片段和常用操作手册，适合分析语法结构与转换入口。',
+    iconClass: 'i-mdi-source-branch',
+    to: '/ast-explorer',
+    keywords: ['ast', 'babel', 'parser', 'traverse', '语法树', '节点', 'explorer'],
     cardState: '已上线',
   },
   {

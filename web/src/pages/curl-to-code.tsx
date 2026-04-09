@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import toast from 'react-hot-toast';
 import { AppSelect, type AppSelectOption } from '@/components/ui/app-select';
 import { CodeEditor, type CodeEditorLanguage } from '@/components/ui/code-editor';
+import { Tip } from '@/components/ui/tip';
 import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
 import classes from './curl-to-code.module.scss';
 import exampleCurl from '@/assets/raw/curl.txt?raw';
@@ -506,10 +507,9 @@ function CurlToCodePage() {
               {errorMessage}
             </div>
           ) : (
-            <div className={clsx(classes.curlNote)}>
-              <span className="i-mdi-information-outline" aria-hidden="true" />
+            <Tip variant="inline">
               {outputCode ? '转换完成，可直接复制或下载。' : '粘贴 cURL 后点"立即转换"。'}
-            </div>
+            </Tip>
           )}
           <div className={clsx(classes.curlEditorWrap)}>
             <CodeEditor

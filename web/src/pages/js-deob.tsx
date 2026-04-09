@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { AppCheckbox } from '@/components/ui/app-checkbox';
 import { AppSelect, type AppSelectOption } from '@/components/ui/app-select';
 import { CodeEditor } from '@/components/ui/code-editor';
+import { Tip } from '@/components/ui/tip';
 import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
 import JsDeobWorker from './js-deob.worker?worker';
 import classes from './js-deob.module.scss';
@@ -688,9 +689,9 @@ function JsDeobPage() {
           {errorMessage ? (
             <div className={clsx(classes.jsDeobError)}>{errorMessage}</div>
           ) : (
-            <div className={clsx(classes.jsDeobNote)}>
+            <Tip variant="callout" tone="info" align="center">
               {parseTime === null ? '运行后结果会在这里出现' : `处理耗时 ${parseTime} ms`}
-            </div>
+            </Tip>
           )}
           <CodeEditor readOnly value={outputCode} />
         </div>

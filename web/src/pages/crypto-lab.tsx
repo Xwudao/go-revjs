@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import { AppCheckbox } from '@/components/ui/app-checkbox';
 import { AppSelect } from '@/components/ui/app-select';
 import { CodeEditor } from '@/components/ui/code-editor';
+import { Tip } from '@/components/ui/tip';
 import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
 import {
   algorithmOptions,
@@ -117,10 +118,9 @@ function CryptoLabPage() {
               {errorMessage}
             </div>
           ) : (
-            <div className={clsx(classes.cryptoLabNote)}>
-              <span className="i-mdi-information-outline" aria-hidden="true" />
+            <Tip variant="inline">
               {result ? '执行完成。' : '调好参数后点"立即执行"。'}
-            </div>
+            </Tip>
           )}
           <div className={clsx(classes.cryptoLabEditorWrap)}>
             <CodeEditor value={result} readOnly minHeight="20rem" />
