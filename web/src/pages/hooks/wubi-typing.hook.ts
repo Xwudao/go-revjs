@@ -197,48 +197,67 @@ export function useWubiTyping() {
     }
   }, [isStarted, isFinished, taskIndex]);
 
-  // Process a single typed Chinese character
-  const processInputChar = useCallback(
-    (char: string) => {
+  // Process a string of typed Chinese characters (may be more than one at a time)
+  const processInputString = useCallback(
+    (input: string) => {
       if (!isStarted || isFinished || !currentTask) return;
       startTimer();
-      if (char === currentTask.char) {
-        setTotalCorrectKeys((n) => n + 1);
-        setTaskHadError((prev) => {
-          const next = [...prev];
-          if (next[taskIndex] === undefined) next[taskIndex] = false;
-          return next;
-        });
-        setCurrentInput('');
-        const nextIdx = taskIndex + 1;
-        if (nextIdx >= typingTasks.length) {
-          stopTimer();
-          setIsFinished(true);
-          setTaskIndex(typingTasks.length);
+
+      const chars = Array.from(input);
+      let idx = taskIndex;
+      let correct = 0;
+      let errors = 0;
+      let finished = false;
+      const hadErrorPatch: Array<[number, boolean]> = [];
+
+      for (const ch of chars) {
+        const task = typingTasks[idx];
+        if (!task) break;
+        if (ch === task.char) {
+          correct++;
+          hadErrorPatch.push([idx, false]);
+          idx++;
+          if (idx >= typingTasks.length) {
+            finished = true;
+            break;
+          }
         } else {
-          setTaskIndex(nextIdx);
+          errors++;
+          hadErrorPatch.push([idx, true]);
+          break; // stop on first wrong character
         }
-      } else {
-        setTotalErrors((n) => n + 1);
-        setTaskHadError((prev) => {
-          const next = [...prev];
-          next[taskIndex] = true;
-          return next;
-        });
+      }
+
+      if (correct > 0) setTotalCorrectKeys((n) => n + correct);
+      if (errors > 0) {
+        setTotalErrors((n) => n + errors);
         setErrorFlash(true);
-        setCurrentInput('');
         setTimeout(() => setErrorFlash(false), 250);
       }
+      if (hadErrorPatch.length > 0) {
+        setTaskHadError((prev) => {
+          const next = [...prev];
+          for (const [i, wasError] of hadErrorPatch) {
+            if (wasError) {
+              next[i] = true;
+            } else if (next[i] === undefined) {
+              next[i] = false;
+            }
+          }
+          return next;
+        });
+      }
+
+      setCurrentInput('');
+      if (finished) {
+        stopTimer();
+        setIsFinished(true);
+        setTaskIndex(typingTasks.length);
+      } else {
+        setTaskIndex(idx);
+      }
     },
-    [
-      isStarted,
-      isFinished,
-      currentTask,
-      taskIndex,
-      typingTasks.length,
-      startTimer,
-      stopTimer,
-    ],
+    [isStarted, isFinished, currentTask, taskIndex, typingTasks, startTimer, stopTimer],
   );
 
   const handleCompositionStart = useCallback(() => {
@@ -251,14 +270,11 @@ export function useWubiTyping() {
       isComposing.current = false;
       justFinishedComposing.current = true;
       const composed = e.data ?? '';
-      setCurrentInput('');
-      for (const ch of Array.from(composed)) {
-        processInputChar(ch);
-      }
+      if (composed) processInputString(composed);
       // Clear the native input value so the next character starts fresh
       if (inputRef.current) inputRef.current.value = '';
     },
-    [processInputChar],
+    [processInputString],
   );
 
   const handleInputChange = useCallback(
@@ -276,13 +292,10 @@ export function useWubiTyping() {
       }
       const val = e.target.value;
       if (!val) return;
-      setCurrentInput('');
-      for (const ch of Array.from(val)) {
-        processInputChar(ch);
-      }
+      processInputString(val);
       if (inputRef.current) inputRef.current.value = '';
     },
-    [processInputChar],
+    [processInputString],
   );
 
   // ── Controls ──
