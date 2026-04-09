@@ -13,6 +13,7 @@ const navItems = [
   { key: 'crypto-lab', label: 'Crypto Lab', to: '/crypto-lab' },
   { key: 'js-deob', label: 'JS Deob', to: '/js-deob' },
   { key: 'ast-explorer', label: 'AST Explorer', to: '/ast-explorer' },
+  { key: 'tools', label: '工具箱', to: '/tools' },
 ] as const;
 
 type NavKey = (typeof navItems)[number]['key'];
@@ -21,6 +22,7 @@ const routeMatchers = [
   { key: 'crypto-lab', prefix: '/crypto-lab' },
   { key: 'js-deob', prefix: '/js-deob' },
   { key: 'ast-explorer', prefix: '/ast-explorer' },
+  { key: 'tools', prefix: '/tools' },
 ] as const;
 
 export function FrontShell({ children }: FrontShellProps) {

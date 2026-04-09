@@ -6,7 +6,9 @@ export type ToolRoute =
   | '/ast-explorer'
   | '/code-format'
   | '/string-tools'
-  | '/text-pipeline';
+  | '/text-pipeline'
+  | '/tools'
+  | '/tools/wubi-typing';
 
 export interface HubTool {
   title: string;
@@ -25,6 +27,21 @@ export const HUB_TOOLS = [
     iconClass: 'i-mdi-home-outline',
     to: '/',
     keywords: ['home', '首页', 'index', '导航'],
+  },
+  {
+    title: '工具箱',
+    description: '实用小工具合集，与逆向无关，全部本地运行。',
+    iconClass: 'i-mdi-toolbox-outline',
+    to: '/tools',
+    keywords: ['tools', '工具箱', '工具', '实用'],
+    cardState: '已上线',
+  },
+  {
+    title: '五笔练字',
+    description: '五笔字型输入法打字练习，支持全屏、提示、速度与准确率统计。',
+    iconClass: 'i-mdi-keyboard-outline',
+    to: '/tools/wubi-typing',
+    keywords: ['wubi', '五笔', '打字', '练习', '输入法'],
   },
   {
     title: 'cURL 2 Req',

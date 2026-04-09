@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ToolsRouteImport } from './routes/tools'
 import { Route as TextPipelineRouteImport } from './routes/text-pipeline'
 import { Route as StringToolsRouteImport } from './routes/string-tools'
 import { Route as JsDeobRouteImport } from './routes/js-deob'
@@ -17,7 +18,14 @@ import { Route as CryptoLabRouteImport } from './routes/crypto-lab'
 import { Route as CodeFormatRouteImport } from './routes/code-format'
 import { Route as AstExplorerRouteImport } from './routes/ast-explorer'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ToolsIndexRouteImport } from './routes/tools/index'
+import { Route as ToolsWubiTypingRouteImport } from './routes/tools/wubi-typing'
 
+const ToolsRoute = ToolsRouteImport.update({
+  id: '/tools',
+  path: '/tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TextPipelineRoute = TextPipelineRouteImport.update({
   id: '/text-pipeline',
   path: '/text-pipeline',
@@ -58,6 +66,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsIndexRoute = ToolsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ToolsRoute,
+} as any)
+const ToolsWubiTypingRoute = ToolsWubiTypingRouteImport.update({
+  id: '/wubi-typing',
+  path: '/wubi-typing',
+  getParentRoute: () => ToolsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +86,9 @@ export interface FileRoutesByFullPath {
   '/js-deob': typeof JsDeobRoute
   '/string-tools': typeof StringToolsRoute
   '/text-pipeline': typeof TextPipelineRoute
+  '/tools': typeof ToolsRouteWithChildren
+  '/tools/wubi-typing': typeof ToolsWubiTypingRoute
+  '/tools/': typeof ToolsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +99,8 @@ export interface FileRoutesByTo {
   '/js-deob': typeof JsDeobRoute
   '/string-tools': typeof StringToolsRoute
   '/text-pipeline': typeof TextPipelineRoute
+  '/tools/wubi-typing': typeof ToolsWubiTypingRoute
+  '/tools': typeof ToolsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +112,9 @@ export interface FileRoutesById {
   '/js-deob': typeof JsDeobRoute
   '/string-tools': typeof StringToolsRoute
   '/text-pipeline': typeof TextPipelineRoute
+  '/tools': typeof ToolsRouteWithChildren
+  '/tools/wubi-typing': typeof ToolsWubiTypingRoute
+  '/tools/': typeof ToolsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +127,9 @@ export interface FileRouteTypes {
     | '/js-deob'
     | '/string-tools'
     | '/text-pipeline'
+    | '/tools'
+    | '/tools/wubi-typing'
+    | '/tools/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +140,8 @@ export interface FileRouteTypes {
     | '/js-deob'
     | '/string-tools'
     | '/text-pipeline'
+    | '/tools/wubi-typing'
+    | '/tools'
   id:
     | '__root__'
     | '/'
@@ -121,6 +152,9 @@ export interface FileRouteTypes {
     | '/js-deob'
     | '/string-tools'
     | '/text-pipeline'
+    | '/tools'
+    | '/tools/wubi-typing'
+    | '/tools/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,10 +166,18 @@ export interface RootRouteChildren {
   JsDeobRoute: typeof JsDeobRoute
   StringToolsRoute: typeof StringToolsRoute
   TextPipelineRoute: typeof TextPipelineRoute
+  ToolsRoute: typeof ToolsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tools': {
+      id: '/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof ToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/text-pipeline': {
       id: '/text-pipeline'
       path: '/text-pipeline'
@@ -192,8 +234,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/': {
+      id: '/tools/'
+      path: '/'
+      fullPath: '/tools/'
+      preLoaderRoute: typeof ToolsIndexRouteImport
+      parentRoute: typeof ToolsRoute
+    }
+    '/tools/wubi-typing': {
+      id: '/tools/wubi-typing'
+      path: '/wubi-typing'
+      fullPath: '/tools/wubi-typing'
+      preLoaderRoute: typeof ToolsWubiTypingRouteImport
+      parentRoute: typeof ToolsRoute
+    }
   }
 }
+
+interface ToolsRouteChildren {
+  ToolsWubiTypingRoute: typeof ToolsWubiTypingRoute
+  ToolsIndexRoute: typeof ToolsIndexRoute
+}
+
+const ToolsRouteChildren: ToolsRouteChildren = {
+  ToolsWubiTypingRoute: ToolsWubiTypingRoute,
+  ToolsIndexRoute: ToolsIndexRoute,
+}
+
+const ToolsRouteWithChildren = ToolsRoute._addFileChildren(ToolsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -204,6 +272,7 @@ const rootRouteChildren: RootRouteChildren = {
   JsDeobRoute: JsDeobRoute,
   StringToolsRoute: StringToolsRoute,
   TextPipelineRoute: TextPipelineRoute,
+  ToolsRoute: ToolsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

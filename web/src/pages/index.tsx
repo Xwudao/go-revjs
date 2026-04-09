@@ -66,6 +66,10 @@ function IndexPage() {
               <span className="i-mdi-lock-open-variant-outline" aria-hidden="true" />
               打开 Crypto Lab
             </Link>
+            <Link to="/tools" className={clsx(classes.frontPageAction)}>
+              <span className="i-mdi-toolbox-outline" aria-hidden="true" />
+              实用工具箱
+            </Link>
           </div>
 
           <div className={clsx(classes.frontPageTags)} aria-label="首页亮点">
