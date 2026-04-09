@@ -6,5 +6,5 @@
   "printWidth": 90,
   "tabWidth": 2,
   "jsxSingleQuote": false,
-  "ignorePatterns": ["src/auto-imports.d.ts"]
+  "ignorePatterns": ["src/auto-imports.d.ts", "src/routeTree.gen.ts"]
 }
