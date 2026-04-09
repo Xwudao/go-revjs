@@ -57,18 +57,26 @@ export default function WubiTypingPage() {
           <span className="i-mdi-keyboard-outline" aria-hidden="true" />
           <span className={classes.brandName}>五笔打字练习</span>
         </div>
-        <p className={classes.sidebarDesc}>在线五笔输入法练习工具，支持自定义文本和码表提示</p>
+        <p className={classes.sidebarDesc}>
+          在线五笔输入法练习工具，支持自定义文本和码表提示
+        </p>
 
         {/* Tabs */}
         <div className={classes.tabRow}>
           <button
-            className={clsx(classes.tabBtn, activeTab === 'practice' && classes.tabBtnActive)}
+            className={clsx(
+              classes.tabBtn,
+              activeTab === 'practice' && classes.tabBtnActive,
+            )}
             onClick={() => setActiveTab('practice')}
           >
             练习
           </button>
           <button
-            className={clsx(classes.tabBtn, activeTab === 'lookup' && classes.tabBtnActive)}
+            className={clsx(
+              classes.tabBtn,
+              activeTab === 'lookup' && classes.tabBtnActive,
+            )}
             onClick={() => setActiveTab('lookup')}
           >
             编码查询
@@ -91,11 +99,17 @@ export default function WubiTypingPage() {
                   </button>
                 ) : (
                   <>
-                    <button className={clsx(classes.ctrlBtn, classes.ctrlBtnWarning)} onClick={handleReset}>
+                    <button
+                      className={clsx(classes.ctrlBtn, classes.ctrlBtnWarning)}
+                      onClick={handleReset}
+                    >
                       <span className="i-mdi-pause" aria-hidden="true" />
                       暂停
                     </button>
-                    <button className={clsx(classes.ctrlBtn, classes.ctrlBtnDanger)} onClick={handleReset}>
+                    <button
+                      className={clsx(classes.ctrlBtn, classes.ctrlBtnDanger)}
+                      onClick={handleReset}
+                    >
                       <span className="i-mdi-restart" aria-hidden="true" />
                       重置
                     </button>
@@ -105,7 +119,9 @@ export default function WubiTypingPage() {
               <div className={classes.controlRow}>
                 <button className={classes.ctrlBtnGhost} onClick={toggleFullscreen}>
                   <span
-                    className={isFullscreen ? 'i-mdi-fullscreen-exit' : 'i-mdi-fullscreen'}
+                    className={
+                      isFullscreen ? 'i-mdi-fullscreen-exit' : 'i-mdi-fullscreen'
+                    }
                     aria-hidden="true"
                   />
                   全屏
@@ -187,12 +203,17 @@ export default function WubiTypingPage() {
                 autoFocus
               />
               {lookupQuery && (
-                <button className={classes.lookupClear} onClick={() => setLookupQuery('')}>
+                <button
+                  className={classes.lookupClear}
+                  onClick={() => setLookupQuery('')}
+                >
                   <span className="i-mdi-close-circle" aria-hidden="true" />
                 </button>
               )}
             </div>
-            <p className={classes.lookupTip}>输入汉字查看五笔编码，或输入编码前缀查找对应汉字。</p>
+            <p className={classes.lookupTip}>
+              输入汉字查看五笔编码，或输入编码前缀查找对应汉字。
+            </p>
           </div>
         )}
       </aside>
@@ -224,13 +245,19 @@ export default function WubiTypingPage() {
             </div>
 
             {/* Progress bar */}
-            <div className={classes.progressBar} role="progressbar" aria-valuenow={progress}>
+            <div
+              className={classes.progressBar}
+              role="progressbar"
+              aria-valuenow={progress}
+            >
               <div className={classes.progressFill} style={{ width: `${progress}%` }} />
             </div>
 
             {/* Guide card */}
             {isStarted && !isFinished && currentTask ? (
-              <div className={clsx(classes.guideCard, errorFlash && classes.guideCardError)}>
+              <div
+                className={clsx(classes.guideCard, errorFlash && classes.guideCardError)}
+              >
                 <div className={classes.guideChar}>{currentTask.char}</div>
 
                 {isHintVisible && (
@@ -260,7 +287,9 @@ export default function WubiTypingPage() {
 
             {/* Input box — real input, handles IME / Mac composing correctly */}
             {isStarted && !isFinished && (
-              <div className={clsx(classes.inputBox, errorFlash && classes.inputBoxError)}>
+              <div
+                className={clsx(classes.inputBox, errorFlash && classes.inputBoxError)}
+              >
                 <input
                   ref={inputRef}
                   type="text"
@@ -373,4 +402,3 @@ export default function WubiTypingPage() {
     </div>
   );
 }
-

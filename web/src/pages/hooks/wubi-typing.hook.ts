@@ -18,7 +18,9 @@ interface TypingTask {
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
 function formatTime(sec: number): string {
-  const m = Math.floor(sec / 60).toString().padStart(2, '0');
+  const m = Math.floor(sec / 60)
+    .toString()
+    .padStart(2, '0');
   const s = (sec % 60).toString().padStart(2, '0');
   return `${m}:${s}`;
 }
@@ -104,7 +106,9 @@ export function useWubiTyping() {
 
   // ── Char states for display ──
   const charStates = useMemo<CharState[]>(() => {
-    const currentDisplayIdx = isFinished ? Infinity : (currentTask?.displayIndex ?? Infinity);
+    const currentDisplayIdx = isFinished
+      ? Infinity
+      : (currentTask?.displayIndex ?? Infinity);
     return displayChars.map((_, i) => {
       if (i > currentDisplayIdx) return 'pending';
       if (i === currentDisplayIdx) return 'current';
@@ -226,7 +230,15 @@ export function useWubiTyping() {
         setTimeout(() => setErrorFlash(false), 250);
       }
     },
-    [isStarted, isFinished, currentTask, taskIndex, typingTasks.length, startTimer, stopTimer],
+    [
+      isStarted,
+      isFinished,
+      currentTask,
+      taskIndex,
+      typingTasks.length,
+      startTimer,
+      stopTimer,
+    ],
   );
 
   const handleCompositionStart = useCallback(() => {

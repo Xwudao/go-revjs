@@ -42,7 +42,9 @@ export default function ToolsHubPage() {
       <section className={classes.grid}>
         {GENERAL_TOOLS.map((tool) => (
           <Link key={tool.title} to={tool.to} className={classes.cardLink}>
-            <article className={clsx(classes.card, tool.state === '开发中' && classes.cardWip)}>
+            <article
+              className={clsx(classes.card, tool.state === '开发中' && classes.cardWip)}
+            >
               <div className={classes.cardHead}>
                 <span className={classes.cardIcon} aria-hidden="true">
                   <span className={tool.iconClass} />

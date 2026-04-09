@@ -72,7 +72,9 @@
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
   cursor: pointer;
-  transition: color var(--duration-fast), border-color var(--duration-fast);
+  transition:
+    color var(--duration-fast),
+    border-color var(--duration-fast);
 
   &:hover {
     color: var(--color-text-strong);
@@ -117,7 +119,9 @@
   background: transparent;
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: background var(--duration-fast), color var(--duration-fast);
+  transition:
+    background var(--duration-fast),
+    color var(--duration-fast);
 
   &:hover {
     background: var(--color-surface-muted);
@@ -143,7 +147,9 @@
   font-weight: var(--font-weight-medium);
   border: none;
   cursor: pointer;
-  transition: background var(--duration-fast), color var(--duration-fast);
+  transition:
+    background var(--duration-fast),
+    color var(--duration-fast);
 }
 
 .ctrl-btn-primary {
@@ -185,7 +191,10 @@
   background: transparent;
   border: 1px solid var(--color-border-soft);
   cursor: pointer;
-  transition: background var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast);
+  transition:
+    background var(--duration-fast),
+    border-color var(--duration-fast),
+    color var(--duration-fast);
 
   &:hover {
     background: var(--color-surface-muted);
@@ -346,7 +355,9 @@
   border-bottom: 1px solid var(--color-border-soft);
   background: color-mix(in srgb, var(--color-surface) 60%, transparent);
   flex-shrink: 0;
-  transition: background var(--duration-fast), border-color var(--duration-fast);
+  transition:
+    background var(--duration-fast),
+    border-color var(--duration-fast);
   min-height: 7rem;
 }
 
@@ -439,7 +450,9 @@
   background: color-mix(in srgb, var(--color-accent) 4%, var(--color-canvas));
   flex-shrink: 0;
   min-height: 3.5rem;
-  transition: border-color var(--duration-fast), background var(--duration-fast);
+  transition:
+    border-color var(--duration-fast),
+    background var(--duration-fast);
 }
 
 .input-box-error {
@@ -493,7 +506,9 @@
 .char {
   display: inline;
   border-radius: 2px;
-  transition: color var(--duration-fast), background var(--duration-fast);
+  transition:
+    color var(--duration-fast),
+    background var(--duration-fast);
 }
 
 .char-done {
@@ -659,7 +674,9 @@
   border: 1px solid var(--color-border-soft);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  transition: border-color var(--duration-fast), background var(--duration-fast);
+  transition:
+    border-color var(--duration-fast),
+    background var(--duration-fast);
 
   &:hover {
     border-color: var(--color-border-strong);
