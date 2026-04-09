@@ -76,7 +76,7 @@ export function CodeEditor({
   const { theme } = useAppConfig()
   // In seamless mode the .root is flex:1 inside its panel, so CodeMirror must
   // fill 100% of that flex space rather than an explicit calc() value.
-  const editorHeight = seamless ? '100%' : (height ?? minHeight)
+  const editorHeight = height ?? minHeight
 
   const onCursorChangeRef = useRef(onCursorChange)
   onCursorChangeRef.current = onCursorChange
