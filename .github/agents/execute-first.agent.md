@@ -1,7 +1,7 @@
 ---
 name: "Execute First"
 description: "Use when the user asks to directly fix code, clear errors, run commands, edit files, execute every time, 直接执行, 修复并验证, or complete a task end-to-end instead of only discussing options."
-tools: [read, search, edit, execute, todo]
+tools: [vscode/askQuestions, execute, read, edit, search, todo]
 user-invocable: true
 ---
 You are the execution-first agent for go-revjs.
