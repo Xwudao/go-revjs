@@ -12,33 +12,70 @@ const navItems = [
   { key: 'home', label: '首页', to: '/' },
   { key: 'crypto-lab', label: 'Crypto Lab', to: '/crypto-lab' },
   { key: 'js-deob', label: 'JS Deob', to: '/js-deob' },
-  { key: 'code-format', label: 'Formatter', to: '/code-format' },
   { key: 'ast-explorer', label: 'AST Explorer', to: '/ast-explorer' },
 ] as const;
 
 type NavKey = (typeof navItems)[number]['key'];
 
+const routeMatchers = [
+  { key: 'crypto-lab', prefix: '/crypto-lab' },
+  { key: 'js-deob', prefix: '/js-deob' },
+  { key: 'code-format', prefix: '/code-format' },
+  { key: 'ast-explorer', prefix: '/ast-explorer' },
+] as const;
+
+const secondaryItems = [
+  {
+    key: 'code-format',
+    label: 'Code Formatter',
+    description: '快速整理 JSON、HTML、CSS 与通用片段。',
+    icon: 'i-mdi-code-json',
+    to: '/code-format',
+  },
+  {
+    key: 'ast-explorer',
+    label: 'AST Explorer',
+    description: '查看语法树结构并辅助分析转换路径。',
+    icon: 'i-mdi-source-branch',
+    to: '/ast-explorer',
+  },
+] as const;
+
 export function FrontShell({ children }: FrontShellProps) {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
-  const current = pathname.startsWith('/js-deob')
-    ? 'js-deob'
-    : pathname.startsWith('/crypto-lab')
-      ? 'crypto-lab'
-      : pathname.startsWith('/code-format')
-        ? 'code-format'
-        : pathname.startsWith('/ast-explorer')
-          ? 'ast-explorer'
-          : 'home';
+  const matchedRoute =
+    pathname === '/'
+      ? 'home'
+      : routeMatchers.find((item) => pathname.startsWith(item.prefix))?.key;
+  const currentNav = matchedRoute === 'code-format' ? undefined : matchedRoute;
 
   const search = useSearchModal();
 
   return (
     <div className={clsx(classes.frontShell)}>
-      <FrontHeader current={current} onSearchOpen={search.open} />
+      <FrontHeader current={currentNav} onSearchOpen={search.open} />
       <div className={clsx(classes.frontShellBody, classes.frontShellMain)}>
         <div className={clsx(classes.frontShellOutlet)}>{children}</div>
+        <section className={clsx(classes.frontShellSecondary)} aria-label="更多工具入口">
+          {secondaryItems.map((item) => (
+            <Link
+              key={item.key}
+              to={item.to}
+              className={clsx(classes.frontShellSecondaryCard)}
+              data-current={matchedRoute === item.key}
+            >
+              <span className={clsx(classes.frontShellSecondaryIcon)} aria-hidden="true">
+                <span className={item.icon} />
+              </span>
+              <span className={clsx(classes.frontShellSecondaryContent)}>
+                <strong>{item.label}</strong>
+                <span>{item.description}</span>
+              </span>
+            </Link>
+          ))}
+        </section>
       </div>
       <FrontFooter />
       <SearchModal open={search.isOpen} onClose={search.close} />
@@ -64,7 +101,7 @@ function FrontHeader({
   current,
   onSearchOpen,
 }: {
-  current: NavKey;
+  current?: NavKey;
   onSearchOpen: () => void;
 }) {
   const { theme, accent } = useAppConfig();
