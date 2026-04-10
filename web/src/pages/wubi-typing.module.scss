@@ -413,6 +413,15 @@
   background: transparent;
 }
 
+.code-image {
+  max-width: 100%;
+  max-height: 8rem;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-surface);
+}
+
 /* ── Number input ────────────────────────────────────────────────────────── */
 
 .number-input {

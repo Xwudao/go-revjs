@@ -33,6 +33,8 @@ export default function WubiTypingPage() {
     progress,
     isHintVisible,
     toggleHint,
+    isCodeImageVisible,
+    toggleCodeImage,
     handleStart,
     handleReset,
     handlePause,
@@ -163,6 +165,15 @@ export default function WubiTypingPage() {
                   className={classes.checkbox}
                 />
                 显示编码提示
+              </label>
+              <label className={classes.checkRow}>
+                <input
+                  type="checkbox"
+                  checked={isCodeImageVisible}
+                  onChange={toggleCodeImage}
+                  className={classes.checkbox}
+                />
+                显示键位图
               </label>
               <label className={classes.checkRow}>
                 从第
@@ -317,6 +328,15 @@ export default function WubiTypingPage() {
                         </span>
                       ))}
                   </div>
+                )}
+
+                {isCodeImageVisible && (
+                  <img
+                    key={currentTask.char}
+                    src={`https://oss.misiai.com/wubi/${encodeURIComponent(currentTask.char)}.gif`}
+                    alt={`键位图-${currentTask.char}`}
+                    className={classes.codeImage}
+                  />
                 )}
               </div>
             ) : (

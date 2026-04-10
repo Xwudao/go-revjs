@@ -72,6 +72,7 @@ export function useWubiTyping() {
 
   // ── Practice settings ──
   const [isHintVisible, setIsHintVisible] = useState(true);
+  const [isCodeImageVisible, setIsCodeImageVisible] = useState(false);
 
   // ── Session state ──
   const [taskIndex, setTaskIndex] = useState(0);
@@ -390,6 +391,7 @@ export function useWubiTyping() {
   }, [startTimer]);
 
   const toggleHint = useCallback(() => setIsHintVisible((v) => !v), []);
+  const toggleCodeImage = useCallback(() => setIsCodeImageVisible((v) => !v), []);
   const toggleSettings = useCallback(() => setSettingsOpen((v) => !v), []);
   const closeSettings = useCallback(() => setSettingsOpen(false), []);
 
@@ -438,6 +440,8 @@ export function useWubiTyping() {
     // settings
     isHintVisible,
     toggleHint,
+    isCodeImageVisible,
+    toggleCodeImage,
     settingsOpen,
     toggleSettings,
     closeSettings,
