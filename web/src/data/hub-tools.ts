@@ -74,7 +74,7 @@ export const HUB_TOOLS = [
     title: 'AST Explorer',
     description:
       '可视化查看 JavaScript AST，联动节点路径、Babel 片段和常用操作手册，适合分析语法结构与转换入口。',
-    iconClass: 'i-mdi-source-branch',
+    iconClass: 'i-mdi-sitemap',
     to: '/ast-explorer',
     keywords: ['ast', 'babel', 'parser', 'traverse', '语法树', '节点', 'explorer'],
     cardState: '已上线',
