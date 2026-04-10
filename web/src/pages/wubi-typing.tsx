@@ -296,6 +296,20 @@ export default function WubiTypingPage() {
                   {progress}%
                 </strong>
               </div>
+              {isCodeImageVisible &&
+                isStarted &&
+                !isPaused &&
+                !isFinished &&
+                currentTask && (
+                  <div className={clsx(classes.statItem, classes.statItemImg)}>
+                    <img
+                      key={currentTask.char}
+                      src={`https://oss.misiai.com/wubi/${encodeURIComponent(currentTask.char)}.gif`}
+                      alt={`键位图-${currentTask.char}`}
+                      className={classes.codeImage}
+                    />
+                  </div>
+                )}
             </div>
 
             {/* Progress bar */}
@@ -328,15 +342,6 @@ export default function WubiTypingPage() {
                         </span>
                       ))}
                   </div>
-                )}
-
-                {isCodeImageVisible && (
-                  <img
-                    key={currentTask.char}
-                    src={`https://oss.misiai.com/wubi/${encodeURIComponent(currentTask.char)}.gif`}
-                    alt={`键位图-${currentTask.char}`}
-                    className={classes.codeImage}
-                  />
                 )}
               </div>
             ) : (
