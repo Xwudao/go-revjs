@@ -10,6 +10,7 @@ export default function WubiTypingPage() {
     // lookup
     lookupQuery,
     setLookupQuery,
+    isPassageMode,
     lookupResults,
     // text
     wubiTexts,
@@ -236,12 +237,12 @@ export default function WubiTypingPage() {
             <div className={classes.sideSectionTitle}>查询</div>
             <div className={classes.lookupSearch}>
               <span className="i-mdi-magnify" aria-hidden="true" />
-              <input
-                className={classes.lookupInput}
-                type="text"
+              <textarea
+                className={classes.lookupTextarea}
                 value={lookupQuery}
                 onChange={(e) => setLookupQuery(e.target.value)}
-                placeholder="汉字或编码前缀…"
+                placeholder="汉字、编码前缀或一段文本…"
+                rows={3}
                 autoFocus
               />
               {lookupQuery && (
@@ -254,7 +255,7 @@ export default function WubiTypingPage() {
               )}
             </div>
             <p className={classes.lookupTip}>
-              输入汉字查看五笔编码，或输入编码前缀查找对应汉字。
+              单字或编码前缀：搜索匹配结果；多字文本：逐字显示五笔编码。
             </p>
           </div>
         )}
@@ -422,20 +423,35 @@ export default function WubiTypingPage() {
         {activeTab === 'lookup' && (
           <div className={classes.lookupPanel}>
             {lookupResults.length > 0 ? (
-              <div className={classes.lookupGrid}>
-                {lookupResults.map(({ char, codes }, i) => (
-                  <div key={i} className={classes.lookupCard}>
-                    <span className={classes.lookupChar}>{char}</span>
-                    <div className={classes.lookupCodes}>
-                      {codes.map((c, ci) => (
-                        <span key={ci} className={classes.lookupCode}>
-                          {c}
-                        </span>
-                      ))}
+              isPassageMode ? (
+                <div className={classes.lookupPassage}>
+                  {lookupResults.map(({ char, codes }, i) => (
+                    <div key={i} className={classes.lookupPassageItem}>
+                      <span className={classes.lookupPassageChar}>{char}</span>
+                      {codes.length > 0 ? (
+                        <span className={classes.lookupPassageCode}>{codes[0]}</span>
+                      ) : (
+                        <span className={classes.lookupPassageNoCode}>—</span>
+                      )}
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={classes.lookupGrid}>
+                  {lookupResults.map(({ char, codes }, i) => (
+                    <div key={i} className={classes.lookupCard}>
+                      <span className={classes.lookupChar}>{char}</span>
+                      <div className={classes.lookupCodes}>
+                        {codes.map((c, ci) => (
+                          <span key={ci} className={classes.lookupCode}>
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
             ) : lookupQuery ? (
               <div className={classes.lookupEmpty}>
                 <span className="i-mdi-emoticon-sad-outline" aria-hidden="true" />

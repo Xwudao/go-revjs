@@ -35,10 +35,23 @@ export function useWubiTyping() {
 
   // ── Lookup ──
   const [lookupQuery, setLookupQuery] = useState('');
+
+  // Passage mode: query contains more than one Unicode code point
+  const isPassageMode = useMemo(
+    () => Array.from(lookupQuery.trim()).length > 1,
+    [lookupQuery],
+  );
+
   const lookupResults = useMemo<Array<{ char: string; codes: string[] }>>(() => {
     const q = lookupQuery.trim();
     if (!q) return [];
-    // Search by character (exact match first) then by code prefix
+
+    if (isPassageMode) {
+      // Return codes for each character in passage order (including uncoded chars)
+      return Array.from(q).map((char) => ({ char, codes: wubiDict[char] ?? [] }));
+    }
+
+    // Single char or code-prefix search
     const byChar: Array<{ char: string; codes: string[] }> = [];
     const byCode: Array<{ char: string; codes: string[] }> = [];
     for (const [char, codes] of Object.entries(wubiDict)) {
@@ -49,7 +62,7 @@ export function useWubiTyping() {
       }
     }
     return [...byChar, ...byCode].slice(0, 60);
-  }, [lookupQuery]);
+  }, [lookupQuery, isPassageMode]);
 
   // ── Text settings ──
   const [textSource, setTextSource] = useState<TextSource>('preset');
@@ -393,6 +406,7 @@ export function useWubiTyping() {
     // lookup
     lookupQuery,
     setLookupQuery,
+    isPassageMode,
     lookupResults,
     // text
     wubiTexts,
