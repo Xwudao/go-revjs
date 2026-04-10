@@ -369,3 +369,39 @@ test('pipeline uses brute-force rotation fallback for jsjiami.cn.v7 slow rotator
   expect(code).not.toContain('_dec(');
   expect(code).toContain('"hello world"');
 });
+
+// Regression test: findBestRotation must accept Unicode-printable strings (CJK, accented
+// Latin, etc.) as valid decoded values, not only ASCII-printable ones.
+//
+// The string array here has control-character garbage at positions 0-3 and CJK strings at
+// positions 4-7.  Correct rotation is 4.  With the old isAsciiPrintable scorer, all
+// rotations score 0 (both control chars and CJK are rejected), so rotation=0 is picked
+// (wrong).  With the new isPrintable scorer, rotation=4 scores 4/4 and is correctly
+// selected, so the decoded CJK strings appear in the output.
+test('brute-force rotation scorer selects correct rotation when decoded strings are CJK', async () => {
+  const { code } = await deob(`
+    function _getArr() {
+      var _a = ['\x01\x02', '\x03\x04', '\x05\x06', '\x07\x08', '你好', '世界', '默认排序', '最新入库'];
+      _getArr = function () { return _a; };
+      return _getArr();
+    }
+    function _dec(idx, key) {
+      var a = _getArr();
+      return a[idx];
+    }
+    (function (arrFn) {
+      throw new Error('deliberate failure – forces brute-force rotation fallback');
+      arrFn();
+    }(_getArr));
+    var a = _dec(0, 'k0');
+    var b = _dec(1, 'k1');
+    var c = _dec(2, 'k2');
+    var d = _dec(3, 'k3');
+    console.log(a + ' ' + b + ' ' + c + ' ' + d);
+  `);
+
+  expect(code).not.toContain('_dec(');
+  expect(code).toContain('"你好"');
+  expect(code).toContain('"世界"');
+  expect(code).toContain('"默认排序"');
+});

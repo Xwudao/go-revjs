@@ -15,6 +15,7 @@
     "**/dist/**",
     "**/node_modules/**",
     "**/tmp/**",
-    "**/routeTree.gen.ts"
+    "**/routeTree.gen.ts",
+    "src/assets/raw/**"
   ]
 }

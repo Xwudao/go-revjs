@@ -4,11 +4,18 @@ import traverse from '../interop/babel-traverse';
 import { deobLogger as logger } from '../ast-utils';
 import { buildSetupCode } from './setup-code';
 
-/** Returns true when a string looks like a deobfuscated identifier or literal value. */
-function isAsciiPrintable(s: unknown): s is string {
-  return (
-    typeof s === 'string' && s.length > 0 && s.length < 100 && /^[\x20-\x7E]+$/.test(s)
-  );
+/**
+ * Returns true when a string looks like a deobfuscated identifier or literal value.
+ * Accepts printable ASCII, CJK, accented Latin, and other Unicode characters.
+ * Rejects control characters (< U+0020) and surrogate code units.
+ */
+function isPrintable(s: unknown): s is string {
+  if (typeof s !== 'string' || s.length === 0 || s.length >= 200) return false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    if (c < 0x20 || (c >= 0xd800 && c <= 0xdfff)) return false;
+  }
+  return true;
 }
 
 /**
@@ -116,7 +123,7 @@ export function findBestRotation(
 
     try {
       const vals = new Function(fnBody)() as unknown[];
-      const score = (vals as unknown[]).filter(isAsciiPrintable).length;
+      const score = (vals as unknown[]).filter(isPrintable).length;
       if (score > bestScore) {
         bestScore = score;
         bestRot = rot;

@@ -8,6 +8,7 @@ import { AppSelect, type AppSelectOption } from '@/components/ui/app-select';
 import { CodeEditor } from '@/components/ui/code-editor';
 import { Tip } from '@/components/ui/tip';
 import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
+import { ToolbarSelect, type ToolbarSelectOption } from '@/components/ui/toolbar-select';
 import JsDeobWorker from './js-deob.worker?worker';
 import classes from './js-deob.module.scss';
 
@@ -84,6 +85,23 @@ const mangleModeOptions: AppSelectOption<EditableOptions['mangleMode']>[] = [
 ];
 
 const STORAGE_COMPRESS_PREFIX = 'z:';
+
+interface DemoEntry {
+  label: string;
+  load: () => Promise<string>;
+}
+
+const DEMO_MAP: Record<string, DemoEntry> = {
+  xuneli: {
+    label: 'Xuneli 示例',
+    load: () => import('@/assets/raw/xuneli-demo.js?raw').then((m) => m.default),
+  },
+};
+
+const demoSelectOptions: ToolbarSelectOption<string>[] = [
+  { value: '', label: '加载示例…' },
+  ...Object.entries(DEMO_MAP).map(([value, { label }]) => ({ value, label })),
+];
 
 function compressToStorage(str: string): string {
   try {
@@ -248,6 +266,8 @@ function JsDeobPage() {
   const [copyState, setCopyState] = useState<'idle' | 'done' | 'failed'>('idle');
   const [logs, setLogs] = useState<ConsoleEntry[]>([]);
   const [options, setOptions] = useState<EditableOptions>(readStoredOptions);
+  const [demoKey, setDemoKey] = useState('');
+  const [isLoadingDemo, setIsLoadingDemo] = useState(false);
   const optionsRef = useRef(options);
 
   const keywordsValue = useMemo(() => options.keywords.join(', '), [options.keywords]);
@@ -470,6 +490,29 @@ function JsDeobPage() {
     }
   }
 
+  async function loadDemo(key: string) {
+    if (!key) return;
+
+    const entry = DEMO_MAP[key];
+    if (!entry) return;
+
+    setDemoKey(key);
+    setIsLoadingDemo(true);
+
+    try {
+      const code = await entry.load();
+      setSourceCode(code);
+      setErrorMessage('');
+      pushLog(`已加载示例: ${entry.label} (${code.length} 字符)`);
+      toast.success(`已加载: ${entry.label}`);
+    } catch {
+      toast.error('示例加载失败，请重试');
+    } finally {
+      setIsLoadingDemo(false);
+      setDemoKey('');
+    }
+  }
+
   function resetAll() {
     setSourceCode('');
     setOutputCode('');
@@ -623,6 +666,14 @@ function JsDeobPage() {
             <span className="i-mdi-clipboard-arrow-down-outline" aria-hidden="true" />
             粘贴
           </ToolbarButton>
+          <ToolbarSelect
+            value={demoKey}
+            options={demoSelectOptions}
+            ariaLabel="加载示例"
+            disabled={isLoadingDemo}
+            onChange={loadDemo}
+            menuWidth="10rem"
+          />
 
           <ToolbarDivider />
 
