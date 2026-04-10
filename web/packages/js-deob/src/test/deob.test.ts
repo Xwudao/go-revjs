@@ -405,3 +405,38 @@ test('brute-force rotation scorer selects correct rotation when decoded strings 
   expect(code).toContain('"世界"');
   expect(code).toContain('"默认排序"');
 });
+
+// Regression test: when the string-array function and decoder are nested INSIDE a
+// top-level IIFE (e.g. `!function apMain(){ function _za(){} function _zb(){} ... }()`),
+// buildSetupCode must hoist those declarations directly instead of pulling in the entire
+// IIFE wrapper.  Without this fix, the whole IIFE body (including browser-specific code
+// like `new SomeClass(window)`) is eval'd and crashes the Node sandbox with
+// "ReferenceError: window is not defined".
+test('pipeline decodes strings when string-array and decoder are nested inside an IIFE', async () => {
+  const { code } = await deob(`
+    !function apMain() {
+      function _za() {
+        var arr = ['hello', 'world', 'done'];
+        _za = function () { return arr; };
+        return _za();
+      }
+
+      function _zb(idx) {
+        var a = _za();
+        _zb = function (i) { return a[i]; };
+        return _zb(idx);
+      }
+
+      // This part would crash the Node sandbox if the entire IIFE were eval'd
+      var win = typeof window !== 'undefined' ? window : null;
+      if (win) win.title = _zb(0);
+
+      console.log(_zb(1));
+      console.log(_zb(2));
+    }();
+  `);
+
+  expect(code).not.toContain('_zb(');
+  expect(code).toContain('"world"');
+  expect(code).toContain('"done"');
+});
