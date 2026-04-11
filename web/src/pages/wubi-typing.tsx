@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import { useWubiTyping } from './hooks/wubi-typing.hook';
 import classes from './wubi-typing.module.scss';
+import { WubiLookupPanel } from './wubi-lookup-panel';
 
 export default function WubiTypingPage() {
   const {
@@ -446,49 +447,11 @@ export default function WubiTypingPage() {
         )}
 
         {activeTab === 'lookup' && (
-          <div className={classes.lookupPanel}>
-            {lookupResults.length > 0 ? (
-              isPassageMode ? (
-                <div className={classes.lookupPassage}>
-                  {lookupResults.map(({ char, codes }, i) => (
-                    <div key={i} className={classes.lookupPassageItem}>
-                      <span className={classes.lookupPassageChar}>{char}</span>
-                      {codes.length > 0 ? (
-                        <span className={classes.lookupPassageCode}>{codes[0]}</span>
-                      ) : (
-                        <span className={classes.lookupPassageNoCode}>—</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className={classes.lookupGrid}>
-                  {lookupResults.map(({ char, codes }, i) => (
-                    <div key={i} className={classes.lookupCard}>
-                      <span className={classes.lookupChar}>{char}</span>
-                      <div className={classes.lookupCodes}>
-                        {codes.map((c, ci) => (
-                          <span key={ci} className={classes.lookupCode}>
-                            {c}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )
-            ) : lookupQuery ? (
-              <div className={classes.lookupEmpty}>
-                <span className="i-mdi-emoticon-sad-outline" aria-hidden="true" />
-                <p>未找到匹配结果</p>
-              </div>
-            ) : (
-              <div className={classes.lookupEmpty}>
-                <span className="i-mdi-keyboard-outline" aria-hidden="true" />
-                <p>在左侧搜索框输入汉字或编码前缀</p>
-              </div>
-            )}
-          </div>
+          <WubiLookupPanel
+            lookupResults={lookupResults}
+            isPassageMode={isPassageMode}
+            lookupQuery={lookupQuery}
+          />
         )}
       </div>
     </div>

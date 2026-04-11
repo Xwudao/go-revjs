@@ -72,7 +72,13 @@ export function useWubiTyping() {
 
   // ── Practice settings ──
   const [isHintVisible, setIsHintVisible] = useState(true);
-  const [isCodeImageVisible, setIsCodeImageVisible] = useState(false);
+  const [isCodeImageVisible, setIsCodeImageVisible] = useState(() => {
+    try {
+      return localStorage.getItem('wubi-code-image-visible') === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   // ── Session state ──
   const [taskIndex, setTaskIndex] = useState(0);
@@ -123,6 +129,14 @@ export function useWubiTyping() {
   }, [typingTasks]);
 
   const currentTask: TypingTask | null = typingTasks[taskIndex] ?? null;
+  const nextTask: TypingTask | null = typingTasks[taskIndex + 1] ?? null;
+
+  // Preload the next char's code image so it's ready when needed
+  useEffect(() => {
+    if (!isCodeImageVisible || !nextTask) return;
+    const img = new Image();
+    img.src = `https://oss.misiai.com/wubi/${encodeURIComponent(nextTask.char)}.gif`;
+  }, [nextTask?.char, isCodeImageVisible]);
 
   // ── Char states for display ──
   const charStates = useMemo<CharState[]>(() => {
@@ -391,7 +405,15 @@ export function useWubiTyping() {
   }, [startTimer]);
 
   const toggleHint = useCallback(() => setIsHintVisible((v) => !v), []);
-  const toggleCodeImage = useCallback(() => setIsCodeImageVisible((v) => !v), []);
+  const toggleCodeImage = useCallback(() => {
+    setIsCodeImageVisible((v) => {
+      const next = !v;
+      try {
+        localStorage.setItem('wubi-code-image-visible', String(next));
+      } catch {}
+      return next;
+    });
+  }, []);
   const toggleSettings = useCallback(() => setSettingsOpen((v) => !v), []);
   const closeSettings = useCallback(() => setSettingsOpen(false), []);
 
