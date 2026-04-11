@@ -21,6 +21,15 @@ const GENERAL_TOOLS: GeneralTool[] = [
     tags: ['五笔', '打字', '练习'],
     state: '已上线',
   },
+  {
+    title: 'SBTI 人格测试',
+    description:
+      'MBTI 已经过时，SBTI 来了。30 道题，15 个维度，27 种人格，揭晓你到底是哪种人。',
+    iconClass: 'i-mdi-brain',
+    to: '/tools/sbti-test',
+    tags: ['人格', '测试', '娱乐'],
+    state: '已上线',
+  },
 ];
 
 export default function ToolsHubPage() {
