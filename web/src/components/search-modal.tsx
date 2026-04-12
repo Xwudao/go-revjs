@@ -1,14 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import clsx from 'clsx';
-import { HUB_TOOLS, type HubTool } from '@/data/hub-tools';
+import { ALL_COMMAND_ITEMS, type CommandItem } from '@/data/hub-tools';
 import classes from './search-modal.module.scss';
 
-function filterItems(query: string): readonly HubTool[] {
+function filterItems(query: string): readonly CommandItem[] {
   const q = query.trim().toLowerCase();
-  if (!q) return HUB_TOOLS;
-  return HUB_TOOLS.filter((item) => {
-    const haystack = [item.title, item.description, ...item.keywords]
+  if (!q) return ALL_COMMAND_ITEMS;
+  return ALL_COMMAND_ITEMS.filter((item) => {
+    const haystack = [
+      item.title,
+      item.description,
+      ...(item.groupLabel ? [item.groupLabel] : []),
+      ...item.keywords,
+    ]
       .join(' ')
       .toLowerCase();
     return haystack.includes(q);
@@ -49,9 +54,17 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
   }, [results.length]);
 
   const handleSelect = useCallback(
-    (item: HubTool) => {
+    (item: CommandItem) => {
       onClose();
-      void navigate({ to: item.to });
+      if (item.search) {
+        void navigate({
+          to: item.to,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          search: item.search as any,
+        });
+      } else {
+        void navigate({ to: item.to });
+      }
     },
     [navigate, onClose],
   );
@@ -142,7 +155,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
           ) : (
             results.map((item, i) => (
               <li
-                key={item.to}
+                key={item.search?.op ? `${item.to}?op=${item.search.op}` : item.to}
                 role="option"
                 aria-selected={i === activeIndex}
                 className={clsx(
@@ -160,6 +173,9 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                   <span className={clsx(classes.resultLabel)}>{item.title}</span>
                   <span className={clsx(classes.resultDesc)}>{item.description}</span>
                 </span>
+                {item.groupLabel && (
+                  <span className={clsx(classes.resultGroup)}>{item.groupLabel}</span>
+                )}
                 <span
                   className={clsx(classes.resultArrow, 'i-mdi-arrow-right')}
                   aria-hidden="true"

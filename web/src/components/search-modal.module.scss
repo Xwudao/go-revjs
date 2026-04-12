@@ -160,6 +160,17 @@
   text-overflow: ellipsis;
 }
 
+.result-group {
+  flex-shrink: 0;
+  font-size: var(--font-size-2xs);
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-1);
+  line-height: 1.6;
+}
+
 .result-arrow {
   flex-shrink: 0;
   font-size: 1rem;

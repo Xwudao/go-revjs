@@ -6,6 +6,16 @@
 - Frontend app lives under `web`.
 - The JS deobfuscation core lives under `web/packages/js-deob`.
 
+## Command and Tools You need
+
+```shell
+# Frontend validation (check lint/typescript errors)
+cd web && pnpm run type-check
+
+# If you want to also check with tsc, plesae use `tsgo`
+pnpm -C web exec tsgo
+```
+
 ## Interaction Rule
 
 After completing each response, you MUST ask exactly ONE follow-up question.
