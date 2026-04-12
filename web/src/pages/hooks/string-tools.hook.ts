@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import CryptoJS from 'crypto-js';
 import toast from 'react-hot-toast';
 
@@ -208,7 +209,7 @@ function isoToTimestamp(s: string): string {
 
 // ── Op definitions ───────────────────────────────────────────────────────────
 
-export const opsByTab: Record<Exclude<TabKey, 'hash'>, OpDef[]> = {
+export const opsByTab = {
   encode: [
     {
       label: 'URL 编码',
@@ -385,7 +386,17 @@ export const opsByTab: Record<Exclude<TabKey, 'hash'>, OpDef[]> = {
       fn: safeOp((s) => JSON.stringify(JSON.parse(s))),
     },
   ],
-};
+} satisfies Record<Exclude<TabKey, 'hash'>, readonly OpDef[]>;
+
+/**
+ * Union of every operation label across all non-hash tabs.
+ * The command registry in hub-tools.ts must cover every member —
+ * TypeScript will error at compile time if any label is missing.
+ */
+export type StringToolsOpLabel = (typeof opsByTab)[Exclude<
+  TabKey,
+  'hash'
+>][number]['label'];
 
 // ── Shared helpers ───────────────────────────────────────────────────────────
 
@@ -413,15 +424,44 @@ function readStoredTab(): TabKey {
 }
 
 export function useStringTools() {
+  const { tab: urlTab, op: urlOp } = useSearch({ from: '/string-tools' });
+  const navigate = useNavigate({ from: '/string-tools' });
+
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
-  const [activeTab, setActiveTab] = useState<TabKey>(readStoredTab);
+  const [activeTab, setActiveTab] = useState<TabKey>(() => {
+    if (urlTab) return urlTab;
+    return readStoredTab();
+  });
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
   const outputRef = useRef<HTMLTextAreaElement>(null);
 
+  // Persist tab choice to localStorage
   useEffect(() => {
     localStorage.setItem(TAB_STORAGE_KEY, activeTab);
   }, [activeTab]);
+
+  // Push tab change to URL (replace so back button still works naturally)
+  useEffect(() => {
+    void navigate({ search: (prev) => ({ ...prev, tab: activeTab }), replace: true });
+  }, [activeTab, navigate]);
+
+  // Auto-apply op from URL on first mount when op param is present
+  useEffect(() => {
+    if (!urlOp) return;
+    const tab = urlTab ?? activeTab;
+    if (tab === 'hash') return;
+    const ops = opsByTab[tab as Exclude<TabKey, 'hash'>];
+    const matched = ops.find((o) => o.label === urlOp);
+    if (matched) {
+      // Strip op from URL after reading it so it doesn't re-trigger
+      void navigate({
+        search: (prev) => ({ tab: prev.tab, op: undefined }),
+        replace: true,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally runs once at mount
 
   const inputStats = useMemo(() => getStats(input), [input]);
   const outputStats = useMemo(() => getStats(output), [output]);

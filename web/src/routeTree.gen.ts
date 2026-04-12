@@ -20,6 +20,7 @@ import { Route as AstExplorerRouteImport } from './routes/ast-explorer'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToolsIndexRouteImport } from './routes/tools/index'
 import { Route as ToolsWubiTypingRouteImport } from './routes/tools/wubi-typing'
+import { Route as ToolsSbtiTestRouteImport } from './routes/tools/sbti-test'
 
 const ToolsRoute = ToolsRouteImport.update({
   id: '/tools',
@@ -76,6 +77,11 @@ const ToolsWubiTypingRoute = ToolsWubiTypingRouteImport.update({
   path: '/wubi-typing',
   getParentRoute: () => ToolsRoute,
 } as any)
+const ToolsSbtiTestRoute = ToolsSbtiTestRouteImport.update({
+  id: '/sbti-test',
+  path: '/sbti-test',
+  getParentRoute: () => ToolsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/string-tools': typeof StringToolsRoute
   '/text-pipeline': typeof TextPipelineRoute
   '/tools': typeof ToolsRouteWithChildren
+  '/tools/sbti-test': typeof ToolsSbtiTestRoute
   '/tools/wubi-typing': typeof ToolsWubiTypingRoute
   '/tools/': typeof ToolsIndexRoute
 }
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/js-deob': typeof JsDeobRoute
   '/string-tools': typeof StringToolsRoute
   '/text-pipeline': typeof TextPipelineRoute
+  '/tools/sbti-test': typeof ToolsSbtiTestRoute
   '/tools/wubi-typing': typeof ToolsWubiTypingRoute
   '/tools': typeof ToolsIndexRoute
 }
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/string-tools': typeof StringToolsRoute
   '/text-pipeline': typeof TextPipelineRoute
   '/tools': typeof ToolsRouteWithChildren
+  '/tools/sbti-test': typeof ToolsSbtiTestRoute
   '/tools/wubi-typing': typeof ToolsWubiTypingRoute
   '/tools/': typeof ToolsIndexRoute
 }
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/string-tools'
     | '/text-pipeline'
     | '/tools'
+    | '/tools/sbti-test'
     | '/tools/wubi-typing'
     | '/tools/'
   fileRoutesByTo: FileRoutesByTo
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/js-deob'
     | '/string-tools'
     | '/text-pipeline'
+    | '/tools/sbti-test'
     | '/tools/wubi-typing'
     | '/tools'
   id:
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/string-tools'
     | '/text-pipeline'
     | '/tools'
+    | '/tools/sbti-test'
     | '/tools/wubi-typing'
     | '/tools/'
   fileRoutesById: FileRoutesById
@@ -248,15 +260,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsWubiTypingRouteImport
       parentRoute: typeof ToolsRoute
     }
+    '/tools/sbti-test': {
+      id: '/tools/sbti-test'
+      path: '/sbti-test'
+      fullPath: '/tools/sbti-test'
+      preLoaderRoute: typeof ToolsSbtiTestRouteImport
+      parentRoute: typeof ToolsRoute
+    }
   }
 }
 
 interface ToolsRouteChildren {
+  ToolsSbtiTestRoute: typeof ToolsSbtiTestRoute
   ToolsWubiTypingRoute: typeof ToolsWubiTypingRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
 const ToolsRouteChildren: ToolsRouteChildren = {
+  ToolsSbtiTestRoute: ToolsSbtiTestRoute,
   ToolsWubiTypingRoute: ToolsWubiTypingRoute,
   ToolsIndexRoute: ToolsIndexRoute,
 }

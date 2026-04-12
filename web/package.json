@@ -13,7 +13,6 @@
     "fmt": "oxfmt --write",
     "test:js-deob": "pnpm --filter @revjs/js-deob run test",
     "tsgo": "tsgo",
-    "type-check:native": "tsgo",
     "type-check": "oxlint --type-aware --type-check",
     "preview": "vite preview"
   },
