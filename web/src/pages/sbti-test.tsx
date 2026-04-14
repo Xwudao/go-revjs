@@ -787,7 +787,7 @@ export default function SbtiTestPage() {
     setScreen('test');
   }, []);
 
-  const handleAnswer = useCallback((qId: string, value: number) => {
+  const handleAnswer = useCallback((qId: string, value: number, nextId?: string) => {
     setAnswers((prev) => {
       const next = { ...prev, [qId]: value };
       if (qId === 'drink_gate_q1' && value !== 3) {
@@ -795,6 +795,13 @@ export default function SbtiTestPage() {
       }
       return next;
     });
+    if (nextId) {
+      requestAnimationFrame(() => {
+        document
+          .getElementById(`q-${nextId}`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
   }, []);
 
   const submitTest = useCallback(() => {
@@ -906,6 +913,27 @@ export default function SbtiTestPage() {
       {screen === 'intro' && (
         <div className={classes.introCard}>
           <h2 className={classes.introTitle}>MBTI已经过时，SBTI来了。</h2>
+          <div className={classes.introStats}>
+            <div className={classes.introStat}>
+              <span className={classes.introStatNum}>30</span>
+              <span className={classes.introStatLabel}>道题</span>
+            </div>
+            <div className={classes.introStat}>
+              <span className={classes.introStatNum}>15</span>
+              <span className={classes.introStatLabel}>个维度</span>
+            </div>
+            <div className={classes.introStat}>
+              <span className={classes.introStatNum}>27</span>
+              <span className={classes.introStatLabel}>种人格</span>
+            </div>
+          </div>
+          <div className={classes.typeChips}>
+            {Object.keys(TYPE_LIBRARY).map((code) => (
+              <span key={code} className={classes.typeChip}>
+                {code}
+              </span>
+            ))}
+          </div>
           <div className={classes.btnRow}>
             <button className={classes.btnPrimary} onClick={startTest}>
               <span className="i-mdi-play" aria-hidden="true" />
@@ -934,12 +962,15 @@ export default function SbtiTestPage() {
 
           <div className={classes.questionList}>
             {visibleQuestions.map((q, idx) => (
-              <div key={q.id} className={classes.questionCard}>
+              <div
+                key={q.id}
+                id={`q-${q.id}`}
+                className={classes.questionCard}
+                data-answered={answers[q.id] !== undefined ? '' : undefined}
+              >
                 <div className={classes.questionMeta}>
                   <span className={classes.badge}>第 {idx + 1} 题</span>
-                  <span className={classes.dimLabel}>
-                    {q.special ? '补充题' : '维度已隐藏'}
-                  </span>
+                  {q.special && <span className={classes.dimLabel}>附加题</span>}
                 </div>
                 <p className={classes.questionText}>{q.text}</p>
                 <div className={classes.options}>
@@ -952,7 +983,9 @@ export default function SbtiTestPage() {
                           name={q.id}
                           value={opt.value}
                           checked={answers[q.id] === opt.value}
-                          onChange={() => handleAnswer(q.id, opt.value)}
+                          onChange={() =>
+                            handleAnswer(q.id, opt.value, visibleQuestions[idx + 1]?.id)
+                          }
                         />
                         <span className={classes.optionCode}>{code}</span>
                         <span className={classes.optionText}>{opt.label}</span>
@@ -1024,22 +1057,44 @@ export default function SbtiTestPage() {
           <div className={classes.sectionBox}>
             <h3>十五维度评分</h3>
             <div className={classes.dimList}>
-              {DIMENSION_ORDER.map((dim) => {
-                const level = result.levels[dim];
-                return (
-                  <div key={dim} className={classes.dimItem}>
-                    <div className={classes.dimItemTop}>
-                      <span className={classes.dimItemName}>
-                        {DIMENSION_META[dim].name}
-                      </span>
-                      <span className={classes.dimItemScore}>
-                        {level} / {result.rawScores[dim]}分
-                      </span>
+              {['自我模型', '情感模型', '态度模型', '行动驱力模型', '社交模型'].map(
+                (model) => {
+                  const dims = DIMENSION_ORDER.filter(
+                    (d) => DIMENSION_META[d].model === model,
+                  );
+                  return (
+                    <div key={model} className={classes.dimGroup}>
+                      <div className={classes.dimGroupTitle}>{model}</div>
+                      <div className={classes.dimGroupGrid}>
+                        {dims.map((dim) => {
+                          const level = result.levels[dim];
+                          const lvlClass =
+                            level === 'H'
+                              ? classes.lvlH
+                              : level === 'M'
+                                ? classes.lvlM
+                                : classes.lvlL;
+                          return (
+                            <div key={dim} className={clsx(classes.dimItem, lvlClass)}>
+                              <div className={classes.dimItemTop}>
+                                <span className={classes.dimItemName}>
+                                  {DIMENSION_META[dim].name}
+                                </span>
+                                <span className={classes.dimItemScore}>
+                                  {level} · {result.rawScores[dim]}分
+                                </span>
+                              </div>
+                              <p className={classes.dimItemDesc}>
+                                {DIM_EXPLANATIONS[dim][level]}
+                              </p>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <p className={classes.dimItemDesc}>{DIM_EXPLANATIONS[dim][level]}</p>
-                  </div>
-                );
-              })}
+                  );
+                },
+              )}
             </div>
           </div>
 
