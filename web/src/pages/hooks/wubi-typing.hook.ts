@@ -5,7 +5,7 @@ import wubiTextsRaw from '@/assets/data/wubi_text.json';
 const wubiDict = wubiDictRaw as Record<string, string[]>;
 export const wubiTexts = wubiTextsRaw as Array<{ title: string; content: string }>;
 
-export type TextSource = 'preset' | 'custom';
+export type TextSource = 'preset' | 'custom' | 'error';
 export type CharState = 'done' | 'done-error' | 'current' | 'skipped' | 'pending';
 export type ActiveTab = 'practice' | 'lookup';
 
@@ -64,11 +64,53 @@ export function useWubiTyping() {
     return [...byChar, ...byCode].slice(0, 60);
   }, [lookupQuery, isPassageMode]);
 
+  // ── Error notebook ──
+  const [errorChars, setErrorChars] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('wubi-error-chars');
+      if (saved) return new Set<string>(JSON.parse(saved) as string[]);
+    } catch {}
+    return new Set<string>();
+  });
+
+  const clearErrorChars = useCallback(() => {
+    setErrorChars(new Set());
+    try {
+      localStorage.removeItem('wubi-error-chars');
+    } catch {}
+  }, []);
+
   // ── Text settings ──
-  const [textSource, setTextSource] = useState<TextSource>('preset');
-  const [presetIndex, setPresetIndex] = useState(0);
+  const [textSource, setTextSource] = useState<TextSource>(() => {
+    try {
+      const saved = localStorage.getItem('wubi-text-source');
+      if (saved === 'preset' || saved === 'custom' || saved === 'error') return saved;
+    } catch {}
+    return 'preset';
+  });
+  const [presetIndex, setPresetIndex] = useState(() => {
+    try {
+      const saved = localStorage.getItem('wubi-preset-index');
+      const n = parseInt(saved ?? '', 10);
+      if (!isNaN(n) && n >= 0 && n < wubiTexts.length) return n;
+    } catch {}
+    return 0;
+  });
   const [customText, setCustomText] = useState('');
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Persist text source and preset index
+  useEffect(() => {
+    try {
+      localStorage.setItem('wubi-text-source', textSource);
+    } catch {}
+  }, [textSource]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('wubi-preset-index', String(presetIndex));
+    } catch {}
+  }, [presetIndex]);
 
   // ── Practice settings ──
   const [isHintVisible, setIsHintVisible] = useState(true);
@@ -105,8 +147,9 @@ export function useWubiTyping() {
   // ── Derived: text & tasks ──
   const rawText = useMemo(() => {
     if (textSource === 'custom') return customText;
+    if (textSource === 'error') return Array.from(errorChars).join('');
     return wubiTexts[presetIndex]?.content ?? '';
-  }, [textSource, presetIndex, customText]);
+  }, [textSource, presetIndex, customText, errorChars]);
 
   const displayChars = useMemo(() => Array.from(rawText), [rawText]);
 
@@ -294,6 +337,21 @@ export function useWubiTyping() {
           }
           return next;
         });
+
+        // Persist newly erred chars to the error notebook
+        const newErrorChars = hadErrorPatch
+          .filter(([, wasError]) => wasError)
+          .map(([i]) => typingTasks[i].char);
+        if (newErrorChars.length > 0) {
+          setErrorChars((prev) => {
+            const next = new Set(prev);
+            for (const c of newErrorChars) next.add(c);
+            try {
+              localStorage.setItem('wubi-error-chars', JSON.stringify([...next]));
+            } catch {}
+            return next;
+          });
+        }
       }
 
       setCurrentInput('');
@@ -432,6 +490,9 @@ export function useWubiTyping() {
     setLookupQuery,
     isPassageMode,
     lookupResults,
+    // error notebook
+    errorChars,
+    clearErrorChars,
     // text
     wubiTexts,
     textSource,

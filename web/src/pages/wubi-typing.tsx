@@ -13,6 +13,9 @@ export default function WubiTypingPage() {
     setLookupQuery,
     isPassageMode,
     lookupResults,
+    // error notebook
+    errorChars,
+    clearErrorChars,
     // text
     wubiTexts,
     textSource,
@@ -202,14 +205,48 @@ export default function WubiTypingPage() {
             <div className={classes.sideSection}>
               <div className={classes.sideSectionTitleRow}>
                 <span className={classes.sideSectionTitle}>练习文本</span>
+                {textSource === 'error' && errorChars.size > 0 && (
+                  <button
+                    className={classes.iconBtn}
+                    title="清空错题本"
+                    onClick={clearErrorChars}
+                  >
+                    <span className="i-mdi-delete-outline" aria-hidden="true" />
+                  </button>
+                )}
+              </div>
+
+              {/* Source selector */}
+              <div className={classes.sourceRow}>
                 <button
-                  className={classes.iconBtn}
-                  title="切换文本来源"
-                  onClick={() =>
-                    setTextSource(textSource === 'preset' ? 'custom' : 'preset')
-                  }
+                  className={clsx(
+                    classes.sourceBtn,
+                    textSource === 'preset' && classes.sourceBtnActive,
+                  )}
+                  onClick={() => setTextSource('preset')}
                 >
-                  <span className="i-mdi-swap-horizontal" aria-hidden="true" />
+                  预设
+                </button>
+                <button
+                  className={clsx(
+                    classes.sourceBtn,
+                    textSource === 'custom' && classes.sourceBtnActive,
+                  )}
+                  onClick={() => setTextSource('custom')}
+                >
+                  自定义
+                </button>
+                <button
+                  className={clsx(
+                    classes.sourceBtn,
+                    textSource === 'error' && classes.sourceBtnActive,
+                  )}
+                  onClick={() => setTextSource('error')}
+                >
+                  错题本
+                  {errorChars.size > 0 && (
+                    <span className={classes.errorBadge}>{errorChars.size}</span>
+                  )}
                 </button>
               </div>
 
@@ -227,7 +264,7 @@ export default function WubiTypingPage() {
                 </select>
               )}
 
-              {textSource === 'custom' ? (
+              {textSource === 'custom' && (
                 <textarea
                   className={classes.customTextarea}
                   value={customText}
@@ -235,11 +272,24 @@ export default function WubiTypingPage() {
                   placeholder="粘贴或输入要练习的文本…"
                   rows={6}
                 />
-              ) : (
+              )}
+
+              {textSource === 'error' ? (
+                errorChars.size === 0 ? (
+                  <div className={classes.errorEmpty}>
+                    <span className="i-mdi-book-open-blank-variant-outline" aria-hidden="true" />
+                    <p>暂无错题，练习时答错的字会自动收录</p>
+                  </div>
+                ) : (
+                  <div className={classes.textPreview}>
+                    {Array.from(errorChars).join('　')}
+                  </div>
+                )
+              ) : textSource === 'preset' ? (
                 <div className={classes.textPreview}>
                   {wubiTexts[presetIndex]?.content.slice(0, 100)}…
                 </div>
-              )}
+              ) : null}
             </div>
           </>
         )}
