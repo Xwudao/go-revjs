@@ -6,14 +6,30 @@
 - Frontend app lives under `web`.
 - The JS deobfuscation core lives under `web/packages/js-deob`.
 
-## Command and Tools You need
+## Build & Run Commands
 
-```shell
+```bash
+# Verify backend compiles
+go build -o /dev/null ./cmd/app
+
+# Fix old code issues (imports, formatting, etc.)
+go fix ./...
+
+# Regenerate Wire DI after adding/changing constructors
+nr wire
+
+# Regenerate Ent ORM after schema changes
+nr gen ent
+
 # Frontend validation (check lint/typescript errors)
 cd web && pnpm run type-check
 
 # If you want to also check with tsc, plesae use `tsgo`
 pnpm -C web exec tsgo
+
+# Finally, run the format check (gofmt for Go, oxfmt for frontend)
+go fmt ./...
+pnpm -C web run fmt
 ```
 
 ## Interaction Rule
