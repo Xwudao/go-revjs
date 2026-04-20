@@ -9,6 +9,7 @@
     "build:deob": "pnpm --filter @revjs/js-deob run build",
     "check": "oxlint .",
     "cli:js-deob": "pnpm build:deob && node ./packages/js-deob/dist/cli.mjs",
+    "gen:wubi-phrases": "node ./scripts/generate-wubi-phrase-json.mjs",
     "fix": "oxlint --fix --fix-suggestions --fix-dangerously",
     "fmt": "oxfmt --write",
     "test:js-deob": "pnpm --filter @revjs/js-deob run test",

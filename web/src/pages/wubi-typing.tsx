@@ -26,6 +26,8 @@ export default function WubiTypingPage() {
     setCustomText,
     displayChars,
     typingTasks,
+    practiceMode,
+    setPracticeMode,
     currentTask,
     charStates,
     errorFlash,
@@ -35,6 +37,7 @@ export default function WubiTypingPage() {
     wpm,
     accuracy,
     progress,
+    practiceCharCount,
     isHintVisible,
     toggleHint,
     isCodeImageVisible,
@@ -161,6 +164,37 @@ export default function WubiTypingPage() {
             {/* Settings */}
             <div className={classes.sideSection}>
               <div className={classes.sideSectionTitle}>设置</div>
+              <div className={classes.modeSection}>
+                <div className={classes.modeLabelRow}>
+                  <span className={classes.modeLabel}>练习模式</span>
+                  <span className={classes.modeValue}>
+                    {practiceMode === 'single' ? '单字' : '词组优化'}
+                  </span>
+                </div>
+                <div className={classes.modeSwitch}>
+                  <button
+                    className={clsx(
+                      classes.modeBtn,
+                      practiceMode === 'single' && classes.modeBtnActive,
+                    )}
+                    onClick={() => setPracticeMode('single')}
+                  >
+                    单字模式
+                  </button>
+                  <button
+                    className={clsx(
+                      classes.modeBtn,
+                      practiceMode === 'phrase' && classes.modeBtnActive,
+                    )}
+                    onClick={() => setPracticeMode('phrase')}
+                  >
+                    词组优化
+                  </button>
+                </div>
+                <p className={classes.modeHint}>
+                  词组模式会优先匹配词库中的完整词组，未命中内容自动回退为单字。
+                </p>
+              </div>
               <label className={classes.checkRow}>
                 <input
                   type="checkbox"
@@ -197,7 +231,7 @@ export default function WubiTypingPage() {
                   disabled={isStarted}
                   className={classes.numberInput}
                 />
-                字开始
+                {practiceMode === 'single' ? '字' : '段'}开始
               </label>
             </div>
 
@@ -277,7 +311,10 @@ export default function WubiTypingPage() {
               {textSource === 'error' ? (
                 errorChars.size === 0 ? (
                   <div className={classes.errorEmpty}>
-                    <span className="i-mdi-book-open-blank-variant-outline" aria-hidden="true" />
+                    <span
+                      className="i-mdi-book-open-blank-variant-outline"
+                      aria-hidden="true"
+                    />
                     <p>暂无错题，练习时答错的字会自动收录</p>
                   </div>
                 ) : (
@@ -351,12 +388,13 @@ export default function WubiTypingPage() {
                 isStarted &&
                 !isPaused &&
                 !isFinished &&
+                currentTask?.kind === 'char' &&
                 currentTask && (
                   <div className={clsx(classes.statItem, classes.statItemImg)}>
                     <img
-                      key={currentTask.char}
-                      src={`https://oss.misiai.com/wubi/${encodeURIComponent(currentTask.char)}.gif`}
-                      alt={`键位图-${currentTask.char}`}
+                      key={currentTask.text}
+                      src={`https://oss.misiai.com/wubi/${encodeURIComponent(currentTask.text)}.gif`}
+                      alt={`键位图-${currentTask.text}`}
                       className={classes.codeImage}
                     />
                   </div>
@@ -377,7 +415,22 @@ export default function WubiTypingPage() {
               <div
                 className={clsx(classes.guideCard, errorFlash && classes.guideCardError)}
               >
-                <div className={classes.guideChar}>{currentTask.char}</div>
+                <div className={classes.guideMeta}>
+                  <span className={classes.guideMetaBadge}>
+                    {currentTask.kind === 'phrase' ? '词组' : '单字'}
+                  </span>
+                  <span className={classes.guideMetaText}>
+                    {Array.from(currentTask.text).length} 字
+                  </span>
+                </div>
+                <div
+                  className={clsx(
+                    classes.guideChar,
+                    currentTask.kind === 'phrase' && classes.guideCharPhrase,
+                  )}
+                >
+                  {currentTask.text}
+                </div>
 
                 {isHintVisible && (
                   <div className={classes.keyRow}>
@@ -476,8 +529,8 @@ export default function WubiTypingPage() {
                     <span>准确率</span>
                   </div>
                   <div className={classes.finishStat}>
-                    <strong>{typingTasks.length}</strong>
-                    <span>汉字</span>
+                    <strong>{practiceCharCount}</strong>
+                    <span>练习字数</span>
                   </div>
                   <div className={classes.finishStat}>
                     <strong>{formatTime(elapsedSec)}</strong>

@@ -1,21 +1,33 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import wubiDictRaw from '@/assets/data/wubi_dictionary.json';
+import wubiPhraseDictRaw from '@/assets/data/wubi_phrase_dictionary.json';
 import wubiTextsRaw from '@/assets/data/wubi_text.json';
 
 const wubiDict = wubiDictRaw as Record<string, string[]>;
-export const wubiTexts = wubiTextsRaw as Array<{ title: string; content: string }>;
+const wubiPhraseDict = wubiPhraseDictRaw as Record<string, string[]>;
+const phraseLengthsDesc = [
+  ...new Set(Object.keys(wubiPhraseDict).map((phrase) => Array.from(phrase).length)),
+]
+  .filter((length) => length >= 2)
+  .sort((left, right) => right - left);
+
+export const wubiTexts = wubiTextsRaw as Array<{
+  title: string;
+  content: string;
+}>;
 
 export type TextSource = 'preset' | 'custom' | 'error';
+export type PracticeMode = 'single' | 'phrase';
 export type CharState = 'done' | 'done-error' | 'current' | 'skipped' | 'pending';
 export type ActiveTab = 'practice' | 'lookup';
 
 interface TypingTask {
-  displayIndex: number;
-  char: string;
+  displayStartIndex: number;
+  displayEndIndex: number;
+  text: string;
   codes: string[];
+  kind: 'char' | 'phrase';
 }
-
-// ── Utilities ─────────────────────────────────────────────────────────────────
 
 function formatTime(sec: number): string {
   const m = Math.floor(sec / 60)
@@ -25,18 +37,78 @@ function formatTime(sec: number): string {
   return `${m}:${s}`;
 }
 
+function buildSingleTypingTasks(displayChars: string[]): TypingTask[] {
+  return displayChars.reduce<TypingTask[]>((acc, char, index) => {
+    const codes = wubiDict[char];
+    if (codes && codes.length > 0) {
+      acc.push({
+        displayStartIndex: index,
+        displayEndIndex: index,
+        text: char,
+        codes,
+        kind: 'char',
+      });
+    }
+    return acc;
+  }, []);
+}
+
+function buildPhraseOptimizedTasks(displayChars: string[]): TypingTask[] {
+  const tasks: TypingTask[] = [];
+
+  for (let index = 0; index < displayChars.length; ) {
+    let matched = false;
+
+    for (const phraseLength of phraseLengthsDesc) {
+      if (index + phraseLength > displayChars.length) {
+        continue;
+      }
+
+      const phrase = displayChars.slice(index, index + phraseLength).join('');
+      const codes = wubiPhraseDict[phrase];
+      if (!codes || codes.length === 0) {
+        continue;
+      }
+
+      tasks.push({
+        displayStartIndex: index,
+        displayEndIndex: index + phraseLength - 1,
+        text: phrase,
+        codes,
+        kind: 'phrase',
+      });
+      index += phraseLength;
+      matched = true;
+      break;
+    }
+
+    if (matched) {
+      continue;
+    }
+
+    const char = displayChars[index];
+    const codes = wubiDict[char];
+    if (codes && codes.length > 0) {
+      tasks.push({
+        displayStartIndex: index,
+        displayEndIndex: index,
+        text: char,
+        codes,
+        kind: 'char',
+      });
+    }
+    index += 1;
+  }
+
+  return tasks;
+}
+
 export { formatTime };
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
-
 export function useWubiTyping() {
-  // ── Tab ──
   const [activeTab, setActiveTab] = useState<ActiveTab>('practice');
-
-  // ── Lookup ──
   const [lookupQuery, setLookupQuery] = useState('');
 
-  // Passage mode: query contains more than one Unicode code point
   const isPassageMode = useMemo(
     () => Array.from(lookupQuery.trim()).length > 1,
     [lookupQuery],
@@ -47,24 +119,25 @@ export function useWubiTyping() {
     if (!q) return [];
 
     if (isPassageMode) {
-      // Return codes for each character in passage order (including uncoded chars)
-      return Array.from(q).map((char) => ({ char, codes: wubiDict[char] ?? [] }));
+      return Array.from(q).map((char) => ({
+        char,
+        codes: wubiDict[char] ?? [],
+      }));
     }
 
-    // Single char or code-prefix search
     const byChar: Array<{ char: string; codes: string[] }> = [];
     const byCode: Array<{ char: string; codes: string[] }> = [];
+    const normalizedQuery = q.toLowerCase();
     for (const [char, codes] of Object.entries(wubiDict)) {
       if (char === q) {
         byChar.push({ char, codes });
-      } else if (codes.some((c) => c.startsWith(q.toLowerCase()))) {
+      } else if (codes.some((code) => code.startsWith(normalizedQuery))) {
         byCode.push({ char, codes });
       }
     }
     return [...byChar, ...byCode].slice(0, 60);
   }, [lookupQuery, isPassageMode]);
 
-  // ── Error notebook ──
   const [errorChars, setErrorChars] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem('wubi-error-chars');
@@ -80,7 +153,6 @@ export function useWubiTyping() {
     } catch {}
   }, []);
 
-  // ── Text settings ──
   const [textSource, setTextSource] = useState<TextSource>(() => {
     try {
       const saved = localStorage.getItem('wubi-text-source');
@@ -99,7 +171,6 @@ export function useWubiTyping() {
   const [customText, setCustomText] = useState('');
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // Persist text source and preset index
   useEffect(() => {
     try {
       localStorage.setItem('wubi-text-source', textSource);
@@ -112,7 +183,13 @@ export function useWubiTyping() {
     } catch {}
   }, [presetIndex]);
 
-  // ── Practice settings ──
+  const [practiceMode, setPracticeMode] = useState<PracticeMode>(() => {
+    try {
+      const saved = localStorage.getItem('wubi-practice-mode');
+      if (saved === 'single' || saved === 'phrase') return saved;
+    } catch {}
+    return 'single';
+  });
   const [isHintVisible, setIsHintVisible] = useState(true);
   const [isCodeImageVisible, setIsCodeImageVisible] = useState(() => {
     try {
@@ -122,7 +199,12 @@ export function useWubiTyping() {
     }
   });
 
-  // ── Session state ──
+  useEffect(() => {
+    try {
+      localStorage.setItem('wubi-practice-mode', practiceMode);
+    } catch {}
+  }, [practiceMode]);
+
   const [taskIndex, setTaskIndex] = useState(0);
   const [currentInput, setCurrentInput] = useState('');
   const [taskHadError, setTaskHadError] = useState<boolean[]>([]);
@@ -134,78 +216,108 @@ export function useWubiTyping() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
-  // ── Start-from-position ──
   const [startTaskIndex, setStartTaskIndex] = useState(0);
   const [sessionStartIndex, setSessionStartIndex] = useState(0);
 
-  // ── Timer ──
   const startTimeRef = useRef<number | null>(null);
   const [elapsedSec, setElapsedSec] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const accumulatedSecRef = useRef(0);
 
-  // ── Derived: text & tasks ──
   const rawText = useMemo(() => {
     if (textSource === 'custom') return customText;
     if (textSource === 'error') return Array.from(errorChars).join('');
     return wubiTexts[presetIndex]?.content ?? '';
-  }, [textSource, presetIndex, customText, errorChars]);
+  }, [customText, errorChars, presetIndex, textSource]);
 
   const displayChars = useMemo(() => Array.from(rawText), [rawText]);
 
   const typingTasks = useMemo(
     () =>
-      displayChars.reduce<TypingTask[]>((acc, char, i) => {
-        const codes = wubiDict[char];
-        if (codes && codes.length > 0) {
-          acc.push({ displayIndex: i, char, codes });
-        }
-        return acc;
-      }, []),
-    [displayChars],
+      practiceMode === 'phrase'
+        ? buildPhraseOptimizedTasks(displayChars)
+        : buildSingleTypingTasks(displayChars),
+    [displayChars, practiceMode],
   );
 
   const displayIndexToTaskIndex = useMemo(() => {
     const map = new Map<number, number>();
-    typingTasks.forEach((task, i) => map.set(task.displayIndex, i));
+    typingTasks.forEach((task, index) => {
+      for (
+        let displayIndex = task.displayStartIndex;
+        displayIndex <= task.displayEndIndex;
+        displayIndex += 1
+      ) {
+        map.set(displayIndex, index);
+      }
+    });
     return map;
+  }, [typingTasks]);
+
+  const taskCharOffsets = useMemo(() => {
+    const offsets = [0];
+    for (const task of typingTasks) {
+      offsets.push(offsets[offsets.length - 1] + Array.from(task.text).length);
+    }
+    return offsets;
   }, [typingTasks]);
 
   const currentTask: TypingTask | null = typingTasks[taskIndex] ?? null;
   const nextTask: TypingTask | null = typingTasks[taskIndex + 1] ?? null;
 
-  // Preload the next char's code image so it's ready when needed
   useEffect(() => {
-    if (!isCodeImageVisible || !nextTask) return;
+    if (!isCodeImageVisible || !nextTask || nextTask.kind !== 'char') return;
     const img = new Image();
-    img.src = `https://oss.misiai.com/wubi/${encodeURIComponent(nextTask.char)}.gif`;
-  }, [nextTask?.char, isCodeImageVisible]);
+    img.src = `https://oss.misiai.com/wubi/${encodeURIComponent(nextTask.text)}.gif`;
+  }, [isCodeImageVisible, nextTask]);
 
-  // ── Char states for display ──
   const charStates = useMemo<CharState[]>(() => {
-    const currentDisplayIdx = isFinished
+    const currentTaskStartIndex = isFinished
       ? Infinity
-      : (currentTask?.displayIndex ?? Infinity);
-    return displayChars.map((_, i) => {
-      if (i > currentDisplayIdx) return 'pending';
-      if (i === currentDisplayIdx) return 'current';
-      const ti = displayIndexToTaskIndex.get(i);
-      if (ti !== undefined) {
-        return taskHadError[ti] ? 'done-error' : 'done';
-      }
-      return 'skipped';
-    });
-  }, [displayChars, currentTask, isFinished, displayIndexToTaskIndex, taskHadError]);
+      : (currentTask?.displayStartIndex ?? Infinity);
+    const currentTaskEndIndex = isFinished ? -1 : (currentTask?.displayEndIndex ?? -1);
 
-  // ── Stats ──
-  const completedTasks = isFinished
-    ? typingTasks.length - sessionStartIndex
-    : taskIndex - sessionStartIndex;
+    return displayChars.map((_, index) => {
+      if (index >= currentTaskStartIndex && index <= currentTaskEndIndex) {
+        return 'current';
+      }
+
+      const taskAtIndex = displayIndexToTaskIndex.get(index);
+      if (taskAtIndex !== undefined && taskAtIndex < taskIndex) {
+        return taskHadError[taskAtIndex] ? 'done-error' : 'done';
+      }
+
+      if (index < currentTaskStartIndex) {
+        return 'skipped';
+      }
+
+      return 'pending';
+    });
+  }, [
+    currentTask,
+    displayChars,
+    displayIndexToTaskIndex,
+    isFinished,
+    taskHadError,
+    taskIndex,
+  ]);
+
+  const completedChars = useMemo(() => {
+    if (isFinished) {
+      return taskCharOffsets[typingTasks.length] - taskCharOffsets[sessionStartIndex];
+    }
+    return taskCharOffsets[taskIndex] - taskCharOffsets[sessionStartIndex];
+  }, [isFinished, sessionStartIndex, taskCharOffsets, taskIndex, typingTasks.length]);
+
+  const practiceCharCount = useMemo(
+    () => taskCharOffsets[typingTasks.length] - taskCharOffsets[sessionStartIndex],
+    [sessionStartIndex, taskCharOffsets, typingTasks.length],
+  );
 
   const wpm = useMemo(() => {
-    if (elapsedSec === 0 || completedTasks === 0) return 0;
-    return Math.round((completedTasks / elapsedSec) * 60);
-  }, [completedTasks, elapsedSec]);
+    if (elapsedSec === 0 || completedChars === 0) return 0;
+    return Math.round((completedChars / elapsedSec) * 60);
+  }, [completedChars, elapsedSec]);
 
   const accuracy = useMemo(() => {
     const total = totalCorrectKeys + totalErrors;
@@ -214,14 +326,12 @@ export function useWubiTyping() {
   }, [totalCorrectKeys, totalErrors]);
 
   const progress = useMemo(() => {
-    const total = typingTasks.length - sessionStartIndex;
-    if (total <= 0) return 0;
-    return Math.round((completedTasks / total) * 100);
-  }, [completedTasks, typingTasks.length, sessionStartIndex]);
+    if (practiceCharCount <= 0) return 0;
+    return Math.round((completedChars / practiceCharCount) * 100);
+  }, [completedChars, practiceCharCount]);
 
-  // ── Timer control ──
   const startTimer = useCallback(() => {
-    if (startTimeRef.current !== null) return; // already running
+    if (startTimeRef.current !== null) return;
     startTimeRef.current = Date.now();
     timerRef.current = setInterval(() => {
       if (startTimeRef.current !== null) {
@@ -250,7 +360,6 @@ export function useWubiTyping() {
 
   useEffect(() => () => stopTimer(), [stopTimer]);
 
-  // ── Fullscreen ──
   const containerRef = useRef<HTMLDivElement>(null);
 
   const toggleFullscreen = useCallback(() => {
@@ -267,85 +376,95 @@ export function useWubiTyping() {
     return () => document.removeEventListener('fullscreenchange', handler);
   }, []);
 
-  // ── Scroll current char into view ──
   const currentCharRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (isStarted && !isFinished) {
-      currentCharRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      currentCharRef.current?.scrollIntoView({
+        block: 'center',
+        behavior: 'smooth',
+      });
     }
-  }, [taskIndex, isStarted, isFinished]);
+  }, [isFinished, isStarted, taskIndex]);
 
-  // ── Real input + IME handling ──
   const inputRef = useRef<HTMLInputElement>(null);
   const isComposing = useRef(false);
   const justFinishedComposing = useRef(false);
 
-  // Keep the input focused while practice is running
   useEffect(() => {
     if (isStarted && !isFinished) {
       requestAnimationFrame(() => inputRef.current?.focus());
     }
-  }, [isStarted, isFinished, taskIndex]);
+  }, [isFinished, isStarted, taskIndex]);
 
-  // Process a string of typed Chinese characters (may be more than one at a time)
   const processInputString = useCallback(
     (input: string) => {
       if (!isStarted || isPaused || isFinished || !currentTask) return;
       startTimer();
 
-      const chars = Array.from(input);
-      let idx = taskIndex;
-      let correct = 0;
+      const inputChars = Array.from(input);
+      let inputOffset = 0;
+      let nextTaskIndex = taskIndex;
+      let correctChars = 0;
       let errors = 0;
       let finished = false;
       const hadErrorPatch: Array<[number, boolean]> = [];
 
-      for (const ch of chars) {
-        const task = typingTasks[idx];
+      while (inputOffset < inputChars.length) {
+        const task = typingTasks[nextTaskIndex];
         if (!task) break;
-        if (ch === task.char) {
-          correct++;
-          hadErrorPatch.push([idx, false]);
-          idx++;
-          if (idx >= typingTasks.length) {
+
+        const taskLength = Array.from(task.text).length;
+        const candidate = inputChars
+          .slice(inputOffset, inputOffset + taskLength)
+          .join('');
+        if (candidate === task.text) {
+          correctChars += taskLength;
+          hadErrorPatch.push([nextTaskIndex, false]);
+          inputOffset += taskLength;
+          nextTaskIndex += 1;
+          if (nextTaskIndex >= typingTasks.length) {
             finished = true;
             break;
           }
-        } else {
-          errors++;
-          hadErrorPatch.push([idx, true]);
-          break; // stop on first wrong character
+          continue;
         }
+
+        errors += 1;
+        hadErrorPatch.push([nextTaskIndex, true]);
+        break;
       }
 
-      if (correct > 0) setTotalCorrectKeys((n) => n + correct);
+      if (correctChars > 0) {
+        setTotalCorrectKeys((count) => count + correctChars);
+      }
+
       if (errors > 0) {
-        setTotalErrors((n) => n + errors);
+        setTotalErrors((count) => count + errors);
         setErrorFlash(true);
         setTimeout(() => setErrorFlash(false), 250);
       }
+
       if (hadErrorPatch.length > 0) {
         setTaskHadError((prev) => {
           const next = [...prev];
-          for (const [i, wasError] of hadErrorPatch) {
+          for (const [index, wasError] of hadErrorPatch) {
             if (wasError) {
-              next[i] = true;
-            } else if (next[i] === undefined) {
-              next[i] = false;
+              next[index] = true;
+            } else if (next[index] === undefined) {
+              next[index] = false;
             }
           }
           return next;
         });
 
-        // Persist newly erred chars to the error notebook
         const newErrorChars = hadErrorPatch
           .filter(([, wasError]) => wasError)
-          .map(([i]) => typingTasks[i].char);
+          .flatMap(([index]) => Array.from(typingTasks[index].text));
         if (newErrorChars.length > 0) {
           setErrorChars((prev) => {
             const next = new Set(prev);
-            for (const c of newErrorChars) next.add(c);
+            for (const char of newErrorChars) next.add(char);
             try {
               localStorage.setItem('wubi-error-chars', JSON.stringify([...next]));
             } catch {}
@@ -360,18 +479,18 @@ export function useWubiTyping() {
         setIsFinished(true);
         setTaskIndex(typingTasks.length);
       } else {
-        setTaskIndex(idx);
+        setTaskIndex(nextTaskIndex);
       }
     },
     [
-      isStarted,
-      isPaused,
-      isFinished,
       currentTask,
-      taskIndex,
-      typingTasks,
+      isFinished,
+      isPaused,
+      isStarted,
       startTimer,
       stopTimer,
+      taskIndex,
+      typingTasks,
     ],
   );
 
@@ -379,14 +498,12 @@ export function useWubiTyping() {
     isComposing.current = true;
   }, []);
 
-  // On macOS with an IME, compositionend carries the finalised character(s)
   const handleCompositionEnd = useCallback(
     (e: React.CompositionEvent<HTMLInputElement>) => {
       isComposing.current = false;
       justFinishedComposing.current = true;
       const composed = e.data ?? '';
       if (composed) processInputString(composed);
-      // Clear the native input value so the next character starts fresh
       if (inputRef.current) inputRef.current.value = '';
     },
     [processInputString],
@@ -395,25 +512,24 @@ export function useWubiTyping() {
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (isComposing.current) {
-        // During IME composition, mirror value for display only
         setCurrentInput(e.target.value);
         return;
       }
-      // onChange can fire right after compositionend on some browsers — skip it
+
       if (justFinishedComposing.current) {
         justFinishedComposing.current = false;
         if (inputRef.current) inputRef.current.value = '';
         return;
       }
-      const val = e.target.value;
-      if (!val) return;
-      processInputString(val);
+
+      const value = e.target.value;
+      if (!value) return;
+      processInputString(value);
       if (inputRef.current) inputRef.current.value = '';
     },
     [processInputString],
   );
 
-  // ── Controls ──
   const handleStart = useCallback(() => {
     const clampedStart = Math.min(
       Math.max(0, startTaskIndex),
@@ -433,7 +549,7 @@ export function useWubiTyping() {
     setTotalCorrectKeys(0);
     setElapsedSec(0);
     setErrorFlash(false);
-  }, [stopTimer, startTaskIndex, typingTasks.length]);
+  }, [startTaskIndex, stopTimer, typingTasks.length]);
 
   const handleReset = useCallback(() => {
     stopTimer();
@@ -462,38 +578,33 @@ export function useWubiTyping() {
     startTimer();
   }, [startTimer]);
 
-  const toggleHint = useCallback(() => setIsHintVisible((v) => !v), []);
+  const toggleHint = useCallback(() => setIsHintVisible((visible) => !visible), []);
   const toggleCodeImage = useCallback(() => {
-    setIsCodeImageVisible((v) => {
-      const next = !v;
+    setIsCodeImageVisible((visible) => {
+      const next = !visible;
       try {
         localStorage.setItem('wubi-code-image-visible', String(next));
       } catch {}
       return next;
     });
   }, []);
-  const toggleSettings = useCallback(() => setSettingsOpen((v) => !v), []);
+  const toggleSettings = useCallback(() => setSettingsOpen((open) => !open), []);
   const closeSettings = useCallback(() => setSettingsOpen(false), []);
 
-  // Reset practice when text changes
   useEffect(() => {
     handleReset();
     setStartTaskIndex(0);
-  }, [rawText, handleReset]);
+  }, [handleReset, practiceMode, rawText]);
 
   return {
-    // tab
     activeTab,
     setActiveTab,
-    // lookup
     lookupQuery,
     setLookupQuery,
     isPassageMode,
     lookupResults,
-    // error notebook
     errorChars,
     clearErrorChars,
-    // text
     wubiTexts,
     textSource,
     setTextSource,
@@ -504,7 +615,8 @@ export function useWubiTyping() {
     rawText,
     displayChars,
     typingTasks,
-    // practice
+    practiceMode,
+    setPracticeMode,
     taskIndex,
     currentTask,
     currentInput,
@@ -513,14 +625,12 @@ export function useWubiTyping() {
     isStarted,
     isFinished,
     elapsedSec,
-    // stats
     wpm,
     accuracy,
     progress,
-    completedTasks,
+    practiceCharCount,
     totalErrors,
     formatTime,
-    // settings
     isHintVisible,
     toggleHint,
     isCodeImageVisible,
@@ -528,7 +638,6 @@ export function useWubiTyping() {
     settingsOpen,
     toggleSettings,
     closeSettings,
-    // controls
     handleStart,
     handleReset,
     handlePause,
@@ -536,15 +645,12 @@ export function useWubiTyping() {
     isPaused,
     startTaskIndex,
     setStartTaskIndex,
-    // refs
     containerRef,
     currentCharRef,
     inputRef,
-    // input / IME
     handleCompositionStart,
     handleCompositionEnd,
     handleInputChange,
-    // fullscreen
     isFullscreen,
     toggleFullscreen,
   };
