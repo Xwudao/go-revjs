@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { useWubiTyping } from './hooks/wubi-typing.hook';
 import classes from './wubi-typing.module.scss';
 import { WubiLookupPanel } from './wubi-lookup-panel';
+import { SaveProgressModal } from '@/components/front/modals/SaveProgressModal';
 
 export default function WubiTypingPage() {
   const {
@@ -59,21 +60,30 @@ export default function WubiTypingPage() {
     isFullscreen,
     toggleFullscreen,
     formatTime,
+    saves,
+    isSaveModalOpen,
+    setIsSaveModalOpen,
+    saveName,
+    setSaveName,
+    saveProgress,
+    loadSave,
+    deleteSave,
   } = useWubiTyping();
   const [isLookupModalOpen, setIsLookupModalOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLookupModalOpen) return;
+    if (!isLookupModalOpen && !isSaveModalOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsLookupModalOpen(false);
+        setIsSaveModalOpen(false);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isLookupModalOpen]);
+  }, [isLookupModalOpen, isSaveModalOpen, setIsSaveModalOpen]);
 
   return (
     <div
@@ -161,6 +171,13 @@ export default function WubiTypingPage() {
             >
               <span className="i-mdi-magnify" aria-hidden="true" />
               编码查询
+            </button>
+            <button
+              className={classes.ctrlBtnGhost}
+              onClick={() => setIsSaveModalOpen(true)}
+            >
+              <span className="i-mdi-content-save-outline" aria-hidden="true" />
+              存档
             </button>
           </div>
         </div>
@@ -529,6 +546,18 @@ export default function WubiTypingPage() {
           </div>
         )}
       </div>
+
+      {isSaveModalOpen && (
+        <SaveProgressModal
+          saves={saves}
+          saveName={saveName}
+          setSaveName={setSaveName}
+          saveProgress={saveProgress}
+          loadSave={loadSave}
+          deleteSave={deleteSave}
+          onClose={() => setIsSaveModalOpen(false)}
+        />
+      )}
 
       {isLookupModalOpen && (
         <div

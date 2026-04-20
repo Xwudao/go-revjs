@@ -54,6 +54,20 @@ export type TextSource = 'preset' | 'custom' | 'error';
 export type PracticeMode = 'single' | 'phrase';
 export type CharState = 'done' | 'done-error' | 'current' | 'skipped' | 'pending';
 
+const SAVES_KEY = 'revjs:wubi-typing:saves';
+const MAX_SAVES = 10;
+
+export interface WubiSaveSlot {
+  id: string;
+  name: string;
+  savedAt: number;
+  textSource: TextSource;
+  presetIndex: number;
+  customText: string;
+  practiceMode: PracticeMode;
+  taskIndex: number;
+}
+
 interface TypingTask {
   displayStartIndex: number;
   displayEndIndex: number;
@@ -206,6 +220,16 @@ export function useWubiTyping() {
   });
   const [customText, setCustomText] = useState('');
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const [saves, setSaves] = useState<WubiSaveSlot[]>(() => {
+    try {
+      const raw = localStorage.getItem(SAVES_KEY);
+      if (raw) return JSON.parse(raw) as WubiSaveSlot[];
+    } catch {}
+    return [];
+  });
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [saveName, setSaveName] = useState('');
 
   useEffect(() => {
     try {
@@ -662,6 +686,56 @@ export function useWubiTyping() {
     startTimer();
   }, [startTimer]);
 
+  const persistSaves = useCallback((next: WubiSaveSlot[]) => {
+    setSaves(next);
+    try {
+      localStorage.setItem(SAVES_KEY, JSON.stringify(next));
+    } catch {}
+  }, []);
+
+  const saveProgress = useCallback(
+    (name: string) => {
+      const slot: WubiSaveSlot = {
+        id: String(Date.now()),
+        name: name.trim() || `存档 ${new Date().toLocaleString('zh-CN')}`,
+        savedAt: Date.now(),
+        textSource,
+        presetIndex,
+        customText,
+        practiceMode,
+        taskIndex: isStarted ? taskIndex : startTaskIndex,
+      };
+      persistSaves([slot, ...saves].slice(0, MAX_SAVES));
+    },
+    [
+      customText,
+      isStarted,
+      persistSaves,
+      practiceMode,
+      presetIndex,
+      saves,
+      startTaskIndex,
+      taskIndex,
+      textSource,
+    ],
+  );
+
+  const loadSave = useCallback((slot: WubiSaveSlot) => {
+    setTextSource(slot.textSource);
+    setPresetIndex(slot.presetIndex);
+    setCustomText(slot.customText);
+    setPracticeMode(slot.practiceMode);
+    setStartTaskIndex(slot.taskIndex);
+    setIsSaveModalOpen(false);
+  }, []);
+
+  const deleteSave = useCallback(
+    (id: string) => {
+      persistSaves(saves.filter((s) => s.id !== id));
+    },
+    [persistSaves, saves],
+  );
+
   const toggleHint = useCallback(() => setIsHintVisible((visible) => !visible), []);
   const toggleCodeImage = useCallback(() => {
     setIsCodeImageVisible((visible) => {
@@ -738,5 +812,13 @@ export function useWubiTyping() {
     handleInputChange,
     isFullscreen,
     toggleFullscreen,
+    saves,
+    isSaveModalOpen,
+    setIsSaveModalOpen,
+    saveName,
+    setSaveName,
+    saveProgress,
+    loadSave,
+    deleteSave,
   };
 }

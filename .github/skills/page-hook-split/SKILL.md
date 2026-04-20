@@ -17,11 +17,11 @@ The goal is a clean separation: **logic lives in the hook, TSX only renders**.
 
 ## File naming convention
 
-| File | Purpose |
-|---|---|
-| `some-page.tsx` | JSX rendering only — imports from the hook |
+| File                      | Purpose                                                                 |
+| ------------------------- | ----------------------------------------------------------------------- |
+| `some-page.tsx`           | JSX rendering only — imports from the hook                              |
 | `hooks/some-page.hook.ts` | All state, derived values, handlers, side effects, constants, and types |
-| `some-page.module.scss` | Scoped styles (unchanged) |
+| `some-page.module.scss`   | Scoped styles (unchanged)                                               |
 
 Place the hook file under a `hooks/` subdirectory inside the same `pages/` folder (e.g. `web/src/pages/hooks/some-page.hook.ts`). This keeps hook files separated from TSX and SCSS files without moving them out of the pages tree.
 
@@ -49,9 +49,11 @@ Return a **flat object** from the hook. Avoid nested objects so the TSX destruct
 ```ts
 return {
   // state
-  input, setInput,
+  input,
+  setInput,
   output,
-  activeTab, setActiveTab,
+  activeTab,
+  setActiveTab,
   // derived
   inputStats,
   outputStats,
@@ -62,7 +64,7 @@ return {
   applyOp,
   handleCopyOutput,
   handleClear,
-}
+};
 ```
 
 ## localStorage persistence
@@ -70,47 +72,46 @@ return {
 When a user choice (active tab, selected mode, preferred option) should survive a page refresh, persist it in localStorage.
 
 Rules:
+
 - Use a namespaced key: `revjs:<page-name>:<field>`, e.g. `revjs:string-tools:tab`.
 - Initialize state from a **lazy initializer function** so localStorage is only read once on mount — pass the function reference, not the call result.
 - Validate the stored value against a known list of valid values before accepting it; fall back to the default if the value is missing or unknown.
 - Write back on every change via a dedicated `useEffect` targeting only that state value.
 
 ```ts
-const STORAGE_KEY = 'revjs:some-page:tab'
+const STORAGE_KEY = 'revjs:some-page:tab';
 
 function readStoredTab(): TabKey {
-  const stored = localStorage.getItem(STORAGE_KEY)
-  const valid: TabKey[] = ['a', 'b', 'c']
-  return valid.includes(stored as TabKey) ? (stored as TabKey) : 'a'
+  const stored = localStorage.getItem(STORAGE_KEY);
+  const valid: TabKey[] = ['a', 'b', 'c'];
+  return valid.includes(stored as TabKey) ? (stored as TabKey) : 'a';
 }
 
 // In the hook:
-const [activeTab, setActiveTab] = useState<TabKey>(readStoredTab) // lazy init
+const [activeTab, setActiveTab] = useState<TabKey>(readStoredTab); // lazy init
 
 useEffect(() => {
-  localStorage.setItem(STORAGE_KEY, activeTab)
-}, [activeTab])
+  localStorage.setItem(STORAGE_KEY, activeTab);
+}, [activeTab]);
 ```
 
 ## Minimal TSX skeleton after extraction
 
 ```tsx
-import clsx from 'clsx'
-import { tabs, opsByTab, useMyPage } from './hooks/my-page.hook'
-import classes from './my-page.module.scss'
+import clsx from 'clsx';
+import { tabs, opsByTab, useMyPage } from './hooks/my-page.hook';
+import classes from './my-page.module.scss';
 
 export default function MyPage() {
   const {
-    input, setInput,
-    activeTab, setActiveTab,
+    input,
+    setInput,
+    activeTab,
+    setActiveTab,
     // ...
-  } = useMyPage()
+  } = useMyPage();
 
-  return (
-    <div className={classes.page}>
-      {/* pure JSX — no logic here */}
-    </div>
-  )
+  return <div className={classes.page}>{/* pure JSX — no logic here */}</div>;
 }
 ```
 
@@ -118,6 +119,44 @@ export default function MyPage() {
 
 - Hook: `web/src/pages/hooks/string-tools.hook.ts`
 - Page: `web/src/pages/string-tools.tsx`
+
+## Modal extraction rule
+
+When a page needs a modal dialog (e.g. a save/restore panel, a settings dialog, or a confirmation overlay), **do not write the modal inline in the page TSX**.
+
+Extract it into a dedicated component under `web/src/components/front/modals/`.
+
+Rules:
+
+- File name matches the feature: `SaveProgressModal.tsx` / `SaveProgressModal.module.scss`.
+- The component accepts only the props it strictly needs — state values, setters, and handlers already owned by the page hook.
+- All modal-specific styles live in the component's own `.module.scss`; no modal selectors in the page SCSS.
+- The page TSX mounts the component conditionally: `{isOpen && <SomeModal ... />}`.
+- The page hook owns open/close state and all business logic; the component is pure rendering.
+
+```tsx
+// In the page TSX — minimal mount:
+{
+  isSaveModalOpen && (
+    <SaveProgressModal
+      saves={saves}
+      saveName={saveName}
+      setSaveName={setSaveName}
+      saveProgress={saveProgress}
+      loadSave={loadSave}
+      deleteSave={deleteSave}
+      onClose={() => setIsSaveModalOpen(false)}
+    />
+  );
+}
+```
+
+```
+web/src/components/front/modals/
+  SaveProgressModal.tsx
+  SaveProgressModal.module.scss
+```
+
 - Hook: `web/src/pages/crypto-lab.hook.ts`
 - Page: `web/src/pages/crypto-lab.tsx`
 
