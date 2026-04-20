@@ -118,7 +118,7 @@ export function WubiLookupPanel({ lookupResults, isPassageMode, lookupQuery }: P
       ) : (
         <div className={classes.lookupEmpty}>
           <span className="i-mdi-keyboard-outline" aria-hidden="true" />
-          <p>在左侧搜索框输入汉字或编码前缀</p>
+          <p>在上方搜索框输入汉字或编码前缀</p>
         </div>
       )}
     </div>

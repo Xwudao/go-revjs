@@ -1,15 +1,49 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import wubiDictRaw from '@/assets/data/wubi_dictionary.json';
-import wubiPhraseDictRaw from '@/assets/data/wubi_phrase_dictionary.json';
 import wubiTextsRaw from '@/assets/data/wubi_text.json';
 
-const wubiDict = wubiDictRaw as Record<string, string[]>;
-const wubiPhraseDict = wubiPhraseDictRaw as Record<string, string[]>;
-const phraseLengthsDesc = [
-  ...new Set(Object.keys(wubiPhraseDict).map((phrase) => Array.from(phrase).length)),
-]
-  .filter((length) => length >= 2)
-  .sort((left, right) => right - left);
+type WubiCodeDictionary = Record<string, string[]>;
+
+const wubiDict = wubiDictRaw as WubiCodeDictionary;
+
+let wubiPhraseDictCache: WubiCodeDictionary | null = null;
+let phraseLengthsDescCache: number[] | null = null;
+let wubiPhraseDictPromise: Promise<{
+  dict: WubiCodeDictionary;
+  phraseLengthsDesc: number[];
+}> | null = null;
+
+function buildPhraseLengthsDesc(dict: WubiCodeDictionary): number[] {
+  return [...new Set(Object.keys(dict).map((phrase) => Array.from(phrase).length))]
+    .filter((length) => length >= 2)
+    .sort((left, right) => right - left);
+}
+
+async function loadWubiPhraseDict() {
+  if (wubiPhraseDictCache && phraseLengthsDescCache) {
+    return {
+      dict: wubiPhraseDictCache,
+      phraseLengthsDesc: phraseLengthsDescCache,
+    };
+  }
+
+  if (!wubiPhraseDictPromise) {
+    wubiPhraseDictPromise = import('@/assets/data/wubi_phrase_dictionary.json')
+      .then((module) => {
+        const dict = module.default as WubiCodeDictionary;
+        const phraseLengthsDesc = buildPhraseLengthsDesc(dict);
+        wubiPhraseDictCache = dict;
+        phraseLengthsDescCache = phraseLengthsDesc;
+        return { dict, phraseLengthsDesc };
+      })
+      .catch((error) => {
+        wubiPhraseDictPromise = null;
+        throw error;
+      });
+  }
+
+  return wubiPhraseDictPromise;
+}
 
 export const wubiTexts = wubiTextsRaw as Array<{
   title: string;
@@ -19,7 +53,6 @@ export const wubiTexts = wubiTextsRaw as Array<{
 export type TextSource = 'preset' | 'custom' | 'error';
 export type PracticeMode = 'single' | 'phrase';
 export type CharState = 'done' | 'done-error' | 'current' | 'skipped' | 'pending';
-export type ActiveTab = 'practice' | 'lookup';
 
 interface TypingTask {
   displayStartIndex: number;
@@ -53,7 +86,11 @@ function buildSingleTypingTasks(displayChars: string[]): TypingTask[] {
   }, []);
 }
 
-function buildPhraseOptimizedTasks(displayChars: string[]): TypingTask[] {
+function buildPhraseOptimizedTasks(
+  displayChars: string[],
+  phraseDict: WubiCodeDictionary,
+  phraseLengthsDesc: number[],
+): TypingTask[] {
   const tasks: TypingTask[] = [];
 
   for (let index = 0; index < displayChars.length; ) {
@@ -65,7 +102,7 @@ function buildPhraseOptimizedTasks(displayChars: string[]): TypingTask[] {
       }
 
       const phrase = displayChars.slice(index, index + phraseLength).join('');
-      const codes = wubiPhraseDict[phrase];
+      const codes = phraseDict[phrase];
       if (!codes || codes.length === 0) {
         continue;
       }
@@ -106,7 +143,6 @@ function buildPhraseOptimizedTasks(displayChars: string[]): TypingTask[] {
 export { formatTime };
 
 export function useWubiTyping() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('practice');
   const [lookupQuery, setLookupQuery] = useState('');
 
   const isPassageMode = useMemo(
@@ -198,12 +234,49 @@ export function useWubiTyping() {
       return false;
     }
   });
+  const [phraseDict, setPhraseDict] = useState<WubiCodeDictionary | null>(
+    wubiPhraseDictCache,
+  );
+  const [phraseLengthsDesc, setPhraseLengthsDesc] = useState<number[]>(
+    phraseLengthsDescCache ?? [],
+  );
+  const [isPhraseDictLoading, setIsPhraseDictLoading] = useState(false);
+  const [phraseDictLoadError, setPhraseDictLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
       localStorage.setItem('wubi-practice-mode', practiceMode);
     } catch {}
   }, [practiceMode]);
+
+  useEffect(() => {
+    if (practiceMode !== 'phrase' || phraseDict) return;
+
+    let cancelled = false;
+    setIsPhraseDictLoading(true);
+    setPhraseDictLoadError(null);
+
+    loadWubiPhraseDict()
+      .then(({ dict, phraseLengthsDesc }) => {
+        if (cancelled) return;
+        setPhraseDict(dict);
+        setPhraseLengthsDesc(phraseLengthsDesc);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setPhraseDictLoadError(
+          error instanceof Error ? error.message : '词组词典加载失败，请稍后重试。',
+        );
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setIsPhraseDictLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [phraseDict, practiceMode]);
 
   const [taskIndex, setTaskIndex] = useState(0);
   const [currentInput, setCurrentInput] = useState('');
@@ -235,10 +308,15 @@ export function useWubiTyping() {
   const typingTasks = useMemo(
     () =>
       practiceMode === 'phrase'
-        ? buildPhraseOptimizedTasks(displayChars)
+        ? phraseDict
+          ? buildPhraseOptimizedTasks(displayChars, phraseDict, phraseLengthsDesc)
+          : []
         : buildSingleTypingTasks(displayChars),
-    [displayChars, practiceMode],
+    [displayChars, phraseDict, phraseLengthsDesc, practiceMode],
   );
+
+  const isPhraseModeLoading = practiceMode === 'phrase' && isPhraseDictLoading;
+  const canStartPractice = !isPhraseModeLoading && typingTasks.length > 0;
 
   const displayIndexToTaskIndex = useMemo(() => {
     const map = new Map<number, number>();
@@ -272,6 +350,10 @@ export function useWubiTyping() {
   }, [isCodeImageVisible, nextTask]);
 
   const charStates = useMemo<CharState[]>(() => {
+    if (!isStarted) {
+      return displayChars.map(() => 'pending');
+    }
+
     const currentTaskStartIndex = isFinished
       ? Infinity
       : (currentTask?.displayStartIndex ?? Infinity);
@@ -531,6 +613,8 @@ export function useWubiTyping() {
   );
 
   const handleStart = useCallback(() => {
+    if (!canStartPractice) return;
+
     const clampedStart = Math.min(
       Math.max(0, startTaskIndex),
       Math.max(0, typingTasks.length - 1),
@@ -549,7 +633,7 @@ export function useWubiTyping() {
     setTotalCorrectKeys(0);
     setElapsedSec(0);
     setErrorFlash(false);
-  }, [startTaskIndex, stopTimer, typingTasks.length]);
+  }, [canStartPractice, startTaskIndex, stopTimer, typingTasks.length]);
 
   const handleReset = useCallback(() => {
     stopTimer();
@@ -597,8 +681,6 @@ export function useWubiTyping() {
   }, [handleReset, practiceMode, rawText]);
 
   return {
-    activeTab,
-    setActiveTab,
     lookupQuery,
     setLookupQuery,
     isPassageMode,
@@ -617,6 +699,9 @@ export function useWubiTyping() {
     typingTasks,
     practiceMode,
     setPracticeMode,
+    isPhraseModeLoading,
+    phraseDictLoadError,
+    canStartPractice,
     taskIndex,
     currentTask,
     currentInput,
