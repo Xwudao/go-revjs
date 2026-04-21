@@ -231,6 +231,8 @@ export function useWubiTyping() {
   });
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [saveName, setSaveName] = useState('');
+  const pendingAutoStartRef = useRef<number | null>(null);
+  const [pendingAutoStart, setPendingAutoStart] = useState(false);
 
   useEffect(() => {
     try {
@@ -722,6 +724,8 @@ export function useWubiTyping() {
   );
 
   const loadSave = useCallback((slot: WubiSaveSlot) => {
+    pendingAutoStartRef.current = slot.taskIndex;
+    setPendingAutoStart(true);
     setTextSource(slot.textSource);
     setPresetIndex(slot.presetIndex);
     setCustomText(slot.customText);
@@ -752,8 +756,16 @@ export function useWubiTyping() {
 
   useEffect(() => {
     handleReset();
-    setStartTaskIndex(0);
+    setStartTaskIndex(pendingAutoStartRef.current ?? 0);
   }, [handleReset, practiceMode, rawText]);
+
+  useEffect(() => {
+    if (!pendingAutoStart) return;
+    if (!canStartPractice || typingTasks.length === 0) return;
+    setPendingAutoStart(false);
+    pendingAutoStartRef.current = null;
+    handleStart();
+  }, [canStartPractice, handleStart, pendingAutoStart, typingTasks.length]);
 
   useEffect(() => {
     const handleSaveShortcut = (e: KeyboardEvent) => {

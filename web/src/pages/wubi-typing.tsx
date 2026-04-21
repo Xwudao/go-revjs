@@ -72,18 +72,21 @@ export default function WubiTypingPage() {
   const [isLookupModalOpen, setIsLookupModalOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLookupModalOpen && !isSaveModalOpen) return;
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsLookupModalOpen(false);
         setIsSaveModalOpen(false);
+        return;
+      }
+      if ((event.metaKey || event.ctrlKey) && event.key === 'i') {
+        event.preventDefault();
+        setIsLookupModalOpen((open) => !open);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isLookupModalOpen, isSaveModalOpen, setIsSaveModalOpen]);
+  }, [setIsSaveModalOpen]);
 
   return (
     <div
@@ -168,6 +171,7 @@ export default function WubiTypingPage() {
             <button
               className={classes.ctrlBtnGhost}
               onClick={() => setIsLookupModalOpen(true)}
+              title="编码查询 (⌘I / Ctrl+I)"
             >
               <span className="i-mdi-magnify" aria-hidden="true" />
               编码查询
@@ -580,6 +584,9 @@ export default function WubiTypingPage() {
                 <h2 className={classes.lookupModalTitle}>编码查询</h2>
                 <p className={classes.lookupModalDesc}>
                   单字或编码前缀会列出候选，多字文本则逐字展示五笔编码。
+                  <span className={classes.lookupModalKbd}>
+                    <kbd>⌘I</kbd> / <kbd>Ctrl+I</kbd> 唤出 · <kbd>Esc</kbd> 关闭
+                  </span>
                 </p>
               </div>
               <button
