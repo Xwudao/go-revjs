@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 import wubiDictRaw from '@/assets/data/wubi_dictionary.json';
 import wubiTextsRaw from '@/assets/data/wubi_text.json';
 
@@ -753,6 +754,19 @@ export function useWubiTyping() {
     handleReset();
     setStartTaskIndex(0);
   }, [handleReset, practiceMode, rawText]);
+
+  useEffect(() => {
+    const handleSaveShortcut = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        const name = `存档 ${new Date().toLocaleString('zh-CN')}`;
+        saveProgress(name);
+        toast.success(`已保存「${name}」`);
+      }
+    };
+    document.addEventListener('keydown', handleSaveShortcut);
+    return () => document.removeEventListener('keydown', handleSaveShortcut);
+  }, [saveProgress]);
 
   return {
     lookupQuery,

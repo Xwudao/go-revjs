@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import toast from 'react-hot-toast';
 import { wubiTexts, type WubiSaveSlot } from '@/pages/hooks/wubi-typing.hook';
 import classes from './SaveProgressModal.module.scss';
 
@@ -57,8 +58,11 @@ export function SaveProgressModal({
               placeholder={`存档 ${new Date().toLocaleString('zh-CN')}`}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
+                  const name =
+                    saveName.trim() || `存档 ${new Date().toLocaleString('zh-CN')}`;
                   saveProgress(saveName);
                   setSaveName('');
+                  toast.success(`已保存「${name}」`);
                 }
               }}
               autoFocus
@@ -66,14 +70,21 @@ export function SaveProgressModal({
             <button
               className={clsx(classes.actionBtn, classes.actionBtnPrimary)}
               onClick={() => {
+                const name =
+                  saveName.trim() || `存档 ${new Date().toLocaleString('zh-CN')}`;
                 saveProgress(saveName);
                 setSaveName('');
+                toast.success(`已保存「${name}」`);
               }}
             >
               <span className="i-mdi-content-save-outline" aria-hidden="true" />
               保存
             </button>
           </div>
+          <p className={classes.shortcutHint}>
+            <span className="i-mdi-keyboard-outline" aria-hidden="true" />
+            也可用 <kbd>⌘S</kbd> / <kbd>Ctrl+S</kbd> 快速保存（使用默认名称）
+          </p>
 
           {saves.length > 0 ? (
             <div className={classes.list}>
@@ -96,18 +107,21 @@ export function SaveProgressModal({
                   </div>
                   <div className={classes.slotActions}>
                     <button
-                      className={clsx(classes.actionBtn, classes.actionBtnPrimary)}
-                      onClick={() => loadSave(slot)}
+                      className={clsx(classes.slotBtn, classes.slotBtnLoad)}
+                      onClick={() => {
+                        loadSave(slot);
+                        toast.success(`已恢复「${slot.name}」`);
+                      }}
                     >
                       <span className="i-mdi-restore" aria-hidden="true" />
                       恢复
                     </button>
                     <button
-                      className={classes.deleteBtn}
+                      className={clsx(classes.slotBtn, classes.slotBtnDelete)}
                       onClick={() => deleteSave(slot.id)}
-                      title="删除存档"
                     >
                       <span className="i-mdi-delete-outline" aria-hidden="true" />
+                      删除
                     </button>
                   </div>
                 </div>
