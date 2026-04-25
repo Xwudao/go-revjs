@@ -1,11 +1,32 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import wubiDictRaw from '@/assets/data/wubi_dictionary.json';
-import wubiTextsRaw from '@/assets/data/wubi_text.json';
 
 type WubiCodeDictionary = Record<string, string[]>;
 
+export type WubiText = { title: string; content: string };
+
 const wubiDict = wubiDictRaw as WubiCodeDictionary;
+
+let wubiTextsCache: WubiText[] | null = null;
+let wubiTextsPromise: Promise<WubiText[]> | null = null;
+
+async function loadWubiTexts(): Promise<WubiText[]> {
+  if (wubiTextsCache) return wubiTextsCache;
+  if (!wubiTextsPromise) {
+    wubiTextsPromise = import('@/assets/data/wubi_text.json')
+      .then((module) => {
+        const data = module.default as WubiText[];
+        wubiTextsCache = data;
+        return data;
+      })
+      .catch((error) => {
+        wubiTextsPromise = null;
+        throw error;
+      });
+  }
+  return wubiTextsPromise;
+}
 
 let wubiPhraseDictCache: WubiCodeDictionary | null = null;
 let phraseLengthsDescCache: number[] | null = null;
@@ -45,11 +66,6 @@ async function loadWubiPhraseDict() {
 
   return wubiPhraseDictPromise;
 }
-
-export const wubiTexts = wubiTextsRaw as Array<{
-  title: string;
-  content: string;
-}>;
 
 export type TextSource = 'preset' | 'custom' | 'error';
 export type PracticeMode = 'single' | 'phrase';
@@ -215,7 +231,7 @@ export function useWubiTyping() {
     try {
       const saved = localStorage.getItem('wubi-preset-index');
       const n = parseInt(saved ?? '', 10);
-      if (!isNaN(n) && n >= 0 && n < wubiTexts.length) return n;
+      if (!isNaN(n) && n >= 0) return n;
     } catch {}
     return 0;
   });
@@ -269,6 +285,8 @@ export function useWubiTyping() {
   );
   const [isPhraseDictLoading, setIsPhraseDictLoading] = useState(false);
   const [phraseDictLoadError, setPhraseDictLoadError] = useState<string | null>(null);
+  const [wubiTexts, setWubiTexts] = useState<WubiText[]>(wubiTextsCache ?? []);
+  const [isTextsLoading, setIsTextsLoading] = useState(!wubiTextsCache);
 
   useEffect(() => {
     try {
@@ -305,6 +323,25 @@ export function useWubiTyping() {
     };
   }, [phraseDict, practiceMode]);
 
+  useEffect(() => {
+    if (wubiTextsCache) return;
+    let cancelled = false;
+    setIsTextsLoading(true);
+    loadWubiTexts()
+      .then((data) => {
+        if (cancelled) return;
+        setWubiTexts(data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (cancelled) return;
+        setIsTextsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const [taskIndex, setTaskIndex] = useState(0);
   const [currentInput, setCurrentInput] = useState('');
   const [taskHadError, setTaskHadError] = useState<boolean[]>([]);
@@ -328,7 +365,7 @@ export function useWubiTyping() {
     if (textSource === 'custom') return customText;
     if (textSource === 'error') return Array.from(errorChars).join('');
     return wubiTexts[presetIndex]?.content ?? '';
-  }, [customText, errorChars, presetIndex, textSource]);
+  }, [customText, errorChars, presetIndex, textSource, wubiTexts]);
 
   const displayChars = useMemo(() => Array.from(rawText), [rawText]);
 
@@ -788,6 +825,7 @@ export function useWubiTyping() {
     errorChars,
     clearErrorChars,
     wubiTexts,
+    isTextsLoading,
     textSource,
     setTextSource,
     presetIndex,

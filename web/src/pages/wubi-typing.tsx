@@ -17,6 +17,7 @@ export default function WubiTypingPage() {
     clearErrorChars,
     // text
     wubiTexts,
+    isTextsLoading,
     textSource,
     setTextSource,
     presetIndex,
@@ -333,12 +334,17 @@ export default function WubiTypingPage() {
               className={classes.select}
               value={presetIndex}
               onChange={(e) => setPresetIndex(Number(e.target.value))}
+              disabled={isTextsLoading}
             >
-              {wubiTexts.map((t, i) => (
-                <option key={i} value={i}>
-                  {t.title}
-                </option>
-              ))}
+              {isTextsLoading ? (
+                <option>加载中…</option>
+              ) : (
+                wubiTexts.map((t, i) => (
+                  <option key={i} value={i}>
+                    {t.title}
+                  </option>
+                ))
+              )}
             </select>
           )}
 
@@ -368,7 +374,11 @@ export default function WubiTypingPage() {
             )
           ) : textSource === 'preset' ? (
             <div className={classes.textPreview}>
-              {wubiTexts[presetIndex]?.content.slice(0, 100)}…
+              {isTextsLoading ? (
+                <span className="i-mdi-loading animate-spin" aria-hidden="true" />
+              ) : (
+                <>{wubiTexts[presetIndex]?.content.slice(0, 100)}…</>
+              )}
             </div>
           ) : null}
         </div>
@@ -553,6 +563,7 @@ export default function WubiTypingPage() {
 
       {isSaveModalOpen && (
         <SaveProgressModal
+          wubiTexts={wubiTexts}
           saves={saves}
           saveName={saveName}
           setSaveName={setSaveName}

@@ -1,9 +1,10 @@
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
-import { wubiTexts, type WubiSaveSlot } from '@/pages/hooks/wubi-typing.hook';
+import { type WubiSaveSlot, type WubiText } from '@/pages/hooks/wubi-typing.hook';
 import classes from './SaveProgressModal.module.scss';
 
 interface SaveProgressModalProps {
+  wubiTexts: WubiText[];
   saves: WubiSaveSlot[];
   saveName: string;
   setSaveName: (name: string) => void;
@@ -14,6 +15,7 @@ interface SaveProgressModalProps {
 }
 
 export function SaveProgressModal({
+  wubiTexts,
   saves,
   saveName,
   setSaveName,
