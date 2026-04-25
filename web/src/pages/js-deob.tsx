@@ -10,6 +10,7 @@ import { Tip } from '@/components/ui/tip';
 import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
 import { ToolbarSelect, type ToolbarSelectOption } from '@/components/ui/toolbar-select';
 import JsDeobWorker from './js-deob.worker?worker';
+import { useTitle } from './hooks/use-title';
 import classes from './js-deob.module.scss';
 
 type EditableOptions = Required<Omit<Options, 'sandbox'>>;
@@ -252,6 +253,7 @@ async function minifyOutputWithWorker(code: string) {
 }
 
 function JsDeobPage() {
+  useTitle('JS 解混淆 · RevJS');
   const workerRef = useRef<Worker | null>(null);
   const spawnWorkerRef = useRef<() => void>(() => {});
   const consoleBodyRef = useRef<HTMLDivElement | null>(null);

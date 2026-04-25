@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import clsx from 'clsx';
+import { useTitle } from './hooks/use-title';
 import classes from './tools-hub.module.scss';
 
 interface GeneralTool {
@@ -33,6 +34,7 @@ const GENERAL_TOOLS: GeneralTool[] = [
 ];
 
 export default function ToolsHubPage() {
+  useTitle('工具箱 · RevJS');
   return (
     <main className={classes.page}>
       <header className={classes.header}>

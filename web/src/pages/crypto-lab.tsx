@@ -14,9 +14,11 @@ import {
   paddingOptions,
   useCryptoLab,
 } from './hooks/crypto-lab.hook';
+import { useTitle } from './hooks/use-title';
 import classes from './crypto-lab.module.scss';
 
 function CryptoLabPage() {
+  useTitle('Crypto Lab · RevJS');
   const {
     form,
     result,

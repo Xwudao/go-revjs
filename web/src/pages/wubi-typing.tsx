@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useWubiTyping } from './hooks/wubi-typing.hook';
+import { useTitle } from './hooks/use-title';
 import classes from './wubi-typing.module.scss';
 import { WubiLookupPanel } from './wubi-lookup-panel';
 import { SaveProgressModal } from '@/components/front/modals/SaveProgressModal';
 
 export default function WubiTypingPage() {
+  useTitle('五笔打字练习 · RevJS');
   const {
     // lookup
     lookupQuery,

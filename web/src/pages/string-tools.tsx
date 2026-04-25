@@ -1,10 +1,12 @@
 import clsx from 'clsx';
 import { tabs, opsByTab, useStringTools } from './hooks/string-tools.hook';
+import { useTitle } from './hooks/use-title';
 import classes from './string-tools.module.scss';
 
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function StringToolsPage() {
+  useTitle('字符串工具箱 · RevJS');
   const {
     input,
     setInput,

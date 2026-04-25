@@ -7,6 +7,7 @@ import { CodeEditor, type CodeEditorLanguage } from '@/components/ui/code-editor
 import { Tip } from '@/components/ui/tip';
 import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
 import classes from './curl-to-code.module.scss';
+import { useTitle } from './hooks/use-title';
 import exampleCurl from '@/assets/raw/curl.txt?raw';
 
 type CurlConverterModule = typeof import('curlconverter');
@@ -223,6 +224,7 @@ function countLines(value: string) {
 }
 
 function CurlToCodePage() {
+  useTitle('cURL 2 Req · RevJS');
   const sourceFileInputRef = useRef<HTMLInputElement | null>(null);
   const [state, setState] = useState<StoredState>(readStoredState);
   const [outputCode, setOutputCode] = useState('');

@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import clsx from 'clsx';
 import { HUB_CARDS } from '@/data/hub-tools';
+import { useTitle } from './hooks/use-title';
 import classes from './index.module.scss';
 
 const commandEntries = [
@@ -30,6 +31,7 @@ const runtimeStats = [
 ] as const;
 
 function IndexPage() {
+  useTitle('RevJS · 逆向工程中心');
   return (
     <main className={clsx(classes.frontPage)}>
       <section className={clsx(classes.frontPageHero)}>

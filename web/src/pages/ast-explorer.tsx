@@ -13,6 +13,7 @@ import {
   NODE_CATEGORY_MAP,
   useAstExplorer,
 } from './hooks/ast-explorer.hook';
+import { useTitle } from './hooks/use-title';
 import classes from './ast-explorer.module.scss';
 
 function HandbookSectionBody({ section }: { section: AstExplorerHandbookSection }) {
@@ -58,6 +59,7 @@ function HandbookSectionBody({ section }: { section: AstExplorerHandbookSection 
 }
 
 export default function AstExplorerPage() {
+  useTitle('AST Explorer · RevJS');
   const {
     code,
     setCode,

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import clsx from 'clsx';
+import { useTitle } from './hooks/use-title';
 import classes from './sbti-test.module.scss';
 
 // ── Images ──────────────────────────────────────────────────────────────────
@@ -757,6 +758,7 @@ interface ResultData {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function SbtiTestPage() {
+  useTitle('SBTI 人格测试 · RevJS');
   const [screen, setScreen] = useState<Screen>('intro');
   const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, number>>({});

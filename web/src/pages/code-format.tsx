@@ -7,6 +7,7 @@ import { Tip } from '@/components/ui/tip';
 import { ToolbarButton, ToolbarDivider } from '@/components/ui/toolbar-button';
 import type { FormatLanguage, FormatOptions } from './code-format.worker';
 import CodeFormatWorker from './code-format.worker?worker';
+import { useTitle } from './hooks/use-title';
 import classes from './code-format.module.scss';
 
 type FormatWorkerResponse =
@@ -189,6 +190,7 @@ function countLines(value: string) {
 }
 
 function CodeFormatPage() {
+  useTitle('代码格式化 · RevJS');
   const sourceFileInputRef = useRef<HTMLInputElement | null>(null);
   const [state, setState] = useState<StoredState>(readStoredState);
   const [outputCode, setOutputCode] = useState('');

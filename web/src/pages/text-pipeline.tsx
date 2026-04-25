@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
 import { SortableList } from '@/components/ui/sortable-list';
+import { useTitle } from './hooks/use-title';
 import type { PipelineFnId, PipelineResponse } from './text-pipeline.worker';
 import TextPipelineWorker from './text-pipeline.worker?worker';
 import classes from './text-pipeline.module.scss';
@@ -316,6 +317,7 @@ function runPipelineInWorker(text: string, pipeline: PipelineFnId[]): Promise<st
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function TextPipelinePage() {
+  useTitle('文本批处理 · RevJS');
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [pipeline, setPipeline] = useState<PipelineStep[]>([]);
