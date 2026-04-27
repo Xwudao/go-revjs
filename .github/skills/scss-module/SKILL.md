@@ -12,68 +12,42 @@ Use this skill when a revjs React component or page should use local scoped styl
 - Converting component-level or page-level `.scss` files to `.module.scss`
 - Adding new scoped styles for a TSX component
 - Refactoring class-heavy JSX into `classes + clsx` usage
-- Styling local UI pieces without leaking selectors globally
 
-## Core rules
+## Core Rules
 
-1. Name the stylesheet with `.module.scss` and keep it next to the component or page.
+1. Name the stylesheet `.module.scss` and keep it next to the component or page.
 2. Import the module as `classes`.
-3. Import `clsx` and wrap every local class reference with `clsx(...)`, even when there is only one class.
-4. Prefer kebab-case selectors in SCSS. Access them from TSX with the generated camelCase names.
+3. Wrap every local class reference with `clsx(...)`, even when there is only one class.
+4. Prefer kebab-case selectors in SCSS; access via generated camelCase names in TSX.
 5. Keep global `.scss` imports only for true app-wide styles such as `src/styles/index.scss`.
 
-## Import pattern
+## Import and Composition Pattern
 
-```tsx
-import clsx from 'clsx'
-import classes from './example.module.scss'
+Import as `classes`, use `clsx` for all class bindings including inline icon utility classes (e.g. `i-mdi-*`). Never build class strings manually.
 
-export function Example() {
-  return <div className={clsx(classes.root)}>...</div>
-}
-```
+See `web/src/pages/string-tools.tsx` and `web/src/pages/string-tools.module.scss` for a working reference.
 
-## Class composition
+## Styling Guidance
 
-```tsx
-<button
-  className={clsx(classes.action, isPrimary && classes.actionPrimary)}
->
-  Save
-</button>
-```
+- Start from tokens in `web/src/styles/_tokens.scss`.
+- Reuse the shared mixins injected from `@/styles/mixins` when useful.
+- Prefer CSS variables over hard-coded values.
+- Keep surfaces compact and tool-like.
+- Keep selectors shallow and local.
 
-For icon utility classes or other global utility classes, merge them through `clsx` instead of string concatenation:
-
-```tsx
-<span className={clsx('i-mdi-check', classes.icon)} aria-hidden="true" />
-```
-
-## Styling guidance for revjs
-
-- Start from tokens in `src/styles/_tokens.scss`
-- Reuse the shared mixins injected from `@/styles/mixins` when useful
-- Prefer CSS variables over hard-coded values
-- Keep surfaces compact, dense, and tool-like unless the task explicitly asks for a more decorative layout
-- Keep selectors shallow and local
-
-## Allowed exceptions
+## Allowed Exceptions
 
 Use `:global(...)` only when styling DOM owned by a third-party library such as CodeMirror.
 
-Example:
-
-```scss
-.root {
-  :global(.cm-editor) {
-    min-height: 16rem;
-  }
-}
-```
-
 ## Avoid
 
-- Importing local `.module.scss` files for side effects only
 - Mixing `styles`, `s`, or other import names when `classes` is the project convention
 - Building class strings manually when `clsx` is clearer
 - Leaving page/component-scoped styles in plain `.scss` files if they are not intended to be global
+- Importing local `.module.scss` for side effects only
+
+## References
+
+- `web/src/pages/string-tools.module.scss`
+- `web/src/pages/js-deob.module.scss`
+- `web/src/styles/_tokens.scss`
